@@ -1,19 +1,9 @@
-# =============================================================
-#  CIOP Central - entorno de desarrollo
-#
-#  Levantar:   docker compose up -d --build
-#  Ver logs:   docker compose logs -f
-#  Detener:    docker compose down
-#
-#  URL:        http://localhost:8080/
-#  Diagnóstico: http://localhost:8080/api/data.php?action=meta
-#
-#  El puerto 8080 se eligió a propósito para no chocar con el
-#  Apache de XAMPP, que ocupa el 80. Los dos pueden convivir.
-# =============================================================
 services:
   ciop:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+
     image: ciop-central:0.1.0
     container_name: ciop_web
 
@@ -21,25 +11,11 @@ services:
       - "8080:80"
 
     environment:
-      # Ruta de los datos DENTRO del contenedor. No cambiar:
-      # lo que se ajusta es el volumen de abajo.
       CIOP_DATA_DIR: /data
       CIOP_REFRESH_SEC: "20"
 
     volumes:
-      # --- Datos -------------------------------------------------------
-      # Se monta en SOLO LECTURA (:ro). Los archivos nunca entran a la
-      # imagen: contienen información real de clientes y no deben quedar
-      # dentro de algo que se pueda copiar o publicar.
-      #
-      # La ruta relativa funciona porque CIOP_DATA está al lado de
-      # CIOP_WEB dentro de htdocs. Si la mueves, cambia esta línea.
       - ../CIOP_DATA:/data:ro
-
-      # --- Código en vivo ----------------------------------------------
-      # Lo que edites en VS Code se ve al instante, sin reconstruir.
-      # Para una imagen de entrega, comenta estas dos líneas: el código
-      # ya viene dentro de la imagen desde el Dockerfile.
       - ./public:/var/www/html/public
       - ./src:/var/www/html/src
 
