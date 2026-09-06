@@ -1,0 +1,23 @@
+# Nunca deben entrar a la imagen
+../CIOP_DATA
+CIOP_DATA/
+*.kml
+*.txt
+*.csv
+
+# Control de versiones y editor
+.git
+.gitignore
+.vscode/
+.idea/
+
+# Documentación y temporales
+README.txt
+*.log
+*.tmp
+Thumbs.db
+desktop.ini
+
+# Configuración de Docker (ya se copia explícitamente)
+docker-compose.yml
+docker-compose.override.yml

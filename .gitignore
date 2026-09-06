@@ -1,0 +1,15 @@
+# Datos operacionales: JAMAS se versionan.
+# Contienen informacion real de clientes, criticos y electrodependientes.
+CIOP_DATA/
+../CIOP_DATA/
+*.kml
+CIOP-PO*.txt
+Hist_24horas.csv
+
+# Entorno
+.vscode/
+.idea/
+*.log
+
+# Configuracion local con rutas del PC
+src/config.local.php
