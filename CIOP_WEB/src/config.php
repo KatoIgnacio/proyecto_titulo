@@ -1,23 +1,33 @@
 <?php
-// C:\xampp\htdocs\CIOP_WEB\src\config.php
+// src/config.php
+//
+// Funciona en los dos entornos sin tocar nada:
+//   - XAMPP en Windows : usa la ruta local de más abajo.
+//   - Docker           : toma CIOP_DATA_DIR del docker-compose.yml.
+
+$dataDir = getenv('CIOP_DATA_DIR');
+if ($dataDir === false || $dataDir === '') {
+  // Entorno local (XAMPP). Ajusta según el PC.
+  $dataDir = 'C:\\Users\\KATO\\Documents\\GitHub\\proyecto_titulo\\CIOP_DATA';
+}
+
+$refresh = getenv('CIOP_REFRESH_SEC');
+$refresh = ($refresh !== false && $refresh !== '') ? (int)$refresh : 20;
 
 return [
-  // Ruta de datos EN DISCO (no en el pendrive). Ajusta según el PC destino.
-  // DEV actual (según lo que indicaste): C:\xampp\htdocs\CIOP_DATA
-  // Servidor institucional (ejemplo): \\SERVIDOR\RUTA\CIOP-PO  o  C:\CIOP_DATA\CIOP-PO
-  'DATA_DIR' => 'C:\\Users\\KATO\\Desktop\\TESIS\\xampp\\htdocs\\CIOP_DATA',
+  'DATA_DIR'     => $dataDir,
 
-  'REFRESH_SEC'  => 20,
+  'REFRESH_SEC'  => $refresh,
   'STALE_MIN'    => 10,
 
-  // Nombres de archivos dentro de DATA_DIR
   'FILES' => [
-    'PO'       => 'CIOP-PO.txt',
-    'CLIENTES' => 'CIOP-PO_clientes.txt',
-    //'CRITICOS' => 'CIOP-PO_criticos.txt',
-    //'ED'       => 'CIOP-PO_ED.txt',
+    'PO'       => 'CIOP-PO_TEST.txt',
+    'CLIENTES' => 'CIOP-PO_clientes_TEST.txt',
     'HIST24'   => 'Hist_24horas.csv',
     'KML'      => 'redes.kml',
+
+    // Se usan las versiones anonimizadas. Los archivos reales no deben
+    // exhibirse: el cliente lo prohibió expresamente.
     'CRITICOS' => 'CIOP-PO_criticos_TEST.txt',
     'ED'       => 'CIOP-PO_ED_TEST.txt',
   ],
