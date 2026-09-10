@@ -46,10 +46,6 @@ function Icon({ name, className = 'h-5 w-5' }: { name: IconName; className?: str
     );
 }
 
-const futureNavigation: Array<{ label: string; icon: IconName }> = [
-    { label: 'Informes', icon: 'report' },
-];
-
 export default function Authenticated({
     header,
     children,
@@ -60,6 +56,7 @@ export default function Authenticated({
     const mapActive = route().current('contingencies.map');
     const detailActive = route().current('contingencies.show');
     const searchActive = route().current('contingencies.search');
+    const reportsActive = route().current('reports.*');
 
     const activeClass = 'bg-blue-600 text-white shadow-sm';
     const inactiveClass = 'text-slate-300 transition hover:bg-slate-900 hover:text-white';
@@ -105,31 +102,26 @@ export default function Authenticated({
                 Buscador operacional
             </Link>
 
-            {futureNavigation.map((item) => (
-                <div
-                    key={item.label}
-                    className="group flex items-center justify-between rounded-lg px-3 py-3 text-sm text-slate-400"
-                    title="Módulo planificado"
-                >
-                    <span className="flex items-center gap-3">
-                        <Icon name={item.icon} />
-                        {item.label}
-                    </span>
-                    <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                        Próximo
-                    </span>
-                </div>
-            ))}
+            <Link
+                href={route('reports.index')}
+                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ${reportsActive ? activeClass : inactiveClass}`}
+            >
+                <Icon name="report" />
+                Informes
+            </Link>
         </nav>
     );
 
     const sidebarContent = (
         <>
             <div className="border-b border-slate-800 px-6 py-7">
-                <Link href={route('dashboard')} className="block">
-                    <span className="text-xl font-black tracking-wide text-white">LUZPARRAL</span>
-                    <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.19em] text-blue-300">
-                        Gestión de contingencias
+                <Link href={route('dashboard')} className="flex items-center gap-3">
+                    <img src="/images/logo-sistema-transparente.png" alt="" className="h-12 w-12 shrink-0 object-contain" />
+                    <span>
+                        <span className="block text-xl font-black tracking-wide text-white">LUZPARRAL</span>
+                        <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-300">
+                            Gestión de contingencias
+                        </span>
                     </span>
                 </Link>
             </div>

@@ -5,6 +5,7 @@ use App\Http\Controllers\ContingencyDetailController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OperationalSearchController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ContingencyReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
@@ -20,6 +21,18 @@ Route::get('/contingencias/mapa', ContingencyMapController::class)
 Route::get('/buscador-operacional', OperationalSearchController::class)
     ->middleware(['auth', 'verified'])
     ->name('contingencies.search');
+
+Route::get('/informes', [ContingencyReportController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('reports.index');
+
+Route::get('/informes/contingencias.csv', [ContingencyReportController::class, 'exportCsv'])
+    ->middleware(['auth', 'verified'])
+    ->name('reports.csv');
+
+Route::get('/informes/contingencias.pdf', [ContingencyReportController::class, 'exportPdf'])
+    ->middleware(['auth', 'verified'])
+    ->name('reports.pdf');
 
 Route::get('/contingencias/{contingency}', ContingencyDetailController::class)
     ->middleware(['auth', 'verified'])
