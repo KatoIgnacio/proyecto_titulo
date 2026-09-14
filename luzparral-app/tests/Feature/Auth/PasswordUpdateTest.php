@@ -20,15 +20,15 @@ class PasswordUpdateTest extends TestCase
             ->from('/profile')
             ->put('/password', [
                 'current_password' => 'password',
-                'password' => 'new-password',
-                'password_confirmation' => 'new-password',
+                'password' => 'NuevaClave2026!',
+                'password_confirmation' => 'NuevaClave2026!',
             ]);
 
         $response
             ->assertSessionHasNoErrors()
             ->assertRedirect('/profile');
 
-        $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+        $this->assertTrue(Hash::check('NuevaClave2026!', $user->refresh()->password));
     }
 
     public function test_correct_password_must_be_provided_to_update_password(): void
@@ -40,12 +40,29 @@ class PasswordUpdateTest extends TestCase
             ->from('/profile')
             ->put('/password', [
                 'current_password' => 'wrong-password',
-                'password' => 'new-password',
-                'password_confirmation' => 'new-password',
+                'password' => 'NuevaClave2026!',
+                'password_confirmation' => 'NuevaClave2026!',
             ]);
 
         $response
             ->assertSessionHasErrors('current_password')
             ->assertRedirect('/profile');
+    }
+
+    public function test_new_password_must_follow_the_strong_password_policy(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->from('/profile')
+            ->put('/password', [
+                'current_password' => 'password',
+                'password' => 'muy-debil',
+                'password_confirmation' => 'muy-debil',
+            ])
+            ->assertSessionHasErrors('password')
+            ->assertRedirect('/profile');
+
+        $this->assertTrue(Hash::check('password', $user->fresh()->password));
     }
 }

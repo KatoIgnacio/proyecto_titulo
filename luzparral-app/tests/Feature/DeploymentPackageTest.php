@@ -15,6 +15,10 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('APP_DEBUG=false', $contents);
         $this->assertStringContainsString('APP_KEY=REEMPLAZAR_', $contents);
         $this->assertStringContainsString('DB_PASSWORD=REEMPLAZAR_', $contents);
+        $this->assertStringContainsString('SESSION_EXPIRE_ON_CLOSE=true', $contents);
+        $this->assertStringContainsString('PASSWORD_RESET_ENABLED=false', $contents);
+        $this->assertStringContainsString('SECURITY_HEADERS_ENABLED=true', $contents);
+        $this->assertStringContainsString('SECURITY_MAX_ACTIVE_USERS=10', $contents);
         $this->assertStringNotContainsString('APP_KEY=base64:', $contents);
     }
 
@@ -28,8 +32,23 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('--env-file "$environment_file"', $contents);
         $this->assertStringContainsString(':/var/www/html/storage', $contents);
         $this->assertStringContainsString('APP_URL debe utilizar el puerto', $contents);
+        $this->assertStringContainsString('SESSION_LIFETIME debe ser un numero de hasta 60 minutos', $contents);
+        $this->assertStringContainsString('SESSION_SECURE_COOKIE debe ser true', $contents);
+        $this->assertStringContainsString('PASSWORD_RESET_ENABLED', $contents);
         $this->assertStringContainsString('/up', $contents);
         $this->assertStringNotContainsString('artisan migrate', $contents);
+    }
+
+    public function test_server_verification_checks_security_headers_and_disabled_recovery(): void
+    {
+        $contents = file_get_contents(base_path('deploy/parra/verify.sh'));
+
+        $this->assertIsString($contents);
+        $this->assertStringContainsString('X-Content-Type-Options: nosniff', $contents);
+        $this->assertStringContainsString('X-Frame-Options: DENY', $contents);
+        $this->assertStringContainsString('Content-Security-Policy:', $contents);
+        $this->assertStringContainsString('/forgot-password', $contents);
+        $this->assertStringContainsString('se esperaba 404', $contents);
     }
 
     public function test_image_transfer_requires_an_integrity_check(): void

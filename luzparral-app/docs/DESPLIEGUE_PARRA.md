@@ -107,6 +107,11 @@ conexion MySQL, pero no modifica la base. Ademas de los comandos, se deben proba
 manualmente inicio de sesion, dashboard, filtros, mapa, detalle, busqueda y las
 tres variantes de informe.
 
+Después de preparar la base y antes de probar el inicio de sesión, se deben
+aprovisionar las cinco cuentas siguiendo
+[`SEGURIDAD_OPERATIVA.md`](SEGURIDAD_OPERATIVA.md). No se ejecutan seeders en
+Parra y la recuperación web permanece deshabilitada mientras no exista SMTP.
+
 ## 7. Promover al puerto estable
 
 Solo despues de aprobar staging:

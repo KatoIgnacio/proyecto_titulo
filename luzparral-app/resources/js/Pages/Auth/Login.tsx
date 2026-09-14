@@ -1,4 +1,3 @@
-import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -17,7 +16,6 @@ export default function Login({
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
-        remember: false as boolean,
     });
 
     const submit: FormEventHandler = (event) => {
@@ -74,21 +72,6 @@ export default function Login({
                         }
                     />
                     <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="mt-4 block">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(event) =>
-                                setData('remember', event.target.checked)
-                            }
-                        />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Mantener sesión
-                        </span>
-                    </label>
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">

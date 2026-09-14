@@ -34,10 +34,9 @@ la línea base. El segundo crea solamente las tablas internas faltantes de Larav
 
 ## Usuarios sintéticos
 
-El seeder crea cinco usuarios para desarrollo. Todos utilizan temporalmente la
-contraseña `LuzparralDemo2026!`; debe cambiarse antes de una validación externa.
-El registro público está deshabilitado porque las cuentas serán administradas
-por usuarios autorizados.
+El seeder crea cinco usuarios para desarrollo solamente cuando se proporciona
+`LUZPARRAL_DEMO_PASSWORD`; no contiene ni imprime una contraseña conocida y se
+niega a ejecutarse en producción. El registro público está deshabilitado.
 
 ## Datos sintéticos completos
 
@@ -58,6 +57,10 @@ La imagen compatible con Docker y Podman y su ejecución local están descritas 
 
 Los escenarios de migración, generación sintética, respaldo, restauración y
 validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DATOS.md).
+
+El aprovisionamiento de las cinco cuentas, la recuperación sin SMTP y las
+protecciones de sesión están documentados en
+[`docs/SEGURIDAD_OPERATIVA.md`](docs/SEGURIDAD_OPERATIVA.md).
 
 La exportación verificable de la imagen y el procedimiento para los puertos
 institucionales `2003` y `2004` están documentados en

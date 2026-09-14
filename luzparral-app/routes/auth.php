@@ -16,12 +16,16 @@ Route::middleware('guest')->group(function () {
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->middleware('password-reset-enabled')
         ->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->middleware('password-reset-enabled')
         ->name('password.email');
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->middleware('password-reset-enabled')
         ->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->middleware('password-reset-enabled')
         ->name('password.store');
 });
 

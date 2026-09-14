@@ -7,7 +7,6 @@ const GENERATOR_VERSION = '1.0.0';
 const DEFAULT_SEED = 20260909;
 const DEFAULT_SUPPLY_POINTS = 5000;
 const DEFAULT_CONTINGENCIES = 360;
-const DEMO_PASSWORD = 'LuzparralDemo2026!';
 
 function envValue(string $name, ?string $default = null): ?string
 {
@@ -106,9 +105,14 @@ $database = envValue('LUZPARRAL_DB_DATABASE', 'luzparral');
 $allowedDatabase = envValue('LUZPARRAL_DB_ALLOWED_DATABASE', 'luzparral');
 $username = envValue('LUZPARRAL_DB_USERNAME', 'luzparral_app');
 $password = envValue('LUZPARRAL_DB_PASSWORD');
+$demoPassword = envValue('LUZPARRAL_DEMO_PASSWORD');
 
 if ($password === null) {
     throw new RuntimeException('Defina LUZPARRAL_DB_PASSWORD antes de ejecutar el generador.');
+}
+
+if ($demoPassword === null || strlen($demoPassword) < 12) {
+    throw new RuntimeException('Defina LUZPARRAL_DEMO_PASSWORD con al menos 12 caracteres.');
 }
 
 $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
@@ -142,7 +146,7 @@ try {
         ['Operacion Turno B', 'operador.b@luzparral.example.invalid', 'operator'],
         ['Consulta Demo', 'consulta@luzparral.example.invalid', 'viewer'],
     ];
-    $passwordHash = password_hash(DEMO_PASSWORD, PASSWORD_BCRYPT);
+    $passwordHash = password_hash($demoPassword, PASSWORD_BCRYPT);
     $insertUser = $pdo->prepare('INSERT INTO users (name, email, email_verified_at, password, role, active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 1, ?, ?)');
     $userIds = [];
     foreach ($userRows as [$name, $email, $role]) {
@@ -425,7 +429,6 @@ try {
         'impacts' => $totalImpacts,
         'history_events' => $totalHistory,
         'import_batches' => count($batchIds),
-        'demo_password' => DEMO_PASSWORD,
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
 } catch (Throwable $error) {
     if ($pdo->inTransaction()) {

@@ -26,6 +26,7 @@ class EnvironmentConfigurationTest extends TestCase
         $this->assertMatchesRegularExpression('/^SESSION_ENCRYPT=true$/m', $contents);
         $this->assertMatchesRegularExpression('/^APP_KEY=$/m', $contents);
         $this->assertMatchesRegularExpression('/^DB_PASSWORD=$/m', $contents);
-        $this->assertStringNotContainsString('LuzparralDemo2026!', $contents);
+        $this->assertMatchesRegularExpression('/^PASSWORD_RESET_ENABLED=false$/m', $contents);
+        $this->assertMatchesRegularExpression('/^SECURITY_HEADERS_ENABLED=true$/m', $contents);
     }
 }

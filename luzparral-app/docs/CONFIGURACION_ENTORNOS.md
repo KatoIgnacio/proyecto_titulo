@@ -60,3 +60,6 @@ php artisan about --only=environment,drivers
 En el contenedor de producción la configuración se cacheará después de inyectar
 las variables privadas. Modificar un archivo de entorno sin reconstruir esa
 caché no cambia la configuración activa.
+
+El aprovisionamiento y el endurecimiento previo a publicar se detallan en
+[`SEGURIDAD_OPERATIVA.md`](SEGURIDAD_OPERATIVA.md).

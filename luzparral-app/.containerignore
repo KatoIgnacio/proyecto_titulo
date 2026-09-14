@@ -23,6 +23,7 @@ backups
 *.tar
 *.tar.gz
 CIOP_DATA
+luzparral-users*.json
 artifacts
 deploy/EXPORTAR_IMAGEN.ps1
 deploy/parra

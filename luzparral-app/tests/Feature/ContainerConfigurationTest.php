@@ -29,6 +29,7 @@ class ContainerConfigurationTest extends TestCase
             $this->assertMatchesRegularExpression('/^node_modules$/m', $contents);
             $this->assertMatchesRegularExpression('/^vendor$/m', $contents);
             $this->assertMatchesRegularExpression('/^CIOP_DATA$/m', $contents);
+            $this->assertMatchesRegularExpression('/^luzparral-users\*\.json$/m', $contents);
         }
     }
 
@@ -38,5 +39,21 @@ class ContainerConfigurationTest extends TestCase
 
         $this->assertIsString($entrypoint);
         $this->assertStringNotContainsString('migrate', $entrypoint);
+    }
+
+    public function test_runtime_directories_are_not_accessible_to_other_users(): void
+    {
+        $entrypoint = file_get_contents(base_path('deploy/container-entrypoint.sh'));
+        $container = file_get_contents(base_path('Containerfile'));
+
+        $this->assertIsString($entrypoint);
+        $this->assertIsString($container);
+        $this->assertStringContainsString('umask 007', $entrypoint);
+        $this->assertStringContainsString('chmod -R u=rwX,g=rwX,o= bootstrap/cache storage', $entrypoint);
+        $this->assertStringContainsString('chmod -R u=rwX,g=rwX,o= bootstrap/cache storage', $container);
+        $this->assertMatchesRegularExpression(
+            '/view:cache\s+fi\s+.*chown -R www-data:www-data bootstrap\/cache storage/s',
+            $entrypoint,
+        );
     }
 }

@@ -23,16 +23,20 @@ defina la contraseña fuera del código y ejecute:
 
 ```powershell
 $env:LUZPARRAL_DB_PASSWORD = '<contraseña-local>'
+$env:LUZPARRAL_DEMO_PASSWORD = '<contraseña-demo-temporal>'
 php database/generate_synthetic.php
 Remove-Item Env:LUZPARRAL_DB_PASSWORD
+Remove-Item Env:LUZPARRAL_DEMO_PASSWORD
 ```
 
 Para regenerar exclusivamente un conjunto previamente marcado como sintético:
 
 ```powershell
 $env:LUZPARRAL_DB_PASSWORD = '<contraseña-local>'
+$env:LUZPARRAL_DEMO_PASSWORD = '<contraseña-demo-temporal-distinta>'
 php database/generate_synthetic.php --reset
 Remove-Item Env:LUZPARRAL_DB_PASSWORD
+Remove-Item Env:LUZPARRAL_DEMO_PASSWORD
 ```
 
 El generador se niega a operar sobre una base distinta de la indicada en
@@ -52,8 +56,9 @@ El ciclo completo de inicialización, adopción, respaldo y restauración está 
 
 ## Usuarios de demostración
 
-Todos usan temporalmente la contraseña `LuzparralDemo2026!`. Esta contraseña es
-solo para desarrollo y debe reemplazarse antes de cualquier validación externa.
+El generador exige `LUZPARRAL_DEMO_PASSWORD` con al menos doce caracteres y no
+la muestra en su salida. La variable debe eliminarse al terminar y estas cuentas
+no deben permanecer activas al publicar.
 
 ## Base institucional
 

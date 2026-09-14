@@ -72,7 +72,8 @@ RUN chmod 0755 /usr/local/bin/luzparral-entrypoint \
         storage/framework/sessions \
         storage/framework/views \
         storage/logs \
-    && chown -R www-data:www-data bootstrap/cache storage
+    && chown -R www-data:www-data bootstrap/cache storage \
+    && chmod -R u=rwX,g=rwX,o= bootstrap/cache storage
 
 EXPOSE 8080
 

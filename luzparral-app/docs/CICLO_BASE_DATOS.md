@@ -39,6 +39,10 @@ php artisan migrate:status
 No ejecutar `db:seed`: las cuentas reales se aprovisionaran de forma controlada
 en el segmento de seguridad operativa.
 
+La validacion sintetica se ejecuta antes del aprovisionamiento. Despues de
+incorporar las cinco cuentas reales, el conjunto deja de ser exclusivamente
+sintetico y ese validador ya no corresponde como control de aceptacion.
+
 ## Escenario B: base vacia con demostracion sintetica
 
 Primero crear toda la estructura con migraciones, sin seeders:
@@ -56,6 +60,7 @@ $env:LUZPARRAL_DB_DATABASE = 'luzparral'
 $env:LUZPARRAL_DB_ALLOWED_DATABASE = 'luzparral'
 $env:LUZPARRAL_DB_USERNAME = 'luzparral_app'
 $env:LUZPARRAL_DB_PASSWORD = '<contraseña-local>'
+$env:LUZPARRAL_DEMO_PASSWORD = '<contraseña-demo-temporal>'
 php database/generate_synthetic.php
 php artisan luzparral:validate-synthetic --require-runtime
 ```
@@ -137,3 +142,5 @@ tener migraciones pendientes.
 En Parra se debe confirmar primero si la universidad ya realiza respaldos de la
 base MySQL y si la cuenta asignada posee permisos para `mysqldump`. Ninguna
 migracion institucional se ejecutara antes de obtener y comprobar un respaldo.
+Las cuentas finales se crean mediante el procedimiento de
+[`SEGURIDAD_OPERATIVA.md`](SEGURIDAD_OPERATIVA.md), nunca mediante seeders.

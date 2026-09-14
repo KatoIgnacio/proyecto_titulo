@@ -51,7 +51,7 @@ read_setting() {
     printf '%s' "${line#*=}"
 }
 
-for required_key in APP_KEY APP_ENV APP_DEBUG APP_URL DB_HOST DB_DATABASE DB_USERNAME DB_PASSWORD; do
+for required_key in APP_KEY APP_ENV APP_DEBUG APP_URL DB_HOST DB_DATABASE DB_USERNAME DB_PASSWORD SESSION_DRIVER SESSION_LIFETIME SESSION_EXPIRE_ON_CLOSE SESSION_ENCRYPT SESSION_HTTP_ONLY PASSWORD_RESET_ENABLED SECURITY_HEADERS_ENABLED SECURITY_MAX_ACTIVE_USERS; do
     setting_value=$(read_setting "$required_key")
     if [[ -z "$setting_value" || "$setting_value" == REEMPLAZAR_* ]]; then
         echo "ERROR: $required_key no esta configurada en $environment_file" >&2
@@ -64,8 +64,30 @@ if [[ $(read_setting APP_ENV) != production || $(read_setting APP_DEBUG) != fals
     exit 65
 fi
 
+if [[ $(read_setting SESSION_DRIVER) != database \
+    || $(read_setting SESSION_EXPIRE_ON_CLOSE) != true \
+    || $(read_setting SESSION_ENCRYPT) != true \
+    || $(read_setting SESSION_HTTP_ONLY) != true \
+    || $(read_setting PASSWORD_RESET_ENABLED) != false \
+    || $(read_setting SECURITY_HEADERS_ENABLED) != true \
+    || $(read_setting SECURITY_MAX_ACTIVE_USERS) != 10 ]]; then
+    echo "ERROR: la configuracion de seguridad operativa de Parra no es valida." >&2
+    exit 65
+fi
+
+session_lifetime=$(read_setting SESSION_LIFETIME)
+if [[ ! "$session_lifetime" =~ ^[0-9]+$ || "$session_lifetime" -gt 60 ]]; then
+    echo "ERROR: SESSION_LIFETIME debe ser un numero de hasta 60 minutos." >&2
+    exit 65
+fi
+
 if [[ $(read_setting APP_URL) != *":${host_port}"* ]]; then
     echo "ERROR: APP_URL debe utilizar el puerto $host_port para $environment_name." >&2
+    exit 65
+fi
+
+if [[ $(read_setting APP_URL) == https://* && $(read_setting SESSION_SECURE_COOKIE) != true ]]; then
+    echo "ERROR: SESSION_SECURE_COOKIE debe ser true cuando APP_URL utiliza HTTPS." >&2
     exit 65
 fi
 

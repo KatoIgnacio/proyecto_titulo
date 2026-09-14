@@ -23,6 +23,7 @@ yarn-error.log
 /deploy/parra/parra.env
 /deploy/parra/.state
 /auth.json
+luzparral-users*.json
 /.fleet
 /.idea
 /.nova

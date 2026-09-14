@@ -4,11 +4,21 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            throw new RuntimeException('El seeder de demostración no se ejecuta en producción.');
+        }
+
+        $password = env('LUZPARRAL_DEMO_PASSWORD');
+        if (! is_string($password) || strlen($password) < 12) {
+            throw new RuntimeException('Defina LUZPARRAL_DEMO_PASSWORD con al menos 12 caracteres.');
+        }
+
         $users = [
             ['Administración Demo', 'admin@luzparral.example.invalid', 'admin'],
             ['Supervisión Demo', 'supervisor@luzparral.example.invalid', 'supervisor'],
@@ -22,7 +32,7 @@ class DatabaseSeeder extends Seeder
                 ['email' => $email],
                 [
                     'name' => $name,
-                    'password' => 'LuzparralDemo2026!',
+                    'password' => $password,
                     'role' => $role,
                     'active' => true,
                     'email_verified_at' => now(),

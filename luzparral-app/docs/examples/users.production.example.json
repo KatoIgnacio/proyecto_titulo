@@ -1,0 +1,32 @@
+[
+    {
+        "name": "REEMPLAZAR ADMINISTRACION",
+        "email": "admin@reemplazar.example",
+        "role": "admin",
+        "password_env": "LUZPARRAL_USER_ADMIN_PASSWORD"
+    },
+    {
+        "name": "REEMPLAZAR SUPERVISION",
+        "email": "supervisor@reemplazar.example",
+        "role": "supervisor",
+        "password_env": "LUZPARRAL_USER_SUPERVISOR_PASSWORD"
+    },
+    {
+        "name": "REEMPLAZAR OPERACION UNO",
+        "email": "operador1@reemplazar.example",
+        "role": "operator",
+        "password_env": "LUZPARRAL_USER_OPERATOR1_PASSWORD"
+    },
+    {
+        "name": "REEMPLAZAR OPERACION DOS",
+        "email": "operador2@reemplazar.example",
+        "role": "operator",
+        "password_env": "LUZPARRAL_USER_OPERATOR2_PASSWORD"
+    },
+    {
+        "name": "REEMPLAZAR CONSULTA",
+        "email": "consulta@reemplazar.example",
+        "role": "viewer",
+        "password_env": "LUZPARRAL_USER_VIEWER_PASSWORD"
+    }
+]
