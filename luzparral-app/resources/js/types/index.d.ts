@@ -14,5 +14,8 @@ export type PageProps<
 > = T & {
     auth: {
         user: User;
+        permissions: {
+            viewReports: boolean;
+        };
     };
 };

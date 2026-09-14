@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\Commune;
 use App\Models\Contingency;
 use App\Models\Feeder;
@@ -23,7 +24,7 @@ class ContingencyReportTest extends TestCase
 
     public function test_report_page_uses_filters_for_summary_and_rows(): void
     {
-        $user = User::factory()->create();
+        $user = $this->reportUser();
         [$commune, $feeder] = $this->createLocation();
         $this->createContingency($commune, $feeder, 'CONT-REPORT-001', 'reported', 'critical', 25);
         $this->createContingency($commune, $feeder, 'CONT-REPORT-002', 'closed', 'medium', 10);
@@ -45,7 +46,7 @@ class ContingencyReportTest extends TestCase
 
     public function test_csv_export_is_excel_compatible_and_filtered(): void
     {
-        $user = User::factory()->create();
+        $user = $this->reportUser();
         [$commune, $feeder] = $this->createLocation();
         $contingency = $this->createContingency($commune, $feeder, 'CONT-CSV-001', 'reported', 'critical', 25);
         $contingency->update(['cause' => 'weather']);
@@ -72,7 +73,7 @@ class ContingencyReportTest extends TestCase
 
     public function test_pdf_export_is_a_filtered_pdf_download(): void
     {
-        $user = User::factory()->create();
+        $user = $this->reportUser();
         [$commune, $feeder] = $this->createLocation();
         $this->createContingency($commune, $feeder, 'CONT-PDF-001', 'reported', 'critical', 25);
 
@@ -88,7 +89,7 @@ class ContingencyReportTest extends TestCase
 
     public function test_pdf_export_supports_the_three_report_types(): void
     {
-        $user = User::factory()->create();
+        $user = $this->reportUser();
         [$commune, $feeder] = $this->createLocation();
         $this->createContingency($commune, $feeder, 'CONT-PDF-MODES', 'reported', 'critical', 25);
 
@@ -107,7 +108,7 @@ class ContingencyReportTest extends TestCase
 
     public function test_report_rejects_invalid_filters(): void
     {
-        $user = User::factory()->create();
+        $user = $this->reportUser();
 
         $this->actingAs($user)
             ->get('/informes?range=century')
@@ -116,6 +117,13 @@ class ContingencyReportTest extends TestCase
         $this->actingAs($user)
             ->get('/informes/contingencias.pdf?report_type=raw')
             ->assertSessionHasErrors('report_type');
+    }
+
+    private function reportUser(): User
+    {
+        return User::factory()->create([
+            'role' => UserRole::Supervisor,
+        ]);
     }
 
     /** @return array{Commune, Feeder} */

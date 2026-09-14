@@ -18,4 +18,12 @@ enum UserRole: string
             self::Viewer => 'Consulta',
         };
     }
+
+    public function canViewReports(): bool
+    {
+        return in_array($this, [
+            self::Admin,
+            self::Supervisor,
+        ], true);
+    }
 }

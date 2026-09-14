@@ -50,7 +50,7 @@ export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const { user } = usePage<PageProps>().props.auth;
+    const { user, permissions } = usePage<PageProps>().props.auth;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dashboardActive = route().current('dashboard');
     const mapActive = route().current('contingencies.map');
@@ -102,13 +102,15 @@ export default function Authenticated({
                 Buscador operacional
             </Link>
 
-            <Link
-                href={route('reports.index')}
-                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ${reportsActive ? activeClass : inactiveClass}`}
-            >
-                <Icon name="report" />
-                Informes
-            </Link>
+            {permissions.viewReports && (
+                <Link
+                    href={route('reports.index')}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ${reportsActive ? activeClass : inactiveClass}`}
+                >
+                    <Icon name="report" />
+                    Informes
+                </Link>
+            )}
         </nav>
     );
 
