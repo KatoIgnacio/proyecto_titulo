@@ -45,3 +45,10 @@ Los scripts MySQL de `database/synthetic` generan comunas, alimentadores, 5.000
 puntos de suministro, 360 contingencias, impactos, historial y errores de
 importación controlados. Las credenciales se entregan mediante variables de
 entorno y nunca se versionan.
+
+## Configuración por entorno
+
+La separación entre el entorno local y la configuración institucional se
+describe en [`docs/CONFIGURACION_ENTORNOS.md`](docs/CONFIGURACION_ENTORNOS.md).
+La plantilla `.env.production.example` no contiene secretos y no debe utilizarse
+sin reemplazar sus marcadores.
