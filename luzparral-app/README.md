@@ -52,3 +52,6 @@ La separación entre el entorno local y la configuración institucional se
 describe en [`docs/CONFIGURACION_ENTORNOS.md`](docs/CONFIGURACION_ENTORNOS.md).
 La plantilla `.env.production.example` no contiene secretos y no debe utilizarse
 sin reemplazar sus marcadores.
+
+La imagen compatible con Docker y Podman y su ejecución local están descritas en
+[`docs/CONTENEDORES.md`](docs/CONTENEDORES.md).

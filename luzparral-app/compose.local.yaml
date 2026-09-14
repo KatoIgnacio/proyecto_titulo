@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: luzparral-app:local
+    container_name: luzparral-local
+    restart: unless-stopped
+    env_file:
+      - ${LUZPARRAL_ENV_FILE:-.env.container.local}
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8080
+      DB_HOST: host.docker.internal
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 127.0.0.1:8080:8080
