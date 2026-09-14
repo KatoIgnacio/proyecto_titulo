@@ -18,7 +18,8 @@ Los códigos comienzan con `SYN-` y los correos usan el dominio reservado
 
 ## Ejecución local
 
-Defina la contraseña fuera del código y ejecute:
+Sobre una base vacía, ejecute primero `php artisan migrate` sin seeders. Luego
+defina la contraseña fuera del código y ejecute:
 
 ```powershell
 $env:LUZPARRAL_DB_PASSWORD = '<contraseña-local>'
@@ -40,6 +41,14 @@ y no elimina datos si encuentra contenido que no tenga su marcador sintético.
 
 El archivo `validate_synthetic.sql` contiene los controles de cantidad,
 consistencia y carácter sintético usados después de cada generación.
+La validación automatizada que retorna un código de error ante inconsistencias es:
+
+```powershell
+php artisan luzparral:validate-synthetic --require-runtime
+```
+
+El ciclo completo de inicialización, adopción, respaldo y restauración está en
+[`docs/CICLO_BASE_DATOS.md`](../../docs/CICLO_BASE_DATOS.md).
 
 ## Usuarios de demostración
 

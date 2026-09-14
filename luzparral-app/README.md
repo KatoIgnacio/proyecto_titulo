@@ -13,7 +13,7 @@ aplicación.
 1. Copiar `.env.example` como `.env`.
 2. Completar `DB_PASSWORD` con la clave local, sin guardarla en Git.
 3. Ejecutar `composer install` y `npm install`.
-4. En una base vacía, ejecutar `php artisan migrate --seed`.
+4. En una base vacía, ejecutar `php artisan migrate` sin seeders.
 5. Ejecutar `npm run build` y `composer run dev`.
 
 No ejecute `migrate:fresh` sobre una base con información que deba conservarse.
@@ -55,6 +55,9 @@ sin reemplazar sus marcadores.
 
 La imagen compatible con Docker y Podman y su ejecución local están descritas en
 [`docs/CONTENEDORES.md`](docs/CONTENEDORES.md).
+
+Los escenarios de migración, generación sintética, respaldo, restauración y
+validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DATOS.md).
 
 La exportación verificable de la imagen y el procedimiento para los puertos
 institucionales `2003` y `2004` están documentados en
