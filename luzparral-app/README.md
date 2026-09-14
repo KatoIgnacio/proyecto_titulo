@@ -55,3 +55,7 @@ sin reemplazar sus marcadores.
 
 La imagen compatible con Docker y Podman y su ejecución local están descritas en
 [`docs/CONTENEDORES.md`](docs/CONTENEDORES.md).
+
+La exportación verificable de la imagen y el procedimiento para los puertos
+institucionales `2003` y `2004` están documentados en
+[`docs/DESPLIEGUE_PARRA.md`](docs/DESPLIEGUE_PARRA.md).

@@ -23,3 +23,6 @@ backups
 *.tar
 *.tar.gz
 CIOP_DATA
+artifacts
+deploy/EXPORTAR_IMAGEN.ps1
+deploy/parra

@@ -19,6 +19,9 @@ yarn-error.log
 *.tar
 *.tar.gz
 /backups
+/artifacts
+/deploy/parra/parra.env
+/deploy/parra/.state
 /auth.json
 /.fleet
 /.idea
