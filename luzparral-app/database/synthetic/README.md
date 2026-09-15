@@ -24,7 +24,7 @@ defina la contraseña fuera del código y ejecute:
 ```powershell
 $env:LUZPARRAL_DB_PASSWORD = '<contraseña-local>'
 $env:LUZPARRAL_DEMO_PASSWORD = '<contraseña-demo-temporal>'
-php database/generate_synthetic.php
+php database/synthetic/generate_synthetic.php
 Remove-Item Env:LUZPARRAL_DB_PASSWORD
 Remove-Item Env:LUZPARRAL_DEMO_PASSWORD
 ```
@@ -34,7 +34,7 @@ Para regenerar exclusivamente un conjunto previamente marcado como sintético:
 ```powershell
 $env:LUZPARRAL_DB_PASSWORD = '<contraseña-local>'
 $env:LUZPARRAL_DEMO_PASSWORD = '<contraseña-demo-temporal-distinta>'
-php database/generate_synthetic.php --reset
+php database/synthetic/generate_synthetic.php --reset
 Remove-Item Env:LUZPARRAL_DB_PASSWORD
 Remove-Item Env:LUZPARRAL_DEMO_PASSWORD
 ```

@@ -51,7 +51,7 @@ read_setting() {
     printf '%s' "${line#*=}"
 }
 
-for required_key in APP_KEY APP_ENV APP_DEBUG APP_URL DB_HOST DB_DATABASE DB_USERNAME DB_PASSWORD SESSION_DRIVER SESSION_LIFETIME SESSION_EXPIRE_ON_CLOSE SESSION_ENCRYPT SESSION_HTTP_ONLY PASSWORD_RESET_ENABLED SECURITY_HEADERS_ENABLED SECURITY_MAX_ACTIVE_USERS; do
+for required_key in APP_KEY APP_ENV APP_DEBUG APP_URL LOG_CHANNEL DB_HOST DB_DATABASE DB_USERNAME DB_PASSWORD SESSION_DRIVER SESSION_LIFETIME SESSION_EXPIRE_ON_CLOSE SESSION_ENCRYPT SESSION_HTTP_ONLY PASSWORD_RESET_ENABLED SECURITY_HEADERS_ENABLED SECURITY_MAX_ACTIVE_USERS; do
     setting_value=$(read_setting "$required_key")
     if [[ -z "$setting_value" || "$setting_value" == REEMPLAZAR_* ]]; then
         echo "ERROR: $required_key no esta configurada en $environment_file" >&2
@@ -61,6 +61,11 @@ done
 
 if [[ $(read_setting APP_ENV) != production || $(read_setting APP_DEBUG) != false ]]; then
     echo "ERROR: Parra requiere APP_ENV=production y APP_DEBUG=false." >&2
+    exit 65
+fi
+
+if [[ $(read_setting LOG_CHANNEL) != stderr_json ]]; then
+    echo "ERROR: Parra requiere LOG_CHANNEL=stderr_json para integrar los logs con Podman." >&2
     exit 65
 fi
 

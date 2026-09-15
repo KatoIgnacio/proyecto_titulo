@@ -39,7 +39,8 @@ configuración.
 
 - `APP_ENV=production` y `APP_DEBUG=false`.
 - `APP_TIMEZONE=America/Santiago` y configuración regional en español.
-- `LOG_CHANNEL=stderr` para consultar los logs mediante Podman.
+- `LOG_CHANNEL=stderr_json` para consultar eventos estructurados mediante
+  Podman.
 - `SESSION_ENCRYPT=true`, cookie HTTP-only y `SameSite=lax`.
 - `QUEUE_CONNECTION=sync`, porque la versión actual no requiere un proceso
   worker separado.
@@ -55,6 +56,7 @@ través de una conexión HTTP sin protección.
 ```powershell
 php artisan config:clear
 php artisan about --only=environment,drivers
+php artisan luzparral:health --database --json
 ```
 
 En el contenedor de producción la configuración se cacheará después de inyectar
@@ -63,3 +65,5 @@ caché no cambia la configuración activa.
 
 El aprovisionamiento y el endurecimiento previo a publicar se detallan en
 [`SEGURIDAD_OPERATIVA.md`](SEGURIDAD_OPERATIVA.md).
+La interpretación de las comprobaciones y los logs se detalla en
+[`DIAGNOSTICO_OPERATIVO.md`](DIAGNOSTICO_OPERATIVO.md).

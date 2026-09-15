@@ -54,6 +54,8 @@ sin reemplazar sus marcadores.
 
 La imagen compatible con Docker y Podman y su ejecución local están descritas en
 [`docs/CONTENEDORES.md`](docs/CONTENEDORES.md).
+Esa guía incluye el ensayo integral aislado con Docker, MySQL 8.4.9 y el
+conjunto sintético completo.
 
 Los escenarios de migración, generación sintética, respaldo, restauración y
 validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DATOS.md).
@@ -65,3 +67,9 @@ protecciones de sesión están documentados en
 La exportación verificable de la imagen y el procedimiento para los puertos
 institucionales `2003` y `2004` están documentados en
 [`docs/DESPLIEGUE_PARRA.md`](docs/DESPLIEGUE_PARRA.md).
+
+La comprobación de salud, los errores controlados de base de datos y la lectura
+de logs están documentados en
+[`docs/DIAGNOSTICO_OPERATIVO.md`](docs/DIAGNOSTICO_OPERATIVO.md). Las
+dependencias de ejecución, construcción y datos se inventarían en
+[`docs/DEPENDENCIAS_EXTERNAS.md`](docs/DEPENDENCIAS_EXTERNAS.md).

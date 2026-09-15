@@ -70,6 +70,6 @@ echo "Puerto: $host_port -> 8080"
 echo "Encabezados y recuperacion web: OK"
 
 if [[ "$database_check" == --database ]]; then
-    podman exec "$container_name" php artisan migrate:status --no-interaction
-    echo "Conexion y estado de migraciones: OK"
+    podman exec "$container_name" php artisan luzparral:health --database --json --no-interaction
+    echo "Conexion y esquema de base de datos: OK"
 fi

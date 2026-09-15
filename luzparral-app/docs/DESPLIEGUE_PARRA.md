@@ -102,10 +102,11 @@ directamente el archivo generado por `docker save`.
 ~/luzparral/scripts/verify.sh staging --database
 ```
 
-La ultima comprobacion consulta el estado de las migraciones para validar la
-conexion MySQL, pero no modifica la base. Ademas de los comandos, se deben probar
+La ultima comprobacion valida la conexion MySQL y la presencia del esquema
+indispensable, pero no modifica la base. Ademas de los comandos, se deben probar
 manualmente inicio de sesion, dashboard, filtros, mapa, detalle, busqueda y las
-tres variantes de informe.
+tres variantes de informe. La lectura de respuestas 503 y logs se documenta en
+[`DIAGNOSTICO_OPERATIVO.md`](DIAGNOSTICO_OPERATIVO.md).
 
 Después de preparar la base y antes de probar el inicio de sesión, se deben
 aprovisionar las cinco cuentas siguiendo

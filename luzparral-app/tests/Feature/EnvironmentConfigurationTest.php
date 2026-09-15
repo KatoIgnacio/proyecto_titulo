@@ -22,7 +22,7 @@ class EnvironmentConfigurationTest extends TestCase
         $this->assertMatchesRegularExpression('/^APP_ENV=production$/m', $contents);
         $this->assertMatchesRegularExpression('/^APP_DEBUG=false$/m', $contents);
         $this->assertMatchesRegularExpression('/^APP_TIMEZONE=America\/Santiago$/m', $contents);
-        $this->assertMatchesRegularExpression('/^LOG_CHANNEL=stderr$/m', $contents);
+        $this->assertMatchesRegularExpression('/^LOG_CHANNEL=stderr_json$/m', $contents);
         $this->assertMatchesRegularExpression('/^SESSION_ENCRYPT=true$/m', $contents);
         $this->assertMatchesRegularExpression('/^APP_KEY=$/m', $contents);
         $this->assertMatchesRegularExpression('/^DB_PASSWORD=$/m', $contents);

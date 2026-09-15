@@ -53,10 +53,42 @@ http://127.0.0.1:8080/up
 ## Comprobaciones del contenedor
 
 ```powershell
-docker compose --file compose.local.yaml exec app php artisan about
-docker compose --file compose.local.yaml exec app php artisan migrate:status
+docker compose --file compose.local.yaml exec app php artisan luzparral:health --json
+docker compose --file compose.local.yaml exec app php artisan luzparral:health --database --json
 docker compose --file compose.local.yaml logs --tail 100 app
 ```
+
+La segunda comprobación valida la conexión y las tablas indispensables sin
+modificar la base. Los logs del contenedor se emiten como JSON; la guía de
+diagnóstico se encuentra en
+[`DIAGNOSTICO_OPERATIVO.md`](DIAGNOSTICO_OPERATIVO.md).
+
+## Ensayo integral local aislado
+
+`compose.integration.yaml` levanta temporalmente la imagen de la aplicación y
+un MySQL 8.4.9 exclusivo para pruebas. MySQL continúa separado de la imagen de
+Luzparral: este servicio adicional es solo un banco de integración local y no
+forma parte del despliegue en Parra.
+
+La prueba genera claves aleatorias en memoria, crea el esquema, carga el
+conjunto `luzparral-synthetic-v1` y valida por HTTP el acceso, dashboard, mapa,
+búsqueda, detalle, informes y las exportaciones CSV/PDF:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy/VALIDAR_INTEGRACION_LOCAL.ps1
+```
+
+El proceso utiliza `127.0.0.1:8080`, elimina al terminar los contenedores y el
+volumen sintético que creó, y no modifica la MySQL instalada en Windows. Si una
+comprobación falla, conserva el banco de prueba para consultar los logs. Para
+mantenerlo también después de una ejecución correcta:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy/VALIDAR_INTEGRACION_LOCAL.ps1 -KeepContainers
+```
+
+Antes de repetir el ensayo se elimina exclusivamente el proyecto Compose
+`luzparral-integration`, incluido su volumen descartable.
 
 Las migraciones nunca se ejecutan automáticamente al iniciar el contenedor. Esto
 evita modificar accidentalmente una base institucional. El procedimiento de
