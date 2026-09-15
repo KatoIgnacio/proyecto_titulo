@@ -303,7 +303,7 @@ export default function MapPage({
                         <MapContainer center={initialCenter} zoom={10} className="h-[620px] w-full" scrollWheelZoom>
                             <TileLayer
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
                             <FitMapToEvents contingencies={contingencies} />
                             {contingencies.map((contingency) => {

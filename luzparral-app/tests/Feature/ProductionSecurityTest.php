@@ -29,16 +29,24 @@ class ProductionSecurityTest extends TestCase
         config()->set('security.headers_enabled', true);
         $user = User::factory()->create();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->get('/profile')
             ->assertOk()
             ->assertHeader('X-Content-Type-Options', 'nosniff')
             ->assertHeader('X-Frame-Options', 'DENY')
-            ->assertHeader('Referrer-Policy', 'same-origin')
+            ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
             ->assertHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
             ->assertHeader('Cross-Origin-Opener-Policy', 'same-origin')
             ->assertHeader('Cache-Control', 'no-store, private')
             ->assertHeader('Content-Security-Policy');
+
+        $policy = (string) $response->headers->get('Content-Security-Policy');
+
+        $this->assertMatchesRegularExpression("/script-src[^;]*'nonce-([^']+)'/", $policy);
+        preg_match("/script-src[^;]*'nonce-([^']+)'/", $policy, $matches);
+        $this->assertNotEmpty($matches[1] ?? null);
+        $this->assertStringContainsString('nonce="'.($matches[1] ?? '').'"', $response->getContent());
+        $this->assertStringNotContainsString("script-src 'self' 'unsafe-inline'", $policy);
     }
 
     public function test_production_template_disables_log_based_recovery_and_persistent_sessions(): void
