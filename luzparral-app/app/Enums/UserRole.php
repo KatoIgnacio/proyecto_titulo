@@ -26,4 +26,13 @@ enum UserRole: string
             self::Supervisor,
         ], true);
     }
+
+    public function canUpdateContingencies(): bool
+    {
+        return in_array($this, [
+            self::Admin,
+            self::Supervisor,
+            self::Operator,
+        ], true);
+    }
 }

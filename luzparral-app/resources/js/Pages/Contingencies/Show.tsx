@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import { PageProps } from '@/types';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 
 type ContingencyDetail = {
     id: number;
@@ -31,6 +32,11 @@ type HistoryEvent = {
     user: string | null;
 };
 
+type StatusTransition = {
+    value: string;
+    label: string;
+};
+
 type ShowPageProps = {
     contingency: ContingencyDetail;
     impactSummary: {
@@ -40,6 +46,7 @@ type ShowPageProps = {
         averageMinutes: number | null;
     };
     history: HistoryEvent[];
+    availableStatusTransitions: StatusTransition[];
     source: {
         name: string;
         file: string;
@@ -127,7 +134,85 @@ function DataItem({ label, value, mono = false }: { label: string; value: string
     );
 }
 
-export default function Show({ contingency, impactSummary, history, source, contingencyOptions }: ShowPageProps) {
+function StatusUpdateForm({
+    contingency,
+    transitions,
+    canUpdate,
+}: {
+    contingency: ContingencyDetail;
+    transitions: StatusTransition[];
+    canUpdate: boolean;
+}) {
+    const form = useForm({
+        current_status: contingency.status,
+        status: transitions[0]?.value ?? '',
+        note: '',
+    });
+
+    if (!canUpdate) return null;
+
+    if (transitions.length === 0) {
+        return (
+            <div className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
+                La contingencia completó su ciclo de seguimiento.
+            </div>
+        );
+    }
+
+    const submit = (event: React.FormEvent) => {
+        event.preventDefault();
+        form.patch(route('contingencies.status.update', contingency.id), {
+            preserveScroll: true,
+            onSuccess: () => form.reset('note'),
+        });
+    };
+
+    return (
+        <form onSubmit={submit} className="mt-5 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+            <h3 className="text-sm font-bold text-slate-900">Registrar cambio de estado</h3>
+            <p className="mt-1 text-xs text-slate-500">La actualización quedará asociada a su usuario, fecha y hora.</p>
+
+            <label className="mt-4 block text-xs font-semibold text-slate-700">
+                Nuevo estado
+                <select
+                    value={form.data.status}
+                    onChange={(event) => form.setData('status', event.target.value)}
+                    className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                    {transitions.map((transition) => (
+                        <option key={transition.value} value={transition.value}>{transition.label}</option>
+                    ))}
+                </select>
+            </label>
+            {form.errors.status && <p className="mt-1 text-xs font-medium text-rose-600">{form.errors.status}</p>}
+
+            <label className="mt-4 block text-xs font-semibold text-slate-700">
+                Antecedente del cambio
+                <textarea
+                    value={form.data.note}
+                    onChange={(event) => form.setData('note', event.target.value)}
+                    rows={3}
+                    maxLength={300}
+                    placeholder="Describa brevemente el avance o antecedente que respalda la actualización."
+                    className="mt-1 block w-full resize-y rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+            </label>
+            {form.errors.note && <p className="mt-1 text-xs font-medium text-rose-600">{form.errors.note}</p>}
+            {form.errors.current_status && <p className="mt-2 text-xs font-medium text-rose-600">{form.errors.current_status}</p>}
+
+            <button
+                type="submit"
+                disabled={form.processing || form.data.note.trim().length < 5}
+                className="mt-4 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+                {form.processing ? 'Registrando...' : 'Registrar actualización'}
+            </button>
+        </form>
+    );
+}
+
+export default function Show({ contingency, impactSummary, history, source, contingencyOptions, availableStatusTransitions }: ShowPageProps) {
+    const { auth, flash } = usePage<PageProps>().props;
     const restorationPercentage = impactSummary.registered > 0
         ? Math.round((impactSummary.restored / impactSummary.registered) * 100)
         : 0;
@@ -169,6 +254,11 @@ export default function Show({ contingency, impactSummary, history, source, cont
             <Head title={`Detalle ${contingency.code}`} />
 
             <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+                {flash.success && (
+                    <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+                        {flash.success}
+                    </div>
+                )}
                 <section aria-label="Resumen de la contingencia" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     <SummaryCard
                         label="Estado actual"
@@ -272,6 +362,13 @@ export default function Show({ contingency, impactSummary, history, source, cont
                             <h2 className="font-bold text-slate-900">Bitácora histórica</h2>
                             <p className="mt-1 text-xs text-slate-500">Cambios de estado ordenados desde el más reciente.</p>
                         </div>
+
+                        <StatusUpdateForm
+                            key={`${contingency.id}-${contingency.status}`}
+                            contingency={contingency}
+                            transitions={availableStatusTransitions}
+                            canUpdate={auth.permissions.updateContingencies}
+                        />
 
                         {history.length > 0 ? (
                             <ol className="mt-5 space-y-0">

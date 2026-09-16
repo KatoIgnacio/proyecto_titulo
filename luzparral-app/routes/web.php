@@ -3,6 +3,7 @@
 use App\Http\Controllers\ContingencyDetailController;
 use App\Http\Controllers\ContingencyMapController;
 use App\Http\Controllers\ContingencyReportController;
+use App\Http\Controllers\ContingencyStatusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OperationalSearchController;
 use App\Http\Controllers\ProfileController;
@@ -17,6 +18,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/pronostico-meteorologico', WeatherForecastController::class)->name('weather.forecast');
     Route::get('/buscador-operacional', OperationalSearchController::class)->name('contingencies.search');
     Route::get('/contingencias/{contingency}', ContingencyDetailController::class)->name('contingencies.show');
+    Route::patch('/contingencias/{contingency}/estado', [ContingencyStatusController::class, 'update'])
+        ->middleware('role:admin,supervisor,operator')
+        ->name('contingencies.status.update');
 
     Route::middleware('role:admin,supervisor')->group(function () {
         Route::get('/informes', [ContingencyReportController::class, 'index'])

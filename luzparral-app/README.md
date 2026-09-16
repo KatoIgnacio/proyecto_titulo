@@ -83,3 +83,7 @@ La validación de calidad, los períodos calendario por día, mes, año o rango,
 la recuperación del pronóstico Windy y la prueba de 5/10 sesiones concurrentes
 están documentados en
 [`docs/CALIDAD_RENDIMIENTO.md`](docs/CALIDAD_RENDIMIENTO.md).
+
+La secuencia de estados, el registro atómico de cambios y las autorizaciones de
+la bitácora se describen en
+[`docs/TRAZABILIDAD_CONTINGENCIAS.md`](docs/TRAZABILIDAD_CONTINGENCIAS.md).

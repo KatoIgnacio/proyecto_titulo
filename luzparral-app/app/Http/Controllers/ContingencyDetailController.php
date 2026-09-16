@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ContingencyStatus;
 use App\Models\Contingency;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,6 +29,7 @@ class ContingencyDetailController extends Controller
 
         $totalImpacts = (int) ($impactSummary?->total ?? 0);
         $restoredImpacts = (int) ($impactSummary?->restored ?? 0);
+        $currentStatus = ContingencyStatus::tryFrom($contingency->status);
 
         return Inertia::render('Contingencies/Show', [
             'contingency' => [
@@ -72,6 +74,12 @@ class ContingencyDetailController extends Controller
                     'source' => $event->source,
                     'user' => $event->user?->name,
                 ]),
+            'availableStatusTransitions' => collect($currentStatus?->allowedTransitions() ?? [])
+                ->map(fn (ContingencyStatus $status) => [
+                    'value' => $status->value,
+                    'label' => $status->label(),
+                ])
+                ->values(),
             'source' => $contingency->sourceBatch ? [
                 'name' => $contingency->sourceBatch->source_name,
                 'file' => $contingency->sourceBatch->synthetic_file_name,

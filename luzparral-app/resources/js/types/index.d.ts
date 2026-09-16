@@ -16,6 +16,10 @@ export type PageProps<
         user: User;
         permissions: {
             viewReports: boolean;
+            updateContingencies: boolean;
         };
+    };
+    flash: {
+        success?: string;
     };
 };

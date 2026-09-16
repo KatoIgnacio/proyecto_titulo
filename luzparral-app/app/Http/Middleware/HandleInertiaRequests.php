@@ -37,7 +37,11 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
                 'permissions' => [
                     'viewReports' => $user?->role?->canViewReports() ?? false,
+                    'updateContingencies' => $user?->role?->canUpdateContingencies() ?? false,
                 ],
+            ],
+            'flash' => [
+                'success' => fn (): ?string => $request->session()->get('success'),
             ],
         ];
     }
