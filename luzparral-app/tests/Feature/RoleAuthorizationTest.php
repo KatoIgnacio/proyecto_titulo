@@ -19,6 +19,7 @@ class RoleAuthorizationTest extends TestCase
 
             $this->actingAs($user)->get('/dashboard')->assertOk();
             $this->actingAs($user)->get('/contingencias/mapa')->assertOk();
+            $this->actingAs($user)->get('/pronostico-meteorologico')->assertOk();
             $this->actingAs($user)->get('/buscador-operacional')->assertOk();
         }
     }

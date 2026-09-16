@@ -2,6 +2,10 @@
 
 return [
 
+    'windy' => [
+        'embed_url' => 'https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=km%2Fh&zoom=9&overlay=wind&product=ecmwf&level=surface&lat=-36.275&lon=-71.782&detailLat=-36.076&detailLon=-71.782&detail=true&pressure=true&message=true',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

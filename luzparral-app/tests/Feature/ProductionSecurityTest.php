@@ -47,6 +47,8 @@ class ProductionSecurityTest extends TestCase
         $this->assertNotEmpty($matches[1] ?? null);
         $this->assertStringContainsString('nonce="'.($matches[1] ?? '').'"', $response->getContent());
         $this->assertStringNotContainsString("script-src 'self' 'unsafe-inline'", $policy);
+        $this->assertStringContainsString("frame-src 'self' https://embed.windy.com", $policy);
+        $this->assertStringNotContainsString('https://www.windy.com', $policy);
     }
 
     public function test_production_template_disables_log_based_recovery_and_persistent_sessions(): void

@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [switch]$KeepContainers
+    [switch]$KeepContainers,
+    [switch]$RunPerformance
 )
 
 $ErrorActionPreference = 'Stop'
@@ -136,6 +137,7 @@ try {
     foreach ($path in @(
         '/dashboard',
         '/contingencias/mapa',
+        '/pronostico-meteorologico',
         '/buscador-operacional',
         '/contingencias/1',
         '/informes'
@@ -155,6 +157,20 @@ try {
     $pdf = Assert-OkResponse -Path '/informes/contingencias.pdf?range=12m&report_type=executive' -Session $webSession
     if ($pdf.RawContentLength -lt 1000 -or $pdf.Headers['Content-Type'] -notmatch 'application/pdf') {
         throw 'La exportación PDF no entregó un archivo válido.'
+    }
+
+    if ($RunPerformance) {
+        Write-Host '[Rendimiento] Probando 5 y 10 sesiones concurrentes...'
+        $env:LUZPARRAL_PERFORMANCE_PASSWORD = $demoPassword
+        try {
+            & (Join-Path $PSScriptRoot 'MEDIR_RENDIMIENTO_LOCAL.ps1') -BaseUrl $baseUrl
+            if ($LASTEXITCODE -ne 0) {
+                throw "La medición de rendimiento terminó con código $LASTEXITCODE."
+            }
+        }
+        finally {
+            Remove-Item Env:LUZPARRAL_PERFORMANCE_PASSWORD -ErrorAction SilentlyContinue
+        }
     }
 
     $completed = $true

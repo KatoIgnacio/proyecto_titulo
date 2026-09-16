@@ -5,6 +5,7 @@ namespace App\Services\Reports;
 use App\Models\Commune;
 use App\Models\Contingency;
 use App\Models\Feeder;
+use App\Support\ContingencyPeriod;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -26,22 +27,12 @@ class ContingencyReportData
     }
 
     /**
-     * @param  array{range: string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
+     * @param  array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
      */
     public function filteredQuery(array $filters, CarbonImmutable $referenceDate): Builder
     {
         $query = Contingency::query();
-        $startDate = match ($filters['range']) {
-            '24h' => $referenceDate->subDay(),
-            '7d' => $referenceDate->startOfDay()->subDays(6),
-            '30d' => $referenceDate->startOfDay()->subDays(29),
-            '12m' => $referenceDate->subYear(),
-            default => null,
-        };
-
-        if ($startDate) {
-            $query->where('contingencies.started_at', '>=', $startDate);
-        }
+        ContingencyPeriod::apply($query, $filters, $referenceDate);
 
         $query
             ->when($filters['commune'], fn (Builder $builder, int $commune) => $builder->where('contingencies.commune_id', $commune))
@@ -87,7 +78,7 @@ class ContingencyReportData
     }
 
     /**
-     * @param  array{range: string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
+     * @param  array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
      */
     public function reportCollection(array $filters): Collection
     {
@@ -182,12 +173,12 @@ class ContingencyReportData
     }
 
     /**
-     * @param  array{range: string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
+     * @param  array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
      * @return array<string, mixed>
      */
     public function analytics(Collection $contingencies, array $filters): array
     {
-        $trend = $this->trend($contingencies, $filters['range']);
+        $trend = $this->trend($contingencies, ContingencyPeriod::trendRange($filters));
         $communes = $contingencies
             ->groupBy(fn (Contingency $contingency) => $contingency->commune?->name ?? 'Sin comuna')
             ->map(fn (Collection $items, string $name) => [
@@ -239,20 +230,14 @@ class ContingencyReportData
     }
 
     /**
-     * @param  array{range: string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
+     * @param  array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
      * @return array<int, array{label: string, value: string}>
      */
     public function filterSummary(array $filters): array
     {
         $items = [[
             'label' => 'Período',
-            'value' => match ($filters['range']) {
-                '24h' => 'Últimas 24 horas',
-                '7d' => 'Últimos 7 días',
-                '30d' => 'Últimos 30 días',
-                '12m' => 'Últimos 12 meses',
-                default => 'Todo el historial',
-            },
+            'value' => ContingencyPeriod::label($filters),
         ]];
 
         if ($filters['commune']) {

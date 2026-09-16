@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Commune;
 use App\Models\Contingency;
 use App\Models\Feeder;
+use App\Support\ContingencyPeriod;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -22,15 +23,16 @@ class ContingencyMapController extends Controller
     public function __invoke(Request $request): Response
     {
         $validated = $request->validate([
-            'range' => ['nullable', Rule::in(['24h', '7d', '30d', '12m', 'all'])],
+            ...ContingencyPeriod::validationRules(),
             'commune' => ['nullable', 'integer', 'exists:communes,id'],
             'feeder' => ['nullable', 'integer', 'exists:feeders,id'],
             'priority' => ['nullable', Rule::in(['critical', 'high', 'medium', 'low'])],
             'status' => ['nullable', Rule::in(['active', 'reported', 'assigned', 'in_progress', 'restored', 'closed', 'all'])],
         ]);
 
+        $period = ContingencyPeriod::normalize($validated);
         $filters = [
-            'range' => $validated['range'] ?? '12m',
+            ...$period,
             'commune' => isset($validated['commune']) ? (int) $validated['commune'] : null,
             'feeder' => isset($validated['feeder']) ? (int) $validated['feeder'] : null,
             'priority' => $validated['priority'] ?? null,
@@ -43,17 +45,7 @@ class ContingencyMapController extends Controller
             : CarbonImmutable::now();
 
         $query = Contingency::query()->with(['commune:id,name', 'feeder:id,code,name']);
-        $startDate = match ($filters['range']) {
-            '24h' => $referenceDate->subDay(),
-            '7d' => $referenceDate->startOfDay()->subDays(6),
-            '30d' => $referenceDate->startOfDay()->subDays(29),
-            '12m' => $referenceDate->subYear(),
-            default => null,
-        };
-
-        if ($startDate) {
-            $query->where('started_at', '>=', $startDate);
-        }
+        ContingencyPeriod::apply($query, $filters, $referenceDate, 'started_at');
 
         $query
             ->when($filters['commune'], fn (Builder $builder, int $commune) => $builder->where('commune_id', $commune))

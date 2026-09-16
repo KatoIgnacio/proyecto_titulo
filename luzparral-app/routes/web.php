@@ -6,6 +6,7 @@ use App\Http\Controllers\ContingencyReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OperationalSearchController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\WeatherForecastController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
@@ -13,6 +14,7 @@ Route::redirect('/', '/login');
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/contingencias/mapa', ContingencyMapController::class)->name('contingencies.map');
+    Route::get('/pronostico-meteorologico', WeatherForecastController::class)->name('weather.forecast');
     Route::get('/buscador-operacional', OperationalSearchController::class)->name('contingencies.search');
     Route::get('/contingencias/{contingency}', ContingencyDetailController::class)->name('contingencies.show');
 

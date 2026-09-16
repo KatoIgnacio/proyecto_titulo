@@ -13,6 +13,7 @@ const roleLabels: Record<UserRole, string> = {
 type IconName =
     | 'dashboard'
     | 'map'
+    | 'weather'
     | 'list'
     | 'search'
     | 'report'
@@ -22,6 +23,7 @@ type IconName =
 const iconPaths: Record<IconName, ReactNode> = {
     dashboard: <path d="M4 19V9m6 10V5m6 14v-7m4 7H2" />,
     map: <path d="m3 6 5-2 8 3 5-2v13l-5 2-8-3-5 2V6Zm5-2v13m8-10v13" />,
+    weather: <path d="M4 15h11a4 4 0 1 0-3.3-6.3A5 5 0 0 0 2 10.5M5 19h7m3 0h4" />,
     list: <path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" />,
     search: <path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />,
     report: <path d="M6 2h9l4 4v16H6V2Zm9 0v5h5M9 12h7m-7 4h7" />,
@@ -54,6 +56,7 @@ export default function Authenticated({
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const dashboardActive = route().current('dashboard');
     const mapActive = route().current('contingencies.map');
+    const weatherActive = route().current('weather.forecast');
     const detailActive = route().current('contingencies.show');
     const searchActive = route().current('contingencies.search');
     const reportsActive = route().current('reports.*');
@@ -77,6 +80,14 @@ export default function Authenticated({
             >
                 <Icon name="map" />
                 Mapa de contingencias
+            </Link>
+
+            <Link
+                href={route('weather.forecast')}
+                className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ${weatherActive ? activeClass : inactiveClass}`}
+            >
+                <Icon name="weather" />
+                Pronóstico meteorológico
             </Link>
 
             <div

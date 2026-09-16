@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\ContingencyPeriod;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,7 +17,7 @@ class ContingencyReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'range' => ['nullable', Rule::in(['24h', '7d', '30d', '12m', 'all'])],
+            ...ContingencyPeriod::validationRules(),
             'commune' => ['nullable', 'integer', 'exists:communes,id'],
             'feeder' => ['nullable', 'integer', 'exists:feeders,id'],
             'priority' => ['nullable', Rule::in(['critical', 'high', 'medium', 'low'])],
@@ -28,14 +29,15 @@ class ContingencyReportRequest extends FormRequest
     }
 
     /**
-     * @return array{range: string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}
+     * @return array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}
      */
     public function reportFilters(): array
     {
         $validated = $this->validated();
+        $period = ContingencyPeriod::normalize($validated);
 
         return [
-            'range' => $validated['range'] ?? '12m',
+            ...$period,
             'commune' => isset($validated['commune']) ? (int) $validated['commune'] : null,
             'feeder' => isset($validated['feeder']) ? (int) $validated['feeder'] : null,
             'priority' => $validated['priority'] ?? null,

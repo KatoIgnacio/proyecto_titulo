@@ -27,6 +27,23 @@ es de cinco usuarios base, con un máximo de diez usuarios concurrentes.
 Los logotipos, estilos, JavaScript y tipografías de la interfaz se sirven desde
 la propia aplicación. No dependen de una CDN en tiempo de ejecución.
 
+### Pronóstico meteorológico de Windy
+
+La vista `Pronóstico meteorológico` incorpora el mapa público de
+`https://embed.windy.com` en un marco aislado. Conserva la función disponible
+en la beta CIOP: presenta viento superficial con el modelo ECMWF y permite
+consultar lluvia, temperatura y presión para la zona de Parral. No utiliza una
+clave API y Luzparral no incorpora datos de contingencias ni clientes en la
+URL. Como en cualquier recurso web de terceros, el navegador establece una
+conexión HTTPS directa con Windy, que puede recibir datos técnicos como la
+dirección IP y el agente de usuario conforme a sus propias políticas.
+
+La política de seguridad permite marcos únicamente desde el origen exacto
+`https://embed.windy.com`. Si el servicio externo o Internet no están
+disponibles, se degrada solo esta vista; dashboard, mapa de contingencias,
+búsqueda, detalle e informes continúan funcionando con MySQL. Su carga en el
+navegador no forma parte de las mediciones de respuesta del servidor Luzparral.
+
 ## Dependencias de construcción
 
 PHP/Composer, Node.js/npm y los repositorios de paquetes se requieren en el

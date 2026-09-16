@@ -1,9 +1,15 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PeriodFields, { type PeriodFilterValue } from '@/Components/PeriodFields';
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, ReactNode, useMemo, useState } from 'react';
 
 type Filters = {
     range: string;
+    date_day: string | null;
+    date_month: string | null;
+    date_year: string | null;
+    date_from: string | null;
+    date_to: string | null;
     commune: number | null;
     feeder: number | null;
     priority: string | null;
@@ -11,8 +17,7 @@ type Filters = {
     search: string;
 };
 
-type FilterForm = {
-    range: string;
+type FilterForm = PeriodFilterValue & {
     commune: string;
     feeder: string;
     priority: string;
@@ -161,6 +166,11 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
     const [reportType, setReportType] = useState<ReportType>('executive');
     const [form, setForm] = useState<FilterForm>({
         range: filters.range,
+        date_day: filters.date_day ?? '',
+        date_month: filters.date_month ?? '',
+        date_year: filters.date_year ?? '',
+        date_from: filters.date_from ?? '',
+        date_to: filters.date_to ?? '',
         commune: filters.commune?.toString() ?? '',
         feeder: filters.feeder?.toString() ?? '',
         priority: filters.priority ?? '',
@@ -176,6 +186,13 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
     const currentParams = useMemo(() => {
         const params = new URLSearchParams();
         params.set('range', filters.range);
+        if (filters.range === 'day' && filters.date_day) params.set('date_day', filters.date_day);
+        if (filters.range === 'month' && filters.date_month) params.set('date_month', filters.date_month);
+        if (filters.range === 'year' && filters.date_year) params.set('date_year', filters.date_year);
+        if (filters.range === 'custom' && filters.date_from && filters.date_to) {
+            params.set('date_from', filters.date_from);
+            params.set('date_to', filters.date_to);
+        }
         if (filters.commune) params.set('commune', filters.commune.toString());
         if (filters.feeder) params.set('feeder', filters.feeder.toString());
         if (filters.priority) params.set('priority', filters.priority);
@@ -204,6 +221,11 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
         event.preventDefault();
         router.get(route('reports.index'), {
             range: form.range,
+            date_day: form.range === 'day' ? form.date_day : undefined,
+            date_month: form.range === 'month' ? form.date_month : undefined,
+            date_year: form.range === 'year' ? form.date_year : undefined,
+            date_from: form.range === 'custom' ? form.date_from : undefined,
+            date_to: form.range === 'custom' ? form.date_to : undefined,
             commune: form.commune || undefined,
             feeder: form.feeder || undefined,
             priority: form.priority || undefined,
@@ -213,7 +235,7 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
     };
 
     const reset = () => {
-        setForm({ range: '12m', commune: '', feeder: '', priority: '', status: '', search: '' });
+        setForm({ range: '12m', date_day: '', date_month: '', date_year: '', date_from: '', date_to: '', commune: '', feeder: '', priority: '', status: '', search: '' });
         router.get(route('reports.index'), {}, { replace: true });
     };
 
@@ -240,16 +262,13 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <form onSubmit={submit} className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-                            <label className="text-sm font-medium text-slate-700">
-                                Período
-                                <select value={form.range} onChange={(event) => setForm((current) => ({ ...current, range: event.target.value }))} className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="24h">Últimas 24 horas</option>
-                                    <option value="7d">Últimos 7 días</option>
-                                    <option value="30d">Últimos 30 días</option>
-                                    <option value="12m">Últimos 12 meses</option>
-                                    <option value="all">Todo el historial</option>
-                                </select>
-                            </label>
+                            <PeriodFields
+                                value={form}
+                                onChange={setForm}
+                                maxDate={referenceDate.slice(0, 10)}
+                                labelClassName="text-sm font-medium text-slate-700"
+                                controlClassName="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
 
                             <label className="text-sm font-medium text-slate-700">
                                 Comuna

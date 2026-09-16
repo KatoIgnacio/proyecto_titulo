@@ -1,9 +1,15 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PeriodFields, { type PeriodFilterValue } from '@/Components/PeriodFields';
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 
 type Filters = {
     range: string;
+    date_day: string | null;
+    date_month: string | null;
+    date_year: string | null;
+    date_from: string | null;
+    date_to: string | null;
     commune: number | null;
     feeder: number | null;
     priority: string | null;
@@ -11,8 +17,7 @@ type Filters = {
     search: string;
 };
 
-type FilterForm = {
-    range: string;
+type FilterForm = PeriodFilterValue & {
     commune: string;
     feeder: string;
     priority: string;
@@ -245,6 +250,11 @@ export default function Dashboard({
 }: DashboardProps) {
     const toForm = (source: Filters): FilterForm => ({
         range: source.range,
+        date_day: source.date_day ?? '',
+        date_month: source.date_month ?? '',
+        date_year: source.date_year ?? '',
+        date_from: source.date_from ?? '',
+        date_to: source.date_to ?? '',
         commune: source.commune?.toString() ?? '',
         feeder: source.feeder?.toString() ?? '',
         priority: source.priority ?? '',
@@ -267,7 +277,7 @@ export default function Dashboard({
     };
 
     const reset = () => {
-        setForm({ range: '12m', commune: '', feeder: '', priority: '', status: '', search: '' });
+        setForm({ range: '12m', date_day: '', date_month: '', date_year: '', date_from: '', date_to: '', commune: '', feeder: '', priority: '', status: '', search: '' });
         router.get(route('dashboard'), {}, { replace: true });
     };
 
@@ -310,16 +320,13 @@ export default function Dashboard({
                     </div>
 
                     <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-                        <label className="text-xs font-semibold text-slate-600">
-                            Período
-                            <select value={form.range} onChange={(event) => setForm({ ...form, range: event.target.value })} className="mt-1 block w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="24h">Últimas 24 horas</option>
-                                <option value="7d">Últimos 7 días</option>
-                                <option value="30d">Últimos 30 días</option>
-                                <option value="12m">Últimos 12 meses</option>
-                                <option value="all">Todo el historial</option>
-                            </select>
-                        </label>
+                        <PeriodFields
+                            value={form}
+                            onChange={setForm}
+                            maxDate={referenceDate.slice(0, 10)}
+                            labelClassName="text-xs font-semibold text-slate-600"
+                            controlClassName="mt-1 block w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
                         <label className="text-xs font-semibold text-slate-600">
                             Comuna
                             <select

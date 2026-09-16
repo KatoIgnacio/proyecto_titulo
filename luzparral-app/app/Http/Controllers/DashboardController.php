@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Commune;
 use App\Models\Contingency;
 use App\Models\Feeder;
+use App\Support\ContingencyPeriod;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class DashboardController extends Controller
     public function __invoke(Request $request): Response
     {
         $validated = $request->validate([
-            'range' => ['nullable', Rule::in(['24h', '7d', '30d', '12m', 'all'])],
+            ...ContingencyPeriod::validationRules(),
             'commune' => ['nullable', 'integer', 'exists:communes,id'],
             'feeder' => ['nullable', 'integer', 'exists:feeders,id'],
             'priority' => ['nullable', Rule::in(['critical', 'high', 'medium', 'low'])],
@@ -31,8 +32,9 @@ class DashboardController extends Controller
             'search' => ['nullable', 'string', 'max:80'],
         ]);
 
+        $period = ContingencyPeriod::normalize($validated);
         $filters = [
-            'range' => $validated['range'] ?? '12m',
+            ...$period,
             'commune' => isset($validated['commune']) ? (int) $validated['commune'] : null,
             'feeder' => isset($validated['feeder']) ? (int) $validated['feeder'] : null,
             'priority' => $validated['priority'] ?? null,
@@ -152,23 +154,12 @@ class DashboardController extends Controller
     /**
      * Build the common query used by every widget so the dashboard remains consistent.
      *
-     * @param  array{range: string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
+     * @param  array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}  $filters
      */
     private function filteredQuery(array $filters, CarbonImmutable $referenceDate): Builder
     {
         $query = Contingency::query();
-
-        $startDate = match ($filters['range']) {
-            '24h' => $referenceDate->subDay(),
-            '7d' => $referenceDate->startOfDay()->subDays(6),
-            '30d' => $referenceDate->startOfDay()->subDays(29),
-            '12m' => $referenceDate->subYear(),
-            default => null,
-        };
-
-        if ($startDate) {
-            $query->where('contingencies.started_at', '>=', $startDate);
-        }
+        ContingencyPeriod::apply($query, $filters, $referenceDate);
 
         $query
             ->when($filters['commune'], fn (Builder $builder, int $commune) => $builder->where('contingencies.commune_id', $commune))

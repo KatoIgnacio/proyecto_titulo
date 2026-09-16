@@ -71,5 +71,10 @@ institucionales `2003` y `2004` están documentados en
 La comprobación de salud, los errores controlados de base de datos y la lectura
 de logs están documentados en
 [`docs/DIAGNOSTICO_OPERATIVO.md`](docs/DIAGNOSTICO_OPERATIVO.md). Las
-dependencias de ejecución, construcción y datos se inventarían en
+dependencias de ejecución, construcción y datos se detallan en
 [`docs/DEPENDENCIAS_EXTERNAS.md`](docs/DEPENDENCIAS_EXTERNAS.md).
+
+La validación de calidad, los períodos calendario por día, mes, año o rango,
+la recuperación del pronóstico Windy y la prueba de 5/10 sesiones concurrentes
+están documentados en
+[`docs/CALIDAD_RENDIMIENTO.md`](docs/CALIDAD_RENDIMIENTO.md).
