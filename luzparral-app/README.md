@@ -1,4 +1,6 @@
-# Sistema de contingencias Luzparral
+# SIGCEL Luzparral
+
+Sistema de Información para la Gestión de Contingencias Eléctricas de Luzparral.
 
 Aplicación principal del proyecto de título de Kato Bello Martínez y Carlos
 Sepúlveda Navarrete. El sistema utiliza Laravel 12, Inertia, React con
@@ -67,6 +69,9 @@ protecciones de sesión están documentados en
 La exportación verificable de la imagen y el procedimiento para los puertos
 institucionales `2003` y `2004` están documentados en
 [`docs/DESPLIEGUE_PARRA.md`](docs/DESPLIEGUE_PARRA.md).
+El cierre local y los controles que solo pueden resolverse dentro del servidor
+se separan en
+[`docs/INFORME_PREMIGRACION_PARRA.md`](docs/INFORME_PREMIGRACION_PARRA.md).
 
 La comprobación de salud, los errores controlados de base de datos y la lectura
 de logs están documentados en

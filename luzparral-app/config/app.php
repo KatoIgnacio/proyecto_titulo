@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Luzparral Contingencias'),
+    'name' => env('APP_NAME', 'SIGCEL Luzparral'),
 
     /*
     |--------------------------------------------------------------------------

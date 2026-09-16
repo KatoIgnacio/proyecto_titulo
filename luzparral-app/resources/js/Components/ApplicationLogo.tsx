@@ -4,11 +4,11 @@ type ApplicationLogoProps = ImgHTMLAttributes<HTMLImageElement> & {
     withBackground?: boolean;
 };
 
-export default function ApplicationLogo({ withBackground = false, alt = 'Sistema de contingencias Luzparral', ...props }: ApplicationLogoProps) {
+export default function ApplicationLogo({ withBackground = false, alt = 'SIGCEL Luzparral', ...props }: ApplicationLogoProps) {
     return (
         <img
             {...props}
-            src={withBackground ? '/images/logo-sistema-fondo-blanco.png' : '/images/logo-sistema-transparente.png'}
+            src={withBackground ? '/images/logo-sigcel-fondo-blanco.png' : '/images/logo-sigcel-transparente.png'}
             alt={alt}
         />
     );

@@ -61,7 +61,7 @@ $env:LUZPARRAL_DB_ALLOWED_DATABASE = 'luzparral'
 $env:LUZPARRAL_DB_USERNAME = 'luzparral_app'
 $env:LUZPARRAL_DB_PASSWORD = '<contraseña-local>'
 $env:LUZPARRAL_DEMO_PASSWORD = '<contraseña-demo-temporal>'
-php database/generate_synthetic.php
+php database/synthetic/generate_synthetic.php
 php artisan luzparral:validate-synthetic --require-runtime
 ```
 

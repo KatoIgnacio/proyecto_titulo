@@ -104,8 +104,9 @@ directamente el archivo generado por `docker save`.
 
 La ultima comprobacion valida la conexion MySQL y la presencia del esquema
 indispensable, pero no modifica la base. Ademas de los comandos, se deben probar
-manualmente inicio de sesion, dashboard, filtros, mapa, detalle, busqueda y las
-tres variantes de informe. La lectura de respuestas 503 y logs se documenta en
+manualmente inicio de sesion, dashboard, filtros por dia, mes, año y rango,
+mapa, detalle, busqueda, pronostico Windy y las tres variantes de informe. La
+lectura de respuestas 503 y logs se documenta en
 [`DIAGNOSTICO_OPERATIVO.md`](DIAGNOSTICO_OPERATIVO.md).
 
 Después de preparar la base y antes de probar el inicio de sesión, se deben
@@ -138,3 +139,11 @@ podman build --pull --tag luzparral-app:TAG_COMMIT --file Containerfile .
 
 La transferencia de la imagen ya construida es preferible mientras esa salida a
 Internet no este confirmada.
+
+## Criterio de cierre y pendientes institucionales
+
+El estado comprobado localmente, la aceptación de staging y las verificaciones
+que requieren acceso al servidor se consolidan en
+[`INFORME_PREMIGRACION_PARRA.md`](INFORME_PREMIGRACION_PARRA.md). El paquete no
+debe declararse productivo hasta completar esa lista en el entorno
+institucional.

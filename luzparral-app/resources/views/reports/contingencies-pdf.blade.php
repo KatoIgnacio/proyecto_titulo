@@ -82,7 +82,7 @@
     </style>
 </head>
 <body>
-    <footer>Luzparral - {{ $reportTitle }} - Página <span class="page"></span></footer>
+    <footer>SIGCEL Luzparral - {{ $reportTitle }} - Página <span class="page"></span></footer>
 
     <section>
         <table class="brand-table">
@@ -96,7 +96,7 @@
                 </td>
                 <td style="text-align: right">
                     @if ($systemLogo !== '')
-                        <img class="system-logo" src="{{ $systemLogo }}" alt="Sistema de contingencias">
+                        <img class="system-logo" src="{{ $systemLogo }}" alt="SIGCEL Luzparral">
                     @endif
                 </td>
             </tr>

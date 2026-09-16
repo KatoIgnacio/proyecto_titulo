@@ -29,10 +29,10 @@ export default function Login({
 
             <div className="mb-6 text-center">
                 <h1 className="text-xl font-semibold text-gray-900">
-                    Sistema de contingencias Luzparral
+                    SIGCEL Luzparral
                 </h1>
                 <p className="mt-1 text-sm text-gray-500">
-                    Acceso para usuarios autorizados
+                    Sistema de información para la gestión de contingencias eléctricas
                 </p>
             </div>
 

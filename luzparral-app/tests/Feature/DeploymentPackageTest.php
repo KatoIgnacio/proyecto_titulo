@@ -80,4 +80,20 @@ class DeploymentPackageTest extends TestCase
             $this->assertMatchesRegularExpression('/^deploy\/parra$/m', $contents);
         }
     }
+
+    public function test_deployment_guide_covers_the_latest_operational_modules(): void
+    {
+        $deployment = file_get_contents(base_path('docs/DESPLIEGUE_PARRA.md'));
+        $handoff = file_get_contents(base_path('docs/INFORME_PREMIGRACION_PARRA.md'));
+
+        $this->assertIsString($deployment);
+        $this->assertIsString($handoff);
+        $this->assertStringContainsString('filtros por dia, mes, año y rango', $deployment);
+        $this->assertStringContainsString('pronostico Windy', $deployment);
+        $this->assertStringContainsString('Pendiente exclusivamente en Parra', $handoff);
+        $this->assertStringContainsString('puerto `2004`', $handoff);
+        $this->assertStringContainsString('puerto `2003`', $handoff);
+        $this->assertStringContainsString('https://embed.windy.com', $handoff);
+        $this->assertStringContainsString('Persistencia tras reinicio', $handoff);
+    }
 }

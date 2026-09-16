@@ -147,7 +147,7 @@ class ContingencyReportController extends Controller
             'includesAnalytics' => $includesAnalytics,
             'includesDetail' => $includesDetail,
             'companyLogo' => $this->reports->imageDataUri('images/logo-luzparral.png'),
-            'systemLogo' => $this->reports->imageDataUri('images/logo-sistema-transparente.png'),
+            'systemLogo' => $this->reports->imageDataUri('images/logo-sigcel-transparente.png'),
         ])->render(), 'UTF-8');
         $dompdf->setPaper('a4', 'landscape');
         $dompdf->render();

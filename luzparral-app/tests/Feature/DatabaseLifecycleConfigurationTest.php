@@ -42,5 +42,7 @@ class DatabaseLifecycleConfigurationTest extends TestCase
         }
         $this->assertStringContainsString('migrate --pretend', $contents);
         $this->assertStringContainsString('validate-synthetic --require-runtime', $contents);
+        $this->assertStringContainsString('database/synthetic/generate_synthetic.php', $contents);
+        $this->assertStringNotContainsString('php database/generate_synthetic.php', $contents);
     }
 }

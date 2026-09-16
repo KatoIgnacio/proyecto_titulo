@@ -129,11 +129,11 @@ export default function Authenticated({
         <>
             <div className="border-b border-slate-800 px-6 py-7">
                 <Link href={route('dashboard')} className="flex items-center gap-3">
-                    <img src="/images/logo-sistema-transparente.png" alt="" className="h-12 w-12 shrink-0 object-contain" />
+                    <img src="/images/logo-sigcel-transparente.png" alt="" className="h-12 w-12 shrink-0 object-contain" />
                     <span>
-                        <span className="block text-xl font-black tracking-wide text-white">LUZPARRAL</span>
+                        <span className="block text-xl font-black tracking-wide text-white">SIGCEL</span>
                         <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-300">
-                            Gestión de contingencias
+                            Luzparral · contingencias
                         </span>
                     </span>
                 </Link>
@@ -197,10 +197,10 @@ export default function Authenticated({
                             </button>
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-bold uppercase tracking-wide text-slate-800 sm:text-base">
-                                    Sistema interno de contingencias
+                                    SIGCEL Luzparral
                                 </p>
                                 <p className="hidden text-xs text-slate-500 sm:block">
-                                    Información para apoyo a la gestión operativa
+                                    Sistema de información para la gestión de contingencias eléctricas
                                 </p>
                             </div>
                         </div>

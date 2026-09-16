@@ -104,8 +104,9 @@ cambiar `MAIL_MAILER=smtp` y establecer `PASSWORD_RESET_ENABLED=true`.
 
 En producción se habilitan CSP, `X-Content-Type-Options`, `X-Frame-Options`,
 `Referrer-Policy`, `Permissions-Policy` y `Cross-Origin-Opener-Policy`. La CSP
-permite exclusivamente los recursos locales y las teselas HTTPS de
-OpenStreetMap requeridas por el mapa.
+permite exclusivamente los recursos locales, las teselas HTTPS de
+OpenStreetMap requeridas por el mapa y el marco oficial
+`https://embed.windy.com` utilizado por el pronóstico meteorológico.
 
 El contenedor asigna `storage` y `bootstrap/cache` a `www-data` con permisos
 para propietario y grupo, sin acceso para otros usuarios. El archivo privado de
@@ -117,7 +118,7 @@ Ejecutar desde la raíz del repositorio:
 
 ```powershell
 git status --short
-git grep -n -I -E 'BEGIN .*PRIVATE KEY|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,}'
+git grep -n -I -E 'BEGIN .*PRIVATE KEY|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,}' -- . ':(exclude)docs/SEGURIDAD_OPERATIVA.md'
 git ls-files | Select-String -Pattern '(^|/)(\.env$|.*\.pem$|.*\.pfx$|.*\.p12$|.*\.tar$)'
 ```
 

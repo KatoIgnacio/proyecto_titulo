@@ -131,6 +131,24 @@ const causeLabels: Record<string, string> = {
 };
 
 const numberFormatter = new Intl.NumberFormat('es-CL');
+const NEARBY_EVENT_RADIUS_KM = 2.5;
+
+function distanceInKilometers(first: MapContingency, second: MapContingency) {
+    const earthRadiusKm = 6371;
+    const toRadians = (value: number) => value * Math.PI / 180;
+    const latitudeDelta = toRadians(second.latitude - first.latitude);
+    const longitudeDelta = toRadians(second.longitude - first.longitude);
+    const firstLatitude = toRadians(first.latitude);
+    const secondLatitude = toRadians(second.latitude);
+    const haversine = Math.sin(latitudeDelta / 2) ** 2
+        + Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+
+    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function markerRadius(nearbyEvents: number) {
+    return Math.min(18, 6 + Math.sqrt(Math.max(0, nearbyEvents - 1)) * 3.25);
+}
 
 function formatDate(value: string | null) {
     if (!value) return 'Sin registro';
@@ -204,6 +222,19 @@ export default function MapPage({
         () => filterOptions.feeders.filter((feeder) => !form.commune || feeder.commune_id === Number(form.commune)),
         [filterOptions.feeders, form.commune],
     );
+    const nearbyEventCounts = useMemo(() => {
+        const counts = new Map<number, number>();
+
+        contingencies.forEach((contingency) => {
+            const nearbyEvents = contingencies.reduce(
+                (total, candidate) => total + (distanceInKilometers(contingency, candidate) <= NEARBY_EVENT_RADIUS_KM ? 1 : 0),
+                0,
+            );
+            counts.set(contingency.id, nearbyEvents);
+        });
+
+        return counts;
+    }, [contingencies]);
     const initialCenter: [number, number] = contingencies.length
         ? [contingencies[0].latitude, contingencies[0].longitude]
         : [-36.14, -71.83];
@@ -316,12 +347,13 @@ export default function MapPage({
                             {contingencies.map((contingency) => {
                                 const color = priorityColors[contingency.priority] ?? priorityColors.low;
                                 const isSelected = contingency.id === selectedId;
+                                const nearbyEvents = nearbyEventCounts.get(contingency.id) ?? 1;
 
                                 return (
                                     <CircleMarker
                                         key={contingency.id}
                                         center={[contingency.latitude, contingency.longitude]}
-                                        radius={isSelected ? 11 : contingency.priority === 'critical' ? 8 : 6}
+                                        radius={markerRadius(nearbyEvents)}
                                         pathOptions={{
                                             color: isSelected ? '#0f172a' : color,
                                             fillColor: color,
@@ -335,6 +367,9 @@ export default function MapPage({
                                             <div className="min-w-36">
                                                 <strong>{contingency.code}</strong><br />
                                                 {contingency.commune} · {numberFormatter.format(contingency.affected_total)} afectados
+                                                {nearbyEvents > 1 && (
+                                                    <><br />{nearbyEvents} contingencias en un radio de {NEARBY_EVENT_RADIUS_KM.toLocaleString('es-CL')} km</>
+                                                )}
                                             </div>
                                         </Tooltip>
                                     </CircleMarker>
@@ -360,6 +395,27 @@ export default function MapPage({
                                         {label}
                                     </span>
                                 ))}
+                            </div>
+                            <div className="mt-3 border-t border-slate-200 pt-3">
+                                <p className="font-bold text-slate-800">Concentración cercana</p>
+                                <div className="mt-2 flex items-end gap-4 text-slate-600">
+                                    {[
+                                        { label: '1', size: 10 },
+                                        { label: '2–4', size: 16 },
+                                        { label: '5+', size: 22 },
+                                    ].map((item) => (
+                                        <span key={item.label} className="flex items-center gap-1.5">
+                                            <i
+                                                className="inline-block rounded-full border-2 border-slate-600 bg-slate-300"
+                                                style={{ height: item.size, width: item.size }}
+                                            />
+                                            {item.label}
+                                        </span>
+                                    ))}
+                                </div>
+                                <p className="mt-1.5 max-w-48 text-[10px] leading-4 text-slate-500">
+                                    El tamaño crece según las contingencias ubicadas dentro de {NEARBY_EVENT_RADIUS_KM.toLocaleString('es-CL')} km.
+                                </p>
                             </div>
                         </div>
                     </div>
