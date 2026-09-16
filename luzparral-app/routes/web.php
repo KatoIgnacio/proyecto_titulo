@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContingencyDetailController;
+use App\Http\Controllers\ContingencyImportController;
 use App\Http\Controllers\ContingencyMapController;
 use App\Http\Controllers\ContingencyReportController;
 use App\Http\Controllers\ContingencyStatusController;
@@ -28,6 +29,13 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         ->name('contingencies.field-reports.store');
     Route::get('/antecedentes-terreno/{attachment}/evidencia', [FieldReportAttachmentController::class, 'download'])
         ->name('field-reports.attachments.download');
+
+    Route::middleware('role:admin,supervisor')->group(function () {
+        Route::get('/importaciones', [ContingencyImportController::class, 'index'])->name('imports.index');
+        Route::post('/importaciones/previsualizar', [ContingencyImportController::class, 'preview'])->name('imports.preview');
+        Route::post('/importaciones', [ContingencyImportController::class, 'store'])->name('imports.store');
+        Route::get('/importaciones/plantilla', [ContingencyImportController::class, 'template'])->name('imports.template');
+    });
 
     Route::middleware('role:admin,supervisor')->group(function () {
         Route::get('/informes', [ContingencyReportController::class, 'index'])

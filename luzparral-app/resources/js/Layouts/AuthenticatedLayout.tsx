@@ -17,6 +17,7 @@ type IconName =
     | 'list'
     | 'search'
     | 'report'
+    | 'import'
     | 'menu'
     | 'close';
 
@@ -27,6 +28,7 @@ const iconPaths: Record<IconName, ReactNode> = {
     list: <path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" />,
     search: <path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />,
     report: <path d="M6 2h9l4 4v16H6V2Zm9 0v5h5M9 12h7m-7 4h7" />,
+    import: <path d="M12 3v12m0-12 4 4m-4-4L8 7M4 14v6h16v-6" />,
     menu: <path d="M4 6h16M4 12h16M4 18h16" />,
     close: <path d="m6 6 12 12M18 6 6 18" />,
 };
@@ -60,6 +62,7 @@ export default function Authenticated({
     const detailActive = route().current('contingencies.show');
     const searchActive = route().current('contingencies.search');
     const reportsActive = route().current('reports.*');
+    const importsActive = route().current('imports.*');
 
     const activeClass = 'bg-blue-600 text-white shadow-sm';
     const inactiveClass = 'text-slate-300 transition hover:bg-slate-900 hover:text-white';
@@ -120,6 +123,16 @@ export default function Authenticated({
                 >
                     <Icon name="report" />
                     Informes
+                </Link>
+            )}
+
+            {permissions.importContingencies && (
+                <Link
+                    href={route('imports.index')}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ${importsActive ? activeClass : inactiveClass}`}
+                >
+                    <Icon name="import" />
+                    Importaciones
                 </Link>
             )}
         </nav>

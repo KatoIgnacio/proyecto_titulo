@@ -19,6 +19,9 @@ institucional aprobado.
   no impide consultar los módulos respaldados por MySQL.
 - Los roles, cuentas inactivas, recuperación sin SMTP, sesiones, encabezados de
   seguridad y límite de usuarios poseen pruebas automatizadas.
+- La importación controlada permite validar archivos sintéticos antes de
+  escribir, registra aceptaciones y rechazos, evita duplicados y revierte el
+  lote completo ante un fallo inesperado.
 - La imagen se exporta junto con su suma SHA-256 y metadatos del commit mediante
   `deploy/EXPORTAR_IMAGEN.ps1`. El script rechaza por defecto un repositorio con
   cambios pendientes.
@@ -91,6 +94,9 @@ No promover a producción hasta marcar todos los controles:
 - [ ] Dashboard y tabla responden a día, mes, año y rango personalizado.
 - [ ] El mapa muestra marcadores; si hay Internet, carga OpenStreetMap.
 - [ ] Detalle, búsqueda y trazabilidad muestran datos consistentes.
+- [ ] Administración y Supervisión pueden previsualizar e importar la plantilla
+      sintética; Operación y Consulta reciben acceso denegado.
+- [ ] Un código repetido queda rechazado y no crea otra contingencia.
 - [ ] Los informes completo, resumen gráfico y evolución se generan.
 - [ ] CSV y PDF conservan los filtros aplicados.
 - [ ] Windy carga cuando existe salida a Internet y su falla no bloquea el resto.

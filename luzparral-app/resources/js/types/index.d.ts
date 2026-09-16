@@ -18,6 +18,7 @@ export type PageProps<
             viewReports: boolean;
             updateContingencies: boolean;
             registerFieldReports: boolean;
+            importContingencies: boolean;
         };
     };
     flash: {

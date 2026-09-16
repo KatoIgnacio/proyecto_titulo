@@ -106,6 +106,8 @@ La ultima comprobacion valida la conexion MySQL y la presencia del esquema
 indispensable, pero no modifica la base. Ademas de los comandos, se deben probar
 manualmente inicio de sesion, dashboard, filtros por dia, mes, año y rango,
 mapa, detalle, busqueda, pronostico Windy y las tres variantes de informe. La
+importacion controlada debe permitir descargar la plantilla, previsualizar un
+lote sintetico y confirmar el resultado sin duplicar codigos. La
 lectura de respuestas 503 y logs se documenta en
 [`DIAGNOSTICO_OPERATIVO.md`](DIAGNOSTICO_OPERATIVO.md).
 

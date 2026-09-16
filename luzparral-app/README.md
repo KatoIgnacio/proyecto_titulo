@@ -91,3 +91,7 @@ la bitácora se describen en
 El registro de avances en terreno, la carga privada de evidencias y sus
 permisos se describen en
 [`docs/ANTECEDENTES_TERRENO.md`](docs/ANTECEDENTES_TERRENO.md).
+
+La validación previa, el formato sintético, la prevención de duplicados y la
+trazabilidad de lotes se describen en
+[`docs/IMPORTACION_CONTROLADA.md`](docs/IMPORTACION_CONTROLADA.md).

@@ -90,10 +90,12 @@ class DeploymentPackageTest extends TestCase
         $this->assertIsString($handoff);
         $this->assertStringContainsString('filtros por dia, mes, año y rango', $deployment);
         $this->assertStringContainsString('pronostico Windy', $deployment);
+        $this->assertStringContainsString('importacion controlada', $deployment);
         $this->assertStringContainsString('Pendiente exclusivamente en Parra', $handoff);
         $this->assertStringContainsString('puerto `2004`', $handoff);
         $this->assertStringContainsString('puerto `2003`', $handoff);
         $this->assertStringContainsString('https://embed.windy.com', $handoff);
         $this->assertStringContainsString('Persistencia tras reinicio', $handoff);
+        $this->assertStringContainsString('importación controlada', $handoff);
     }
 }

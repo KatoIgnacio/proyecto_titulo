@@ -40,4 +40,12 @@ enum UserRole: string
     {
         return $this->canUpdateContingencies();
     }
+
+    public function canImportContingencies(): bool
+    {
+        return in_array($this, [
+            self::Admin,
+            self::Supervisor,
+        ], true);
+    }
 }

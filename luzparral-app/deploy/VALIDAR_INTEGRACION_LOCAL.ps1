@@ -140,7 +140,9 @@ try {
         '/pronostico-meteorologico',
         '/buscador-operacional',
         '/contingencias/1',
-        '/informes'
+        '/informes',
+        '/importaciones',
+        '/importaciones/plantilla'
     )) {
         $response = Assert-OkResponse -Path $path -Session $webSession
         if ($response.Headers['X-Content-Type-Options'] -ne 'nosniff') {
