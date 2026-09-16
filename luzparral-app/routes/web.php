@@ -5,6 +5,8 @@ use App\Http\Controllers\ContingencyMapController;
 use App\Http\Controllers\ContingencyReportController;
 use App\Http\Controllers\ContingencyStatusController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FieldReportAttachmentController;
+use App\Http\Controllers\FieldReportController;
 use App\Http\Controllers\OperationalSearchController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WeatherForecastController;
@@ -21,6 +23,11 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::patch('/contingencias/{contingency}/estado', [ContingencyStatusController::class, 'update'])
         ->middleware('role:admin,supervisor,operator')
         ->name('contingencies.status.update');
+    Route::post('/contingencias/{contingency}/antecedentes-terreno', [FieldReportController::class, 'store'])
+        ->middleware('role:admin,supervisor,operator')
+        ->name('contingencies.field-reports.store');
+    Route::get('/antecedentes-terreno/{attachment}/evidencia', [FieldReportAttachmentController::class, 'download'])
+        ->name('field-reports.attachments.download');
 
     Route::middleware('role:admin,supervisor')->group(function () {
         Route::get('/informes', [ContingencyReportController::class, 'index'])

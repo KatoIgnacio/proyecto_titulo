@@ -24,6 +24,8 @@ class DatabaseSchemaTest extends TestCase
             'contingencies',
             'contingency_impacts',
             'contingency_history',
+            'field_reports',
+            'field_report_attachments',
         ] as $table) {
             $this->assertTrue(Schema::hasTable($table), "Falta la tabla {$table}");
         }

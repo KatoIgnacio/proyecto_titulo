@@ -34,6 +34,8 @@ class ValidateSyntheticDataset extends Command
                 'contingencies',
                 'contingency_impacts',
                 'contingency_history',
+                'field_reports',
+                'field_report_attachments',
             ];
 
             if ($this->option('require-runtime')) {
@@ -82,6 +84,7 @@ class ValidateSyntheticDataset extends Command
                 'contingencies' => 'contingencies',
                 'impacts' => 'contingency_impacts',
                 'history_events' => 'contingency_history',
+                'field_reports' => 'field_reports',
             ];
 
             foreach ($countMap as $parameter => $table) {
@@ -163,8 +166,29 @@ class ValidateSyntheticDataset extends Command
                 ->join('contingencies as c', 'c.id', '=', 'ch.contingency_id')
                 ->whereColumn('ch.event_at', '<', 'c.started_at')
                 ->count();
-            $invalidTimes = $invalidContingencyTimes + $invalidImpactTimes + $invalidHistoryTimes;
+            $invalidFieldReportTimes = DB::table('field_reports as fr')
+                ->join('contingencies as c', 'c.id', '=', 'fr.contingency_id')
+                ->whereColumn('fr.observed_at', '<', 'c.started_at')
+                ->count();
+            $invalidTimes = $invalidContingencyTimes + $invalidImpactTimes + $invalidHistoryTimes + $invalidFieldReportTimes;
             $this->record('Cronología operacional válida', $invalidTimes === 0, "anomalías={$invalidTimes}");
+
+            $invalidFieldReportLocations = DB::table('field_reports')
+                ->where(function ($query): void {
+                    $query->where(function ($pair): void {
+                        $pair->whereNull('latitude')->whereNotNull('longitude');
+                    })->orWhere(function ($pair): void {
+                        $pair->whereNotNull('latitude')->whereNull('longitude');
+                    })->orWhere(function ($coordinates): void {
+                        $coordinates->whereNotNull('latitude')
+                            ->where(function ($range): void {
+                                $range->whereNotBetween('latitude', [-37.0, -35.0])
+                                    ->orWhereNotBetween('longitude', [-72.5, -71.0]);
+                            });
+                    });
+                })
+                ->count();
+            $this->record('Ubicaciones de terreno sintéticas', $invalidFieldReportLocations === 0, "anomalías={$invalidFieldReportLocations}");
         } catch (Throwable $error) {
             $this->record('Ejecución de la validación', false, $error->getMessage());
         }

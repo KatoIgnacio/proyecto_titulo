@@ -11,7 +11,8 @@ direcciones, teléfonos, identificadores ni coordenadas de clientes reales.
 - 5.000 puntos de suministro completamente sintéticos.
 - 18 lotes de importación con errores controlados para probar RF01.
 - 360 contingencias distribuidas en doce meses.
-- Afectaciones, tiempos de reposición e historial cronológico.
+- Afectaciones, tiempos de reposición, historial cronológico y 144 reportes de
+  terreno sintéticos sin adjuntos físicos.
 
 Los códigos comienzan con `SYN-` y los correos usan el dominio reservado
 `example.invalid`, lo que permite reconocer el conjunto como ficticio.

@@ -35,4 +35,9 @@ enum UserRole: string
             self::Operator,
         ], true);
     }
+
+    public function canRegisterFieldReports(): bool
+    {
+        return $this->canUpdateContingencies();
+    }
 }

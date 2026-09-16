@@ -50,4 +50,9 @@ class Contingency extends Model
     {
         return $this->hasMany(ContingencyHistory::class)->orderBy('event_at');
     }
+
+    public function fieldReports(): HasMany
+    {
+        return $this->hasMany(FieldReport::class);
+    }
 }

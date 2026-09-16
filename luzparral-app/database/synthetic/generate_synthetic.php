@@ -87,7 +87,7 @@ function clearSyntheticTables(PDO $pdo): void
     }
 
     $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
-    foreach (['contingency_history', 'contingency_impacts', 'contingencies', 'import_errors', 'import_batches', 'supply_points', 'feeders', 'communes', 'users', 'dataset_metadata'] as $table) {
+    foreach (['field_report_attachments', 'field_reports', 'contingency_history', 'contingency_impacts', 'contingencies', 'import_errors', 'import_batches', 'supply_points', 'feeders', 'communes', 'users', 'dataset_metadata'] as $table) {
         $pdo->exec("TRUNCATE TABLE {$table}");
     }
     $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
@@ -260,6 +260,7 @@ try {
     $insertContingency = $pdo->prepare('INSERT INTO contingencies (code, osf_code, commune_id, feeder_id, source_batch_id, status, priority, cause, description, started_at, estimated_restore_at, restored_at, latitude, longitude, affected_total, critical_affected, electrodependent_affected, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, ?, ?)');
     $insertImpact = $pdo->prepare('INSERT INTO contingency_impacts (contingency_id, supply_point_id, status, affected_at, restored_at, outage_minutes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
     $insertHistory = $pdo->prepare('INSERT INTO contingency_history (contingency_id, status, note, event_at, user_id, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    $insertFieldReport = $pdo->prepare('INSERT INTO field_reports (contingency_id, reported_by, progress_status, description, observed_at, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
     $updateContingency = $pdo->prepare('UPDATE contingencies SET priority = ?, affected_total = ?, critical_affected = ?, electrodependent_affected = ?, updated_at = ? WHERE id = ?');
 
     $causes = ['weather', 'vegetation', 'equipment_failure', 'vehicle_collision', 'third_party', 'unknown'];
@@ -275,6 +276,7 @@ try {
 
     $totalImpacts = 0;
     $totalHistory = 0;
+    $totalFieldReports = 0;
     $openContingencies = max(12, (int) round($contingencyCount * 0.05));
 
     for ($i = 1; $i <= $contingencyCount; $i++) {
@@ -392,6 +394,62 @@ try {
             $insertHistory->execute([$contingencyId, $historyStatus, $note, dt($eventAt), $historyUser, $source, dt($eventAt)]);
             $totalHistory++;
         }
+
+        $fieldReportCount = $i <= min(120, $contingencyCount) ? ($i % 5 === 0 ? 2 : 1) : 0;
+        $fieldReportDescriptions = [
+            'Inspeccion sintetica realizada; se verifican condiciones del sector y elementos de la red.',
+            'Brigada sintetica informa avance de reparacion y coordinacion de recursos en terreno.',
+            'Trabajo sintetico completado; se registran verificaciones previas a la reposicion.',
+        ];
+        for ($reportIndex = 1; $reportIndex <= $fieldReportCount; $reportIndex++) {
+            $windowEnd = $restoredAt ?? $now;
+            $windowSeconds = max(60, $windowEnd->getTimestamp() - $startedAt->getTimestamp());
+            $isLastReport = $reportIndex === $fieldReportCount;
+            $reportAt = $isLastReport && $restoredAt !== null
+                ? $restoredAt
+                : $startedAt->add(new DateInterval('PT'.max(60, (int) round($windowSeconds * $reportIndex / ($fieldReportCount + 1))).'S'));
+            $progress = match (true) {
+                $isLastReport && $restoredAt !== null => 'completed',
+                $status === 'in_progress' || $reportIndex > 1 => 'repair',
+                default => 'inspection',
+            };
+            $description = match ($progress) {
+                'completed' => $fieldReportDescriptions[2],
+                'repair' => $fieldReportDescriptions[1],
+                default => $fieldReportDescriptions[0],
+            };
+            $reportLatitude = round($latitude + ((($i * 13 + $reportIndex * 7) % 17) - 8) * 0.0001, 7);
+            $reportLongitude = round($longitude + ((($i * 11 + $reportIndex * 5) % 17) - 8) * 0.0001, 7);
+
+            $insertFieldReport->execute([
+                $contingencyId,
+                $createdBy,
+                $progress,
+                $description,
+                dt($reportAt),
+                $reportLatitude,
+                $reportLongitude,
+                dt($reportAt),
+                dt($reportAt),
+            ]);
+            $totalFieldReports++;
+
+            $reportHistoryStatus = match ($progress) {
+                'completed' => 'restored',
+                'repair' => 'in_progress',
+                default => $status === 'assigned' ? 'assigned' : 'reported',
+            };
+            $insertHistory->execute([
+                $contingencyId,
+                $reportHistoryStatus,
+                'Antecedente de terreno sintetico incorporado al expediente.',
+                dt($reportAt),
+                $createdBy,
+                'synthetic',
+                dt($reportAt),
+            ]);
+            $totalHistory++;
+        }
     }
 
     $parameters = json_encode([
@@ -402,6 +460,7 @@ try {
         'contingencies' => $contingencyCount,
         'impacts' => $totalImpacts,
         'history_events' => $totalHistory,
+        'field_reports' => $totalFieldReports,
         'import_batches' => count($batchIds),
         'anchor_utc' => dt($now),
     ], JSON_THROW_ON_ERROR);
@@ -428,6 +487,7 @@ try {
         'contingencies' => $contingencyCount,
         'impacts' => $totalImpacts,
         'history_events' => $totalHistory,
+        'field_reports' => $totalFieldReports,
         'import_batches' => count($batchIds),
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).PHP_EOL;
 } catch (Throwable $error) {

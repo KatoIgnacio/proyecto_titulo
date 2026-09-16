@@ -17,6 +17,7 @@ export type PageProps<
         permissions: {
             viewReports: boolean;
             updateContingencies: boolean;
+            registerFieldReports: boolean;
         };
     };
     flash: {

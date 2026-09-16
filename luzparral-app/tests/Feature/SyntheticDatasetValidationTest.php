@@ -128,6 +128,17 @@ class SyntheticDatasetValidationTest extends TestCase
             'source' => 'synthetic',
             'created_at' => $timestamp,
         ]);
+        DB::table('field_reports')->insert([
+            'contingency_id' => $contingencyId,
+            'reported_by' => $user->id,
+            'progress_status' => 'completed',
+            'description' => 'Antecedente sintético para validar el conjunto de pruebas.',
+            'observed_at' => '2026-09-09 10:40:00',
+            'latitude' => -36.14,
+            'longitude' => -71.82,
+            'created_at' => $timestamp,
+            'updated_at' => $timestamp,
+        ]);
         DB::table('dataset_metadata')->insert([
             'dataset_key' => 'luzparral-synthetic-v1',
             'generator_version' => 'test',
@@ -142,6 +153,7 @@ class SyntheticDatasetValidationTest extends TestCase
                 'contingencies' => 1,
                 'impacts' => 1,
                 'history_events' => 1,
+                'field_reports' => 1,
             ], JSON_THROW_ON_ERROR),
             'notes' => 'Conjunto sintético mínimo para pruebas.',
         ]);

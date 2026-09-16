@@ -155,3 +155,34 @@ CREATE TABLE IF NOT EXISTS contingency_history (
     INDEX idx_history_cont_time (contingency_id, event_at),
     INDEX idx_history_event_time (event_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS field_reports (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    contingency_id BIGINT UNSIGNED NOT NULL,
+    reported_by BIGINT UNSIGNED NULL,
+    progress_status VARCHAR(30) NOT NULL,
+    description TEXT NOT NULL,
+    observed_at DATETIME NOT NULL,
+    latitude DECIMAL(10,7) NULL,
+    longitude DECIMAL(10,7) NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    CONSTRAINT fk_field_reports_contingency FOREIGN KEY (contingency_id) REFERENCES contingencies(id) ON DELETE CASCADE,
+    CONSTRAINT fk_field_reports_user FOREIGN KEY (reported_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_field_reports_cont_time (contingency_id, observed_at),
+    INDEX idx_field_reports_progress_time (progress_status, observed_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS field_report_attachments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    field_report_id BIGINT UNSIGNED NOT NULL,
+    disk VARCHAR(30) NOT NULL DEFAULT 'local',
+    path VARCHAR(255) NOT NULL UNIQUE,
+    original_name VARCHAR(180) NOT NULL,
+    mime_type VARCHAR(100) NOT NULL,
+    size_bytes BIGINT UNSIGNED NOT NULL,
+    checksum_sha256 CHAR(64) NOT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    CONSTRAINT fk_field_attachments_report FOREIGN KEY (field_report_id) REFERENCES field_reports(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

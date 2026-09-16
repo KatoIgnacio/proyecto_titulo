@@ -6,7 +6,9 @@ UNION ALL SELECT 'import_batches', COUNT(*) FROM import_batches
 UNION ALL SELECT 'import_errors', COUNT(*) FROM import_errors
 UNION ALL SELECT 'contingencies', COUNT(*) FROM contingencies
 UNION ALL SELECT 'contingency_impacts', COUNT(*) FROM contingency_impacts
-UNION ALL SELECT 'contingency_history', COUNT(*) FROM contingency_history;
+UNION ALL SELECT 'contingency_history', COUNT(*) FROM contingency_history
+UNION ALL SELECT 'field_reports', COUNT(*) FROM field_reports
+UNION ALL SELECT 'field_report_attachments', COUNT(*) FROM field_report_attachments;
 
 SELECT priority, COUNT(*) AS quantity
 FROM contingencies

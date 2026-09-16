@@ -21,6 +21,8 @@ class CheckApplicationHealth extends Command
         'contingencies',
         'contingency_impacts',
         'contingency_history',
+        'field_reports',
+        'field_report_attachments',
     ];
 
     protected $signature = 'luzparral:health

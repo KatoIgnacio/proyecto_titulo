@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ContingencyStatus;
+use App\Enums\FieldReportProgress;
 use App\Models\Contingency;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,6 +20,9 @@ class ContingencyDetailController extends Controller
             'feeder:id,code,name',
             'sourceBatch:id,source_name,synthetic_file_name,completed_at',
             'history.user:id,name',
+            'fieldReports' => fn ($query) => $query->orderByDesc('observed_at'),
+            'fieldReports.reporter:id,name',
+            'fieldReports.attachments:id,field_report_id,original_name,mime_type,size_bytes',
         ]);
 
         $impactSummary = $contingency->impacts()
@@ -73,6 +77,29 @@ class ContingencyDetailController extends Controller
                     'event_at' => $event->event_at?->toIso8601String(),
                     'source' => $event->source,
                     'user' => $event->user?->name,
+                ]),
+            'fieldReports' => $contingency->fieldReports
+                ->map(fn ($report) => [
+                    'id' => $report->id,
+                    'progress_status' => $report->progress_status->value,
+                    'progress_label' => $report->progress_status->label(),
+                    'description' => $report->description,
+                    'observed_at' => $report->observed_at?->toIso8601String(),
+                    'latitude' => $report->latitude === null ? null : (float) $report->latitude,
+                    'longitude' => $report->longitude === null ? null : (float) $report->longitude,
+                    'reporter' => $report->reporter?->name,
+                    'attachments' => $report->attachments->map(fn ($attachment) => [
+                        'id' => $attachment->id,
+                        'name' => $attachment->original_name,
+                        'mime_type' => $attachment->mime_type,
+                        'size_bytes' => $attachment->size_bytes,
+                        'download_url' => route('field-reports.attachments.download', $attachment),
+                    ])->values(),
+                ])->values(),
+            'fieldReportProgressOptions' => collect(FieldReportProgress::cases())
+                ->map(fn (FieldReportProgress $progress) => [
+                    'value' => $progress->value,
+                    'label' => $progress->label(),
                 ]),
             'availableStatusTransitions' => collect($currentStatus?->allowedTransitions() ?? [])
                 ->map(fn (ContingencyStatus $status) => [

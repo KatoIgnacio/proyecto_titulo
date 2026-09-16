@@ -45,6 +45,11 @@ Cada evento manual conserva el usuario autenticado, fecha, hora, estado,
 antecedente y origen. La aplicación no expone rutas para editar o eliminar
 eventos históricos.
 
+Los reportes de terreno agregados mediante RF06 también incorporan un evento
+manual en esta bitácora. Su contenido estructurado y sus evidencias se conservan
+en tablas separadas, según
+[`ANTECEDENTES_TERRENO.md`](ANTECEDENTES_TERRENO.md).
+
 ## Verificación
 
 Las pruebas de `ContingencyStatusTransitionTest` comprueban:

@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { useRef } from 'react';
 
 type ContingencyDetail = {
     id: number;
@@ -37,6 +38,31 @@ type StatusTransition = {
     label: string;
 };
 
+type FieldReportAttachment = {
+    id: number;
+    name: string;
+    mime_type: string;
+    size_bytes: number;
+    download_url: string;
+};
+
+type FieldReport = {
+    id: number;
+    progress_status: string;
+    progress_label: string;
+    description: string;
+    observed_at: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    reporter: string | null;
+    attachments: FieldReportAttachment[];
+};
+
+type SelectOption = {
+    value: string;
+    label: string;
+};
+
 type ShowPageProps = {
     contingency: ContingencyDetail;
     impactSummary: {
@@ -46,6 +72,8 @@ type ShowPageProps = {
         averageMinutes: number | null;
     };
     history: HistoryEvent[];
+    fieldReports: FieldReport[];
+    fieldReportProgressOptions: SelectOption[];
     availableStatusTransitions: StatusTransition[];
     source: {
         name: string;
@@ -103,6 +131,13 @@ const sourceLabels: Record<string, string> = {
 
 const numberFormatter = new Intl.NumberFormat('es-CL');
 
+function currentLocalDateTime() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+
+    return now.toISOString().slice(0, 16);
+}
+
 function formatDate(value: string | null) {
     if (!value) return 'Sin registro';
 
@@ -131,6 +166,202 @@ function DataItem({ label, value, mono = false }: { label: string; value: string
             <dt className="text-xs text-slate-500">{label}</dt>
             <dd className={`mt-1 font-semibold text-slate-900 ${mono ? 'font-mono text-sm' : ''}`}>{value}</dd>
         </div>
+    );
+}
+
+function formatFileSize(bytes: number) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function FieldReportsPanel({
+    contingencyId,
+    reports,
+    progressOptions,
+    canRegister,
+}: {
+    contingencyId: number;
+    reports: FieldReport[];
+    progressOptions: SelectOption[];
+    canRegister: boolean;
+}) {
+    const fileInput = useRef<HTMLInputElement>(null);
+    const form = useForm<{
+        progress_status: string;
+        description: string;
+        observed_at: string;
+        latitude: string;
+        longitude: string;
+        attachments: File[];
+    }>({
+        progress_status: progressOptions[0]?.value ?? '',
+        description: '',
+        observed_at: currentLocalDateTime(),
+        latitude: '',
+        longitude: '',
+        attachments: [],
+    });
+
+    const submit = (event: React.FormEvent) => {
+        event.preventDefault();
+        form.post(route('contingencies.field-reports.store', contingencyId), {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                form.reset();
+                if (fileInput.current) fileInput.current.value = '';
+            },
+        });
+    };
+
+    const attachmentErrors = Object.entries(form.errors)
+        .filter(([key]) => key === 'attachments' || key.startsWith('attachments.'))
+        .map(([, message]) => message);
+
+    return (
+        <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 className="font-bold text-slate-900">Antecedentes y reportes de terreno</h2>
+                    <p className="mt-1 text-xs text-slate-500">Avances observados y evidencias vinculadas al expediente.</p>
+                </div>
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                    {reports.length} {reports.length === 1 ? 'registro' : 'registros'}
+                </span>
+            </div>
+
+            {canRegister && (
+                <form onSubmit={submit} className="mt-5 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                    <h3 className="text-sm font-bold text-slate-900">Registrar antecedente</h3>
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <label className="text-xs font-semibold text-slate-700">
+                            Avance observado
+                            <select
+                                value={form.data.progress_status}
+                                onChange={(event) => form.setData('progress_status', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                                {progressOptions.map((option) => (
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
+                            </select>
+                            {form.errors.progress_status && <span className="mt-1 block text-rose-600">{form.errors.progress_status}</span>}
+                        </label>
+
+                        <label className="text-xs font-semibold text-slate-700">
+                            Fecha y hora observada
+                            <input
+                                type="datetime-local"
+                                value={form.data.observed_at}
+                                onChange={(event) => form.setData('observed_at', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            {form.errors.observed_at && <span className="mt-1 block text-rose-600">{form.errors.observed_at}</span>}
+                        </label>
+                    </div>
+
+                    <label className="mt-4 block text-xs font-semibold text-slate-700">
+                        Descripción del trabajo o hallazgo
+                        <textarea
+                            value={form.data.description}
+                            onChange={(event) => form.setData('description', event.target.value)}
+                            rows={4}
+                            maxLength={2000}
+                            placeholder="Describa el avance, hallazgo, recursos utilizados y condiciones relevantes."
+                            className="mt-1 block w-full resize-y rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                        {form.errors.description && <span className="mt-1 block text-rose-600">{form.errors.description}</span>}
+                    </label>
+
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <label className="text-xs font-semibold text-slate-700">
+                            Latitud (opcional)
+                            <input
+                                type="number"
+                                step="0.0000001"
+                                value={form.data.latitude}
+                                onChange={(event) => form.setData('latitude', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            {form.errors.latitude && <span className="mt-1 block text-rose-600">{form.errors.latitude}</span>}
+                        </label>
+                        <label className="text-xs font-semibold text-slate-700">
+                            Longitud (opcional)
+                            <input
+                                type="number"
+                                step="0.0000001"
+                                value={form.data.longitude}
+                                onChange={(event) => form.setData('longitude', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            {form.errors.longitude && <span className="mt-1 block text-rose-600">{form.errors.longitude}</span>}
+                        </label>
+                    </div>
+
+                    <label className="mt-4 block text-xs font-semibold text-slate-700">
+                        Evidencias (opcional)
+                        <input
+                            ref={fileInput}
+                            type="file"
+                            multiple
+                            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                            onChange={(event) => form.setData('attachments', Array.from(event.target.files ?? []))}
+                            className="mt-1 block w-full rounded-lg border border-slate-300 bg-white text-sm file:mr-3 file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:font-semibold file:text-slate-700"
+                        />
+                        <span className="mt-1 block font-normal text-slate-500">Hasta 3 archivos JPG, PNG o PDF; máximo 5 MB cada uno.</span>
+                        {attachmentErrors.map((message, index) => (
+                            <span key={`${message}-${index}`} className="mt-1 block text-rose-600">{message}</span>
+                        ))}
+                    </label>
+
+                    <button
+                        type="submit"
+                        disabled={form.processing || form.data.description.trim().length < 10}
+                        className="mt-4 rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        {form.processing ? 'Guardando...' : 'Guardar antecedente'}
+                    </button>
+                </form>
+            )}
+
+            {reports.length > 0 ? (
+                <ol className="mt-5 space-y-4">
+                    {reports.map((report) => (
+                        <li key={report.id} className="rounded-xl border border-slate-200 p-4">
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                                <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">{report.progress_label}</span>
+                                <time className="text-xs text-slate-500">{formatDate(report.observed_at)}</time>
+                            </div>
+                            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-700">{report.description}</p>
+                            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                                <span>{report.reporter ? `Registrado por ${report.reporter}` : 'Responsable no disponible'}</span>
+                                {report.latitude !== null && report.longitude !== null && (
+                                    <span className="font-mono">{report.latitude.toFixed(5)}, {report.longitude.toFixed(5)}</span>
+                                )}
+                            </div>
+                            {report.attachments.length > 0 && (
+                                <ul className="mt-3 flex flex-wrap gap-2">
+                                    {report.attachments.map((attachment) => (
+                                        <li key={attachment.id}>
+                                            <a
+                                                href={attachment.download_url}
+                                                className="inline-flex rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                                            >
+                                                {attachment.name} · {formatFileSize(attachment.size_bytes)}
+                                            </a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </li>
+                    ))}
+                </ol>
+            ) : (
+                <p className="mt-5 rounded-lg bg-slate-50 p-4 text-sm text-slate-500">Aún no se han registrado antecedentes de terreno.</p>
+            )}
+        </article>
     );
 }
 
@@ -211,7 +442,7 @@ function StatusUpdateForm({
     );
 }
 
-export default function Show({ contingency, impactSummary, history, source, contingencyOptions, availableStatusTransitions }: ShowPageProps) {
+export default function Show({ contingency, impactSummary, history, fieldReports, fieldReportProgressOptions, source, contingencyOptions, availableStatusTransitions }: ShowPageProps) {
     const { auth, flash } = usePage<PageProps>().props;
     const restorationPercentage = impactSummary.registered > 0
         ? Math.round((impactSummary.restored / impactSummary.registered) * 100)
@@ -317,6 +548,13 @@ export default function Show({ contingency, impactSummary, history, source, cont
                                 <p className="mt-2 text-sm leading-relaxed text-slate-700">{contingency.description}</p>
                             </div>
                         </article>
+
+                        <FieldReportsPanel
+                            contingencyId={contingency.id}
+                            reports={fieldReports}
+                            progressOptions={fieldReportProgressOptions}
+                            canRegister={auth.permissions.registerFieldReports}
+                        />
 
                         <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                             <div className="border-b border-slate-100 pb-4">

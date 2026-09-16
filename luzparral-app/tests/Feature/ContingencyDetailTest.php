@@ -106,7 +106,8 @@ class ContingencyDetailTest extends TestCase
                 ->has('history', 2)
                 ->where('history.0.status', 'in_progress')
                 ->missing('customers')
-                ->missing('fieldReports'));
+                ->has('fieldReports', 0)
+                ->has('fieldReportProgressOptions', 4));
     }
 
     private function createSupplyPoint(int $communeId, int $feederId, string $code): SupplyPoint

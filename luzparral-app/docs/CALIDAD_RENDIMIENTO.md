@@ -42,8 +42,8 @@ HTTP y que el percentil 95 no supere el límite de cada operación.
 - Docker Engine 29.7.2 y PowerShell 7.6.5.
 - Aplicación Linux/AMD64 con PHP 8.3 y Apache.
 - MySQL 8.4.9 aislado.
-- Datos: 360 contingencias, 5.000 suministros, 25.283 impactos y 1.585 eventos
-  de historial, todos sintéticos.
+- Datos: 360 contingencias, 5.000 suministros, 25.283 impactos, 144 reportes de
+  terreno y 1.729 eventos de historial, todos sintéticos.
 
 ## Resultados
 

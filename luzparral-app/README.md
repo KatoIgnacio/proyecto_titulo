@@ -87,3 +87,7 @@ están documentados en
 La secuencia de estados, el registro atómico de cambios y las autorizaciones de
 la bitácora se describen en
 [`docs/TRAZABILIDAD_CONTINGENCIAS.md`](docs/TRAZABILIDAD_CONTINGENCIAS.md).
+
+El registro de avances en terreno, la carga privada de evidencias y sus
+permisos se describen en
+[`docs/ANTECEDENTES_TERRENO.md`](docs/ANTECEDENTES_TERRENO.md).
