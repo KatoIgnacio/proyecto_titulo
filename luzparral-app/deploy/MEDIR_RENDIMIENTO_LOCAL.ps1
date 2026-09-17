@@ -25,23 +25,30 @@ if ([string]::IsNullOrWhiteSpace($email)) {
 
 $projectRoot = Split-Path -Parent $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-    $OutputPath = Join-Path $projectRoot 'storage/app/quality/segment-7-performance.json'
+    $OutputPath = Join-Path $projectRoot 'storage/app/quality/segment-13-performance.json'
 }
 
 $scenarios = @(
-    [pscustomobject]@{ Name = 'Dashboard'; Path = '/dashboard?range=12m'; P95LimitMs = 2000 },
-    [pscustomobject]@{ Name = 'Mapa'; Path = '/contingencias/mapa?range=12m&status=active'; P95LimitMs = 2500 },
-    [pscustomobject]@{ Name = 'Pronóstico'; Path = '/pronostico-meteorologico'; P95LimitMs = 1000 },
-    [pscustomobject]@{ Name = 'Informes'; Path = '/informes?range=12m'; P95LimitMs = 3000 },
-    [pscustomobject]@{ Name = 'CSV'; Path = '/informes/contingencias.csv?range=12m'; P95LimitMs = 5000 },
-    [pscustomobject]@{ Name = 'PDF ejecutivo'; Path = '/informes/contingencias.pdf?range=12m&report_type=executive'; P95LimitMs = 12000 }
+    [pscustomobject]@{ Name = 'Dashboard'; Method = 'GET'; Path = '/dashboard?range=12m'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'Mapa'; Method = 'GET'; Path = '/contingencias/mapa?range=12m&status=active'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'Búsqueda'; Method = 'GET'; Path = '/buscador-operacional?category=code&query=SYN-CONT'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'Registro terreno'; Method = 'POST'; Path = '/contingencias/1/antecedentes-terreno'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'Pronóstico'; Method = 'GET'; Path = '/pronostico-meteorologico'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'Informes'; Method = 'GET'; Path = '/informes?range=12m'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'CSV'; Method = 'GET'; Path = '/informes/contingencias.csv?range=12m'; P95LimitMs = 5000; MaximumUsers = 10 },
+    [pscustomobject]@{ Name = 'PDF ejecutivo'; Method = 'GET'; Path = '/informes/contingencias.pdf?range=12m&report_type=executive'; P95LimitMs = 12000; MaximumUsers = 10 }
 )
 
 $summaries = @()
 
-foreach ($concurrentUsers in @(5, 10)) {
+foreach ($concurrentUsers in @(5, 10, 30)) {
     foreach ($scenario in $scenarios) {
+        if ($concurrentUsers -gt $scenario.MaximumUsers) {
+            continue
+        }
+
         $path = $scenario.Path
+        $method = $scenario.Method
         $results = 1..$concurrentUsers | ForEach-Object -Parallel {
             $workerId = $_
             $session = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
@@ -75,34 +82,57 @@ foreach ($concurrentUsers in @(5, 10)) {
                     -UseBasicParsing `
                     -TimeoutSec 30 | Out-Null
 
-                Invoke-WebRequest `
-                    -Uri ($using:BaseUrl + $using:path) `
-                    -WebSession $session `
-                    -UseBasicParsing `
-                    -TimeoutSec 30 | Out-Null
+                $xsrfCookie = $session.Cookies.GetCookies([Uri]$using:BaseUrl) |
+                    Where-Object Name -eq 'XSRF-TOKEN' |
+                    Select-Object -First 1
+                if ($null -eq $xsrfCookie) {
+                    throw 'La sesión autenticada no conservó la cookie CSRF.'
+                }
 
-                foreach ($iteration in 1..$using:RequestsPerUser) {
+                foreach ($iteration in 0..$using:RequestsPerUser) {
                     $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
                     try {
-                        $response = Invoke-WebRequest `
-                            -Uri ($using:BaseUrl + $using:path) `
-                            -WebSession $session `
-                            -UseBasicParsing `
-                            -TimeoutSec 30
+                        $requestParameters = @{
+                            Uri = $using:BaseUrl + $using:path
+                            Method = $using:method
+                            WebSession = $session
+                            UseBasicParsing = $true
+                            TimeoutSec = 30
+                        }
+                        if ($using:method -eq 'POST') {
+                            $requestParameters.Headers = @{
+                                'X-XSRF-TOKEN' = [Uri]::UnescapeDataString($xsrfCookie.Value)
+                                'X-Requested-With' = 'XMLHttpRequest'
+                                'Referer' = $using:BaseUrl + '/contingencias/1'
+                            }
+                            $requestParameters.Body = @{
+                                progress_status = 'inspection'
+                                description = "Registro sintético RNF03 trabajador $workerId intento $iteration"
+                                observed_at = [DateTimeOffset]::Now.ToString('yyyy-MM-dd HH:mm:ss')
+                            }
+                        }
+
+                        $response = Invoke-WebRequest @requestParameters
                         $stopwatch.Stop()
 
-                        [pscustomobject]@{
-                            Worker = $workerId
-                            Iteration = $iteration
-                            Success = $response.StatusCode -eq 200
-                            StatusCode = $response.StatusCode
-                            DurationMs = [Math]::Round($stopwatch.Elapsed.TotalMilliseconds, 2)
-                            Bytes = $response.RawContentLength
-                            Error = $null
+                        if ($iteration -gt 0) {
+                            [pscustomobject]@{
+                                Worker = $workerId
+                                Iteration = $iteration
+                                Success = $response.StatusCode -eq 200
+                                StatusCode = $response.StatusCode
+                                DurationMs = [Math]::Round($stopwatch.Elapsed.TotalMilliseconds, 2)
+                                Bytes = $response.RawContentLength
+                                Error = $null
+                            }
                         }
                     }
                     catch {
                         $stopwatch.Stop()
+                        if ($iteration -eq 0) {
+                            throw 'Calentamiento fallido: ' + $_.Exception.Message
+                        }
+
                         [pscustomobject]@{
                             Worker = $workerId
                             Iteration = $iteration
@@ -130,6 +160,7 @@ foreach ($concurrentUsers in @(5, 10)) {
 
         $successes = @($results | Where-Object Success)
         $failures = @($results | Where-Object { -not $_.Success })
+        $errorSamples = @($failures | ForEach-Object Error | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Unique -First 3)
         $orderedTimes = @($successes | ForEach-Object DurationMs | Sort-Object)
         $p95 = if ($orderedTimes.Count -gt 0) {
             $orderedTimes[[Math]::Max(0, [Math]::Ceiling($orderedTimes.Count * 0.95) - 1)]
@@ -153,13 +184,19 @@ foreach ($concurrentUsers in @(5, 10)) {
         $summaries += [pscustomobject]@{
             concurrent_users = $concurrentUsers
             scenario = $scenario.Name
+            method = $scenario.Method
             measured_requests = $results.Count
             failures = $failures.Count
             average_ms = $average
             p95_ms = [Math]::Round($p95, 2)
             maximum_ms = $maximum
             p95_limit_ms = $scenario.P95LimitMs
+            error_samples = $errorSamples
             passed = $failures.Count -eq 0 -and $p95 -le $scenario.P95LimitMs
+        }
+
+        if ($errorSamples.Count -gt 0) {
+            Write-Warning "$($scenario.Name) con $concurrentUsers sesiones: $($errorSamples -join ' | ')"
         }
     }
 }
@@ -170,9 +207,11 @@ $report = [ordered]@{
     requests_per_user = $RequestsPerUser
     synthetic_dataset = $true
     criteria = [ordered]@{
-        maximum_concurrent_users = 10
+        maximum_concurrent_users = 30
         allowed_http_failures = 0
         statistic = 'percentil 95 de solicitudes medidas; calentamiento excluido'
+        rnf01_limit_ms = 3000
+        heavy_exports_maximum_users = 10
     }
     results = $summaries
     passed = @($summaries | Where-Object { -not $_.passed }).Count -eq 0

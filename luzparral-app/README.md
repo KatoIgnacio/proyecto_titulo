@@ -80,7 +80,7 @@ dependencias de ejecución, construcción y datos se detallan en
 [`docs/DEPENDENCIAS_EXTERNAS.md`](docs/DEPENDENCIAS_EXTERNAS.md).
 
 La validación de calidad, los períodos calendario por día, mes, año o rango,
-la recuperación del pronóstico Windy y la prueba de 5/10 sesiones concurrentes
+la recuperación del pronóstico Windy y la prueba de 5/10/30 sesiones concurrentes
 están documentados en
 [`docs/CALIDAD_RENDIMIENTO.md`](docs/CALIDAD_RENDIMIENTO.md).
 
@@ -99,3 +99,13 @@ trazabilidad de lotes se describen en
 La búsqueda paginada, la protección de identificadores, las consultas por área
 visible y las capas geográficas agregadas se describen en
 [`docs/BUSQUEDA_MAPA_ESCALABLE.md`](docs/BUSQUEDA_MAPA_ESCALABLE.md).
+
+La cobertura de objetivos, RF, RNF e historias de usuario se consolida en
+[`docs/MATRIZ_TRAZABILIDAD_ACADEMICA.md`](docs/MATRIZ_TRAZABILIDAD_ACADEMICA.md).
+La evaluación requerida para OE4 y RNF05 se prepara, sin resultados inventados,
+en [`docs/VALIDACION_USUARIOS.md`](docs/VALIDACION_USUARIOS.md).
+
+La arquitectura y el modelo de información implementados se describen en
+[`docs/ARQUITECTURA_MODELO_ACTUAL.md`](docs/ARQUITECTURA_MODELO_ACTUAL.md), y el
+balance final de logros, límites y trabajo futuro se mantiene en
+[`docs/CATASTRO_CUMPLIMIENTO_ANTEPROYECTO.md`](docs/CATASTRO_CUMPLIMIENTO_ANTEPROYECTO.md).

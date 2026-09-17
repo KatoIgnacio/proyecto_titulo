@@ -21,8 +21,10 @@ utiliza una clave API. La atribución a OpenStreetMap debe permanecer visible.
 Si el servidor de teselas o la conexión a Internet no están disponibles, se
 degrada únicamente el fondo cartográfico: los marcadores y los módulos de
 dashboard, filtros, búsqueda, detalle e informes continúan consultando MySQL.
-El prototipo no precarga ni descarga teselas de forma masiva y su uso previsto
-es de cinco usuarios base, con un máximo de diez usuarios concurrentes.
+El prototipo no precarga ni descarga teselas de forma masiva. Las operaciones
+ordinarias de SIGCEL se han validado localmente hasta 30 usuarios concurrentes;
+ese resultado no constituye una autorización para generar tráfico masivo hacia
+el servidor público de teselas.
 
 Los logotipos, estilos, JavaScript y tipografías de la interfaz se sirven desde
 la propia aplicación. No dependen de una CDN en tiempo de ejecución.

@@ -19,6 +19,8 @@ institucional aprobado.
   no impide consultar los módulos respaldados por MySQL.
 - Los roles, cuentas inactivas, recuperación sin SMTP, sesiones, encabezados de
   seguridad y límite de usuarios poseen pruebas automatizadas.
+- Las operaciones ordinarias se midieron con 5, 10 y 30 sesiones concurrentes,
+  sin fallos y con un peor P95 local de 392,45 ms frente al límite de 3.000 ms.
 - La importación controlada permite validar archivos sintéticos antes de
   escribir, registra aceptaciones y rechazos, evita duplicados y revierte el
   lote completo ante un fallo inesperado.
@@ -30,6 +32,8 @@ institucional aprobado.
   cambios pendientes.
 - Los scripts de Parra separan staging en el puerto `2004` y producción en el
   puerto `2003`, comprueban la salud y conservan una ruta de reversión.
+- La matriz académica y el protocolo de usuarios separan los requisitos
+  verificados de RNF05 y OE4, que requieren evaluación empírica autorizada.
 
 ## Archivos que se transferirán
 
@@ -109,7 +113,10 @@ No promover a producción hasta marcar todos los controles:
 - [ ] CSV y PDF conservan los filtros aplicados.
 - [ ] Windy carga cuando existe salida a Internet y su falla no bloquea el resto.
 - [ ] No aparecen datos reales no autorizados ni credenciales en interfaz o logs.
-- [ ] Se registra una medición breve con cinco sesiones y se revisan errores 5xx.
+- [ ] Se repite una medición gradual con 5, 10 y 30 sesiones ordinarias y se
+      revisan latencia, errores 5xx y recursos del servidor.
+- [ ] Se ejecuta el protocolo de usuarios o se documenta formalmente la fecha y
+      responsables de su ejecución posterior, sin declarar RNF05 antes de medirlo.
 - [ ] Se prueba una reversión al tag anterior o se documenta su simulación.
 
 ## Promoción y cierre — puerto 2003

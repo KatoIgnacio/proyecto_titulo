@@ -167,7 +167,7 @@ try {
     }
 
     if ($RunPerformance) {
-        Write-Host '[Rendimiento] Probando 5 y 10 sesiones concurrentes...'
+        Write-Host '[Rendimiento] Probando 5, 10 y 30 sesiones concurrentes...'
         $env:LUZPARRAL_PERFORMANCE_PASSWORD = $demoPassword
         try {
             & (Join-Path $PSScriptRoot 'MEDIR_RENDIMIENTO_LOCAL.ps1') -BaseUrl $baseUrl
