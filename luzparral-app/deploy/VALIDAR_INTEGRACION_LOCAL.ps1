@@ -150,6 +150,11 @@ try {
         }
     }
 
+    $mapData = Assert-OkResponse -Path '/contingencias/mapa/datos?north=-35&south=-37&east=-71&west=-72.5&zoom=10' -Session $webSession
+    if ($mapData.Headers['Content-Type'] -notmatch 'application/json' -or $mapData.Content -notmatch '"features"') {
+        throw 'La consulta geográfica del mapa no entregó una respuesta JSON válida.'
+    }
+
     Write-Host '[7/7] Probando exportaciones CSV y PDF...'
     $csv = Assert-OkResponse -Path '/informes/contingencias.csv?range=12m' -Session $webSession
     if ($csv.RawContentLength -lt 100 -or $csv.Headers['Content-Type'] -notmatch 'text/csv') {

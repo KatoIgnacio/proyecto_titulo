@@ -18,6 +18,7 @@ Route::redirect('/', '/login');
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::get('/contingencias/mapa', ContingencyMapController::class)->name('contingencies.map');
+    Route::get('/contingencias/mapa/datos', [ContingencyMapController::class, 'data'])->name('contingencies.map.data');
     Route::get('/pronostico-meteorologico', WeatherForecastController::class)->name('weather.forecast');
     Route::get('/buscador-operacional', OperationalSearchController::class)->name('contingencies.search');
     Route::get('/contingencias/{contingency}', ContingencyDetailController::class)->name('contingencies.show');

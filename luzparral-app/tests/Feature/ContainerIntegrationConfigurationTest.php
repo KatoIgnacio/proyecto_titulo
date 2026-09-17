@@ -31,6 +31,7 @@ class ContainerIntegrationConfigurationTest extends TestCase
         $this->assertStringContainsString('luzparral:validate-synthetic', $contents);
         $this->assertStringContainsString("'/dashboard'", $contents);
         $this->assertStringContainsString("'/contingencias/mapa'", $contents);
+        $this->assertStringContainsString('/contingencias/mapa/datos?', $contents);
         $this->assertStringContainsString("'/buscador-operacional'", $contents);
         $this->assertStringContainsString("'/informes'", $contents);
         $this->assertStringContainsString('contingencias.csv', $contents);

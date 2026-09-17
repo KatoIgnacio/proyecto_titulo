@@ -70,7 +70,7 @@ class CustomDateRangeTest extends TestCase
         $this->actingAs($user)->get('/dashboard'.$query)
             ->assertInertia(fn (Assert $page) => $page->where('metrics.total', 1));
         $this->actingAs($user)->get('/contingencias/mapa'.$query)
-            ->assertInertia(fn (Assert $page) => $page->where('summary.events', 1));
+            ->assertInertia(fn (Assert $page) => $page->where('mapData.summary.events', 1));
         $this->actingAs($user)->get('/informes'.$query)
             ->assertInertia(fn (Assert $page) => $page->where('summary.total', 1));
     }
@@ -102,8 +102,9 @@ class CustomDateRangeTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('filters.range', 'custom')
-                ->where('summary.events', 2)
-                ->has('contingencies', 2));
+                ->where('mapData.summary.events', 2)
+                ->where('mapData.features.0.event_count', 2)
+                ->has('mapData.features', 1));
 
         $this->actingAs($user)
             ->get('/informes'.$query)

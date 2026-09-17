@@ -22,6 +22,9 @@ institucional aprobado.
 - La importación controlada permite validar archivos sintéticos antes de
   escribir, registra aceptaciones y rechazos, evita duplicados y revierte el
   lote completo ante un fallo inesperado.
+- El buscador pagina contingencias y protege las consultas de identificadores
+  sintéticos. El mapa consulta el área visible, agrupa marcadores y expone zonas
+  críticas o electrodependientes únicamente como agregados autorizados.
 - La imagen se exporta junto con su suma SHA-256 y metadatos del commit mediante
   `deploy/EXPORTAR_IMAGEN.ps1`. El script rechaza por defecto un repositorio con
   cambios pendientes.
@@ -92,8 +95,13 @@ No promover a producción hasta marcar todos los controles:
 - [ ] El inicio y cierre de sesión funcionan con cada rol autorizado.
 - [ ] Las restricciones de administración e informes se cumplen en backend.
 - [ ] Dashboard y tabla responden a día, mes, año y rango personalizado.
-- [ ] El mapa muestra marcadores; si hay Internet, carga OpenStreetMap.
+- [ ] El mapa agrupa marcadores, actualiza el área visible y, si hay Internet,
+      carga OpenStreetMap.
+- [ ] Las capas críticas y electrodependientes se pueden activar, no revelan
+      identificadores individuales y no aparecen para el perfil Consulta.
 - [ ] Detalle, búsqueda y trazabilidad muestran datos consistentes.
+- [ ] La búsqueda de cliente y suministro sintético funciona para los perfiles
+      autorizados, pagina resultados y rechaza al perfil Consulta.
 - [ ] Administración y Supervisión pueden previsualizar e importar la plantilla
       sintética; Operación y Consulta reciben acceso denegado.
 - [ ] Un código repetido queda rechazado y no crea otra contingencia.

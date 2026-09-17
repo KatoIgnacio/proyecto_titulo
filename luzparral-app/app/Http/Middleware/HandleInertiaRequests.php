@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
                     'updateContingencies' => $user?->role?->canUpdateContingencies() ?? false,
                     'registerFieldReports' => $user?->role?->canRegisterFieldReports() ?? false,
                     'importContingencies' => $user?->role?->canImportContingencies() ?? false,
+                    'viewSupplyIdentifiers' => $user?->role?->canViewSupplyIdentifiers() ?? false,
                 ],
             ],
             'flash' => [

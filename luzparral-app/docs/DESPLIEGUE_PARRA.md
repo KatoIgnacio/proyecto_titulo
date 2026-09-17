@@ -108,6 +108,9 @@ manualmente inicio de sesion, dashboard, filtros por dia, mes, año y rango,
 mapa, detalle, busqueda, pronostico Windy y las tres variantes de informe. La
 importacion controlada debe permitir descargar la plantilla, previsualizar un
 lote sintetico y confirmar el resultado sin duplicar codigos. La
+busqueda protegida de cliente y suministro debe respetar los perfiles, y el
+mapa debe actualizar el area visible, agrupar marcadores y permitir activar las
+capas de zonas criticas y electrodependientes. La
 lectura de respuestas 503 y logs se documenta en
 [`DIAGNOSTICO_OPERATIVO.md`](DIAGNOSTICO_OPERATIVO.md).
 

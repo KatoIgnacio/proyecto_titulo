@@ -1,15 +1,19 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PeriodFields, { type PeriodFilterValue } from '@/Components/PeriodFields';
 import { Head, Link, router } from '@inertiajs/react';
+import axios from 'axios';
 import type { LatLngBoundsExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     CircleMarker,
+    LayerGroup,
+    LayersControl,
     MapContainer,
     TileLayer,
     Tooltip,
     useMap,
+    useMapEvents,
 } from 'react-leaflet';
 
 type Filters = {
@@ -56,14 +60,54 @@ type MapContingency = {
     priority: string;
     cause: string;
     description: string;
-    latitude: number;
-    longitude: number;
     affected_total: number;
     critical_affected: number;
     electrodependent_affected: number;
     started_at: string | null;
     estimated_restore_at: string | null;
     restored_at: string | null;
+};
+
+type MapFeature = {
+    key: string;
+    latitude: number;
+    longitude: number;
+    event_count: number;
+    affected_total: number;
+    critical_affected: number;
+    electrodependent_affected: number;
+    priority: string;
+    contingency: MapContingency | null;
+};
+
+type AffectedZone = {
+    key: string;
+    latitude: number;
+    longitude: number;
+    supply_points: number;
+    contingencies: number;
+};
+
+type MapData = {
+    summary: {
+        events: number;
+        affected: number;
+        critical: number;
+        electrodependent: number;
+    };
+    features: MapFeature[];
+    layers: {
+        critical_zones: AffectedZone[];
+        electrodependent_zones: AffectedZone[];
+    };
+    meta: {
+        zoom: number;
+        bounds_applied: boolean;
+        feature_limit: number;
+        features_truncated: boolean;
+        zones_truncated: boolean;
+        can_view_sensitive_layers: boolean;
+    };
 };
 
 type MapPageProps = {
@@ -73,13 +117,7 @@ type MapPageProps = {
         communes: CommuneOption[];
         feeders: FeederOption[];
     };
-    summary: {
-        events: number;
-        affected: number;
-        critical: number;
-        electrodependent: number;
-    };
-    contingencies: MapContingency[];
+    mapData: MapData;
 };
 
 const statusLabels: Record<string, string> = {
@@ -131,23 +169,13 @@ const causeLabels: Record<string, string> = {
 };
 
 const numberFormatter = new Intl.NumberFormat('es-CL');
-const NEARBY_EVENT_RADIUS_KM = 2.5;
 
-function distanceInKilometers(first: MapContingency, second: MapContingency) {
-    const earthRadiusKm = 6371;
-    const toRadians = (value: number) => value * Math.PI / 180;
-    const latitudeDelta = toRadians(second.latitude - first.latitude);
-    const longitudeDelta = toRadians(second.longitude - first.longitude);
-    const firstLatitude = toRadians(first.latitude);
-    const secondLatitude = toRadians(second.latitude);
-    const haversine = Math.sin(latitudeDelta / 2) ** 2
-        + Math.cos(firstLatitude) * Math.cos(secondLatitude) * Math.sin(longitudeDelta / 2) ** 2;
-
-    return earthRadiusKm * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+function markerRadius(events: number) {
+    return Math.min(24, 6 + Math.sqrt(Math.max(0, events - 1)) * 3.25);
 }
 
-function markerRadius(nearbyEvents: number) {
-    return Math.min(18, 6 + Math.sqrt(Math.max(0, nearbyEvents - 1)) * 3.25);
+function zoneRadius(points: number) {
+    return Math.min(30, 8 + Math.sqrt(Math.max(1, points)) * 2.4);
 }
 
 function formatDate(value: string | null) {
@@ -162,34 +190,142 @@ function formatDate(value: string | null) {
     }).format(new Date(value));
 }
 
-function FitMapToEvents({ contingencies }: { contingencies: MapContingency[] }) {
+function FitMapToEvents({ features }: { features: MapFeature[] }) {
     const map = useMap();
 
     useEffect(() => {
-        if (contingencies.length === 0) return;
+        if (features.length === 0) return;
 
-        if (contingencies.length === 1) {
-            map.setView([contingencies[0].latitude, contingencies[0].longitude], 13);
+        if (features.length === 1) {
+            map.setView([features[0].latitude, features[0].longitude], 13);
             return;
         }
 
-        const bounds: LatLngBoundsExpression = contingencies.map((contingency) => [
-            contingency.latitude,
-            contingency.longitude,
+        const bounds: LatLngBoundsExpression = features.map((feature) => [
+            feature.latitude,
+            feature.longitude,
         ]);
 
         map.fitBounds(bounds, { padding: [42, 42], maxZoom: 13 });
-    }, [contingencies, map]);
+    }, [features, map]);
 
     return null;
+}
+
+function ViewportDataLoader({
+    filters,
+    onData,
+    onLoading,
+    onError,
+}: {
+    filters: Filters;
+    onData: (data: MapData) => void;
+    onLoading: (loading: boolean) => void;
+    onError: (message: string | null) => void;
+}) {
+    const sequence = useRef(0);
+    const map = useMap();
+
+    const load = useCallback(async () => {
+        const requestSequence = ++sequence.current;
+        const bounds = map.getBounds();
+        onLoading(true);
+        onError(null);
+
+        try {
+            const response = await axios.get<MapData>(route('contingencies.map.data'), {
+                params: {
+                    ...filters,
+                    north: bounds.getNorth().toFixed(6),
+                    south: bounds.getSouth().toFixed(6),
+                    east: bounds.getEast().toFixed(6),
+                    west: bounds.getWest().toFixed(6),
+                    zoom: map.getZoom(),
+                },
+                headers: { Accept: 'application/json' },
+            });
+
+            if (requestSequence === sequence.current) onData(response.data);
+        } catch {
+            if (requestSequence === sequence.current) onError('No fue posible actualizar el área visible del mapa.');
+        } finally {
+            if (requestSequence === sequence.current) onLoading(false);
+        }
+    }, [filters, map, onData, onError, onLoading]);
+
+    useMapEvents({ moveend: () => void load() });
+    useEffect(() => { void load(); }, [load]);
+
+    return null;
+}
+
+function ContingencyFeatures({
+    features,
+    selectedId,
+    onSelect,
+}: {
+    features: MapFeature[];
+    selectedId: number | null;
+    onSelect: (id: number) => void;
+}) {
+    const map = useMap();
+
+    return features.map((feature) => {
+        const contingency = feature.contingency;
+        const color = priorityColors[feature.priority] ?? priorityColors.low;
+        const isSelected = contingency?.id === selectedId;
+
+        return (
+            <CircleMarker
+                key={feature.key}
+                center={[feature.latitude, feature.longitude]}
+                radius={markerRadius(feature.event_count)}
+                pathOptions={{
+                    color: isSelected ? '#0f172a' : color,
+                    fillColor: color,
+                    fillOpacity: 0.88,
+                    opacity: 1,
+                    weight: isSelected ? 4 : 2,
+                }}
+                eventHandlers={{
+                    click: () => contingency
+                        ? onSelect(contingency.id)
+                        : map.setView([feature.latitude, feature.longitude], Math.min(16, map.getZoom() + 2)),
+                }}
+            >
+                <Tooltip direction="top" offset={[0, -6]} opacity={0.96}>
+                    <div className="min-w-40">
+                        {contingency ? <strong>{contingency.code}</strong> : <strong>{feature.event_count} contingencias agrupadas</strong>}<br />
+                        {numberFormatter.format(feature.affected_total)} afectados
+                        {!contingency && <><br />Acerca el mapa para ver más detalle.</>}
+                    </div>
+                </Tooltip>
+            </CircleMarker>
+        );
+    });
+}
+
+function AffectedZones({ zones, color, label }: { zones: AffectedZone[]; color: string; label: string }) {
+    return zones.map((zone) => (
+        <CircleMarker
+            key={zone.key}
+            center={[zone.latitude, zone.longitude]}
+            radius={zoneRadius(zone.supply_points)}
+            pathOptions={{ color, fillColor: color, fillOpacity: 0.18, opacity: 0.8, weight: 2 }}
+        >
+            <Tooltip direction="top" opacity={0.96}>
+                <strong>Zona referencial: {label}</strong><br />
+                {numberFormatter.format(zone.supply_points)} puntos agregados · {numberFormatter.format(zone.contingencies)} contingencias
+            </Tooltip>
+        </CircleMarker>
+    ));
 }
 
 export default function MapPage({
     filters,
     referenceDate,
     filterOptions,
-    summary,
-    contingencies,
+    mapData,
 }: MapPageProps) {
     const toForm = (source: Filters): FilterForm => ({
         range: source.range,
@@ -204,40 +340,48 @@ export default function MapPage({
         status: source.status,
     });
 
+    const initialSelection = mapData.features.find((feature) => feature.contingency)?.contingency?.id ?? null;
     const [form, setForm] = useState<FilterForm>(() => toForm(filters));
-    const [selectedId, setSelectedId] = useState<number | null>(contingencies[0]?.id ?? null);
+    const [data, setData] = useState<MapData>(mapData);
+    const [selectedId, setSelectedId] = useState<number | null>(initialSelection);
+    const [loadingViewport, setLoadingViewport] = useState(false);
+    const [mapError, setMapError] = useState<string | null>(null);
 
     useEffect(() => setForm(toForm(filters)), [filters]);
 
     useEffect(() => {
-        if (contingencies.length === 0) {
-            setSelectedId(null);
-        } else if (!contingencies.some((contingency) => contingency.id === selectedId)) {
-            setSelectedId(contingencies[0].id);
-        }
-    }, [contingencies, selectedId]);
+        setData(mapData);
+        setMapError(null);
+    }, [mapData]);
 
-    const selected = contingencies.find((contingency) => contingency.id === selectedId) ?? null;
+    useEffect(() => {
+        const selectableIds = data.features
+            .map((feature) => feature.contingency?.id)
+            .filter((id): id is number => id !== undefined);
+
+        if (selectableIds.length === 0) {
+            setSelectedId(null);
+        } else if (selectedId === null || !selectableIds.includes(selectedId)) {
+            setSelectedId(selectableIds[0]);
+        }
+    }, [data.features, selectedId]);
+
+    const selected = data.features
+        .map((feature) => feature.contingency)
+        .find((contingency) => contingency?.id === selectedId) ?? null;
     const availableFeeders = useMemo(
         () => filterOptions.feeders.filter((feeder) => !form.commune || feeder.commune_id === Number(form.commune)),
         [filterOptions.feeders, form.commune],
     );
-    const nearbyEventCounts = useMemo(() => {
-        const counts = new Map<number, number>();
-
-        contingencies.forEach((contingency) => {
-            const nearbyEvents = contingencies.reduce(
-                (total, candidate) => total + (distanceInKilometers(contingency, candidate) <= NEARBY_EVENT_RADIUS_KM ? 1 : 0),
-                0,
-            );
-            counts.set(contingency.id, nearbyEvents);
-        });
-
-        return counts;
-    }, [contingencies]);
-    const initialCenter: [number, number] = contingencies.length
-        ? [contingencies[0].latitude, contingencies[0].longitude]
+    const initialCenter: [number, number] = mapData.features.length
+        ? [mapData.features[0].latitude, mapData.features[0].longitude]
         : [-36.14, -71.83];
+    const selectableContingencies = data.features
+        .map((feature) => feature.contingency)
+        .filter((contingency): contingency is MapContingency => contingency !== null);
+    const handleMapData = useCallback((nextData: MapData) => setData(nextData), []);
+    const handleMapLoading = useCallback((loading: boolean) => setLoadingViewport(loading), []);
+    const handleMapError = useCallback((message: string | null) => setMapError(message), []);
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -263,10 +407,10 @@ export default function MapPage({
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
                         <span className="rounded-full bg-slate-100 px-3 py-1.5 text-slate-700">
-                            {numberFormatter.format(summary.events)} eventos
+                            {numberFormatter.format(data.summary.events)} eventos visibles
                         </span>
                         <span className="rounded-full bg-rose-50 px-3 py-1.5 text-rose-700">
-                            {numberFormatter.format(summary.affected)} afectados
+                            {numberFormatter.format(data.summary.affected)} afectados
                         </span>
                         <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700">
                             Corte {formatDate(referenceDate)}
@@ -343,46 +487,47 @@ export default function MapPage({
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                                 url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                             />
-                            <FitMapToEvents contingencies={contingencies} />
-                            {contingencies.map((contingency) => {
-                                const color = priorityColors[contingency.priority] ?? priorityColors.low;
-                                const isSelected = contingency.id === selectedId;
-                                const nearbyEvents = nearbyEventCounts.get(contingency.id) ?? 1;
-
-                                return (
-                                    <CircleMarker
-                                        key={contingency.id}
-                                        center={[contingency.latitude, contingency.longitude]}
-                                        radius={markerRadius(nearbyEvents)}
-                                        pathOptions={{
-                                            color: isSelected ? '#0f172a' : color,
-                                            fillColor: color,
-                                            fillOpacity: 0.88,
-                                            opacity: 1,
-                                            weight: isSelected ? 4 : 2,
-                                        }}
-                                        eventHandlers={{ click: () => setSelectedId(contingency.id) }}
-                                    >
-                                        <Tooltip direction="top" offset={[0, -6]} opacity={0.96}>
-                                            <div className="min-w-36">
-                                                <strong>{contingency.code}</strong><br />
-                                                {contingency.commune} · {numberFormatter.format(contingency.affected_total)} afectados
-                                                {nearbyEvents > 1 && (
-                                                    <><br />{nearbyEvents} contingencias en un radio de {NEARBY_EVENT_RADIUS_KM.toLocaleString('es-CL')} km</>
-                                                )}
-                                            </div>
-                                        </Tooltip>
-                                    </CircleMarker>
-                                );
-                            })}
+                            <FitMapToEvents features={mapData.features} />
+                            <ViewportDataLoader filters={filters} onData={handleMapData} onLoading={handleMapLoading} onError={handleMapError} />
+                            <LayersControl position="topright">
+                                <LayersControl.Overlay checked name="Contingencias">
+                                    <LayerGroup>
+                                        <ContingencyFeatures features={data.features} selectedId={selectedId} onSelect={setSelectedId} />
+                                    </LayerGroup>
+                                </LayersControl.Overlay>
+                                {data.meta.can_view_sensitive_layers && (
+                                    <LayersControl.Overlay name="Zonas críticas">
+                                        <LayerGroup>
+                                            <AffectedZones zones={data.layers.critical_zones} color="#f97316" label="puntos críticos" />
+                                        </LayerGroup>
+                                    </LayersControl.Overlay>
+                                )}
+                                {data.meta.can_view_sensitive_layers && (
+                                    <LayersControl.Overlay name="Zonas electrodependientes">
+                                        <LayerGroup>
+                                            <AffectedZones zones={data.layers.electrodependent_zones} color="#7c3aed" label="electrodependencia" />
+                                        </LayerGroup>
+                                    </LayersControl.Overlay>
+                                )}
+                            </LayersControl>
                         </MapContainer>
 
-                        {contingencies.length === 0 && (
+                        {data.features.length === 0 && !loadingViewport && (
                             <div className="absolute inset-0 z-[500] flex items-center justify-center bg-slate-900/25 p-6">
                                 <div className="rounded-lg bg-white px-5 py-4 text-center shadow-lg">
                                     <p className="font-semibold text-slate-900">No hay eventos para esta selección.</p>
                                     <p className="mt-1 text-sm text-slate-500">Modifica los filtros o reinicia el mapa.</p>
                                 </div>
+                            </div>
+                        )}
+
+                        {(loadingViewport || mapError || data.meta.features_truncated || data.meta.zones_truncated) && (
+                            <div className="absolute right-4 top-4 z-[500] max-w-xs space-y-2 text-xs">
+                                {loadingViewport && <p className="rounded-lg bg-white/95 px-3 py-2 font-semibold text-blue-700 shadow">Actualizando área visible…</p>}
+                                {mapError && <p className="rounded-lg bg-rose-50 px-3 py-2 font-semibold text-rose-700 shadow">{mapError}</p>}
+                                {(data.meta.features_truncated || data.meta.zones_truncated) && (
+                                    <p className="rounded-lg bg-amber-50 px-3 py-2 text-amber-800 shadow">Hay más elementos en esta vista. Acerca el mapa para obtener mayor detalle.</p>
+                                )}
                             </div>
                         )}
 
@@ -397,7 +542,7 @@ export default function MapPage({
                                 ))}
                             </div>
                             <div className="mt-3 border-t border-slate-200 pt-3">
-                                <p className="font-bold text-slate-800">Concentración cercana</p>
+                                <p className="font-bold text-slate-800">Agrupación geográfica</p>
                                 <div className="mt-2 flex items-end gap-4 text-slate-600">
                                     {[
                                         { label: '1', size: 10 },
@@ -414,9 +559,14 @@ export default function MapPage({
                                     ))}
                                 </div>
                                 <p className="mt-1.5 max-w-48 text-[10px] leading-4 text-slate-500">
-                                    El tamaño crece según las contingencias ubicadas dentro de {NEARBY_EVENT_RADIUS_KM.toLocaleString('es-CL')} km.
+                                    El tamaño crece según los eventos agrupados al nivel de acercamiento actual.
                                 </p>
                             </div>
+                            {data.meta.can_view_sensitive_layers && (
+                                <p className="mt-3 border-t border-slate-200 pt-3 text-[10px] leading-4 text-slate-500">
+                                    Las capas críticas y electrodependientes muestran zonas agregadas, nunca ubicaciones ni identificadores individuales.
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -442,7 +592,7 @@ export default function MapPage({
                                             onChange={(event) => setSelectedId(Number(event.target.value))}
                                             className="mt-1 block w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500"
                                         >
-                                            {contingencies.map((contingency) => (
+                                            {selectableContingencies.map((contingency) => (
                                                 <option key={contingency.id} value={contingency.id}>{contingency.code} · {contingency.commune}</option>
                                             ))}
                                         </select>
@@ -511,7 +661,7 @@ export default function MapPage({
                             </div>
                         ) : (
                             <div className="flex min-h-72 items-center justify-center p-6 text-center text-sm text-slate-500">
-                                Selecciona filtros con resultados para consultar el detalle.
+                                Acerca el mapa o selecciona un evento individual para consultar el detalle.
                             </div>
                         )}
                     </aside>
@@ -519,7 +669,7 @@ export default function MapPage({
 
                 <div className="flex flex-wrap justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
                     <span>Mapa base © OpenStreetMap contributors.</span>
-                    <span>Indicadores agregados: {numberFormatter.format(summary.critical)} críticos · {numberFormatter.format(summary.electrodependent)} electrodependientes.</span>
+                    <span>Área visible: {numberFormatter.format(data.summary.critical)} críticos · {numberFormatter.format(data.summary.electrodependent)} electrodependientes.</span>
                 </div>
             </div>
         </AuthenticatedLayout>

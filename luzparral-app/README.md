@@ -95,3 +95,7 @@ permisos se describen en
 La validación previa, el formato sintético, la prevención de duplicados y la
 trazabilidad de lotes se describen en
 [`docs/IMPORTACION_CONTROLADA.md`](docs/IMPORTACION_CONTROLADA.md).
+
+La búsqueda paginada, la protección de identificadores, las consultas por área
+visible y las capas geográficas agregadas se describen en
+[`docs/BUSQUEDA_MAPA_ESCALABLE.md`](docs/BUSQUEDA_MAPA_ESCALABLE.md).

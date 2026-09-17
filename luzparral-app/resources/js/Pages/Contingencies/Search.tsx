@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import { PageProps } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 
 type SearchFilters = {
@@ -17,6 +18,7 @@ type SearchForm = {
 };
 
 type ContingencyResult = {
+    result_type: 'contingency';
     id: number;
     code: string;
     osf_code: string;
@@ -29,8 +31,22 @@ type ContingencyResult = {
     started_at: string | null;
 };
 
+type SupplyPointResult = {
+    result_type: 'supply_point';
+    id: number;
+    supply_code: string;
+    customer_code: string;
+    commune: string | null;
+    feeder: string | null;
+    criticality: string;
+    active: boolean;
+    related_contingencies: number;
+};
+
+type SearchResult = ContingencyResult | SupplyPointResult;
+
 type SearchResults = {
-    data: ContingencyResult[];
+    data: SearchResult[];
     total: number;
     from: number | null;
     to: number | null;
@@ -76,6 +92,13 @@ const priorityStyles: Record<string, string> = {
     low: 'bg-slate-100 text-slate-600',
 };
 
+const criticalityLabels: Record<string, string> = {
+    normal: 'General',
+    critical: 'Crítico',
+    electrodependent: 'Electrodependiente',
+    critical_electrodependent: 'Crítico y electrodependiente',
+};
+
 const numberFormatter = new Intl.NumberFormat('es-CL');
 
 function formatDate(value: string | null) {
@@ -99,12 +122,15 @@ function SearchIcon({ className = 'h-5 w-5' }: { className?: string }) {
 }
 
 export default function Search({ filters, hasSearched, results }: SearchProps) {
+    const { auth, errors } = usePage<PageProps>().props;
     const [form, setForm] = useState<SearchForm>({
         category: filters.category,
         query: filters.query,
         status: filters.status ?? '',
         priority: filters.priority ?? '',
     });
+    const supplySearch = form.category === 'customer' || form.category === 'supply';
+    const displayingSupplyResults = filters.category === 'customer' || filters.category === 'supply';
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
@@ -145,7 +171,12 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                 Categoría
                                 <select
                                     value={form.category}
-                                    onChange={(event) => setForm((current) => ({ ...current, category: event.target.value }))}
+                                    onChange={(event) => setForm((current) => ({
+                                        ...current,
+                                        category: event.target.value,
+                                        status: ['customer', 'supply'].includes(event.target.value) ? '' : current.status,
+                                        priority: ['customer', 'supply'].includes(event.target.value) ? '' : current.priority,
+                                    }))}
                                     className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
                                     <option value="all">Todo el registro</option>
@@ -154,6 +185,8 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                     <option value="commune">Comuna</option>
                                     <option value="feeder">Alimentador</option>
                                     <option value="description">Descripción o causa</option>
+                                    {auth.permissions.viewSupplyIdentifiers && <option value="customer">Código de cliente sintético</option>}
+                                    {auth.permissions.viewSupplyIdentifiers && <option value="supply">Código de suministro sintético</option>}
                                 </select>
                             </label>
 
@@ -164,7 +197,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                     <input
                                         value={form.query}
                                         onChange={(event) => setForm((current) => ({ ...current, query: event.target.value }))}
-                                        placeholder="Código, OSF, comuna, alimentador o descripción"
+                                        placeholder={supplySearch ? 'Inicio o código sintético completo' : 'Código, OSF, comuna, alimentador o descripción'}
                                         maxLength={80}
                                         className="block w-full rounded-lg border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     />
@@ -175,6 +208,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                 Estado
                                 <select
                                     value={form.status}
+                                    disabled={supplySearch}
                                     onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
                                     className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
@@ -187,6 +221,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                 Criticidad
                                 <select
                                     value={form.priority}
+                                    disabled={supplySearch}
                                     onChange={(event) => setForm((current) => ({ ...current, priority: event.target.value }))}
                                     className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 >
@@ -200,6 +235,14 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                 Buscar
                             </button>
                         </div>
+
+                        {errors.query && <p className="text-sm font-semibold text-rose-600">{errors.query}</p>}
+
+                        {auth.permissions.viewSupplyIdentifiers && (
+                            <p className="text-xs text-slate-500">
+                                Los identificadores de cliente y suministro son ficticios y solo están disponibles para perfiles operacionales autorizados.
+                            </p>
+                        )}
 
                         {(hasSearched || form.query || form.status || form.priority) && (
                             <div className="flex justify-end">
@@ -223,7 +266,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                             <div>
                                 <h2 className="font-bold text-slate-900">Resultados</h2>
                                 <p className="mt-0.5 text-xs text-slate-500">
-                                    {results.total === 0 ? 'Sin coincidencias' : `${numberFormatter.format(results.total)} contingencias encontradas`}
+                                    {results.total === 0 ? 'Sin coincidencias' : `${numberFormatter.format(results.total)} resultados encontrados`}
                                 </p>
                             </div>
                             {results.total > 0 && (
@@ -234,6 +277,39 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                         </div>
 
                         <div className="overflow-x-auto">
+                            {displayingSupplyResults ? (
+                                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                                    <thead className="bg-slate-50 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                                        <tr>
+                                            <th className="px-5 py-3">Suministro sintético</th>
+                                            <th className="px-5 py-3">Cliente sintético</th>
+                                            <th className="px-5 py-3">Comuna</th>
+                                            <th className="px-5 py-3">Alimentador</th>
+                                            <th className="px-5 py-3">Clasificación</th>
+                                            <th className="px-5 py-3 text-right">Contingencias asociadas</th>
+                                            <th className="px-5 py-3">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {(results.data as SupplyPointResult[]).map((point) => (
+                                            <tr key={point.id} className="transition hover:bg-blue-50/40">
+                                                <td className="whitespace-nowrap px-5 py-4 font-mono text-xs font-bold text-slate-900">{point.supply_code}</td>
+                                                <td className="whitespace-nowrap px-5 py-4 font-mono text-xs text-slate-600">{point.customer_code}</td>
+                                                <td className="whitespace-nowrap px-5 py-4 font-medium text-slate-700">{point.commune ?? '—'}</td>
+                                                <td className="whitespace-nowrap px-5 py-4 font-mono text-xs text-slate-600">{point.feeder ?? '—'}</td>
+                                                <td className="px-5 py-4 text-xs font-semibold text-slate-700">{criticalityLabels[point.criticality] ?? point.criticality}</td>
+                                                <td className="px-5 py-4 text-right font-semibold text-slate-900">{numberFormatter.format(point.related_contingencies)}</td>
+                                                <td className="px-5 py-4 text-xs font-semibold text-slate-600">{point.active ? 'Activo' : 'Inactivo'}</td>
+                                            </tr>
+                                        ))}
+                                        {results.data.length === 0 && (
+                                            <tr>
+                                                <td colSpan={7} className="px-5 py-14 text-center text-sm text-slate-500">No se encontraron identificadores sintéticos para la búsqueda actual.</td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            ) : (
                             <table className="min-w-full divide-y divide-slate-200 text-sm">
                                 <thead className="bg-slate-50 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500">
                                     <tr>
@@ -249,7 +325,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {results.data.map((contingency) => (
+                                    {(results.data as ContingencyResult[]).map((contingency) => (
                                         <tr key={contingency.id} className="transition hover:bg-blue-50/40">
                                             <td className="whitespace-nowrap px-5 py-4 font-mono text-xs font-bold text-slate-900">{contingency.code}</td>
                                             <td className="whitespace-nowrap px-5 py-4 font-mono text-xs text-slate-600">{contingency.osf_code}</td>
@@ -281,6 +357,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                     )}
                                 </tbody>
                             </table>
+                            )}
                         </div>
 
                         {results.total > 0 && (

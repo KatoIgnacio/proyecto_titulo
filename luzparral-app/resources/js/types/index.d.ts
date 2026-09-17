@@ -19,9 +19,11 @@ export type PageProps<
             updateContingencies: boolean;
             registerFieldReports: boolean;
             importContingencies: boolean;
+            viewSupplyIdentifiers: boolean;
         };
     };
     flash: {
         success?: string;
     };
+    errors: Record<string, string>;
 };

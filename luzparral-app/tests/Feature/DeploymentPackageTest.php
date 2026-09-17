@@ -91,11 +91,13 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('filtros por dia, mes, año y rango', $deployment);
         $this->assertStringContainsString('pronostico Windy', $deployment);
         $this->assertStringContainsString('importacion controlada', $deployment);
+        $this->assertStringContainsString('mapa debe actualizar el area visible', $deployment);
         $this->assertStringContainsString('Pendiente exclusivamente en Parra', $handoff);
         $this->assertStringContainsString('puerto `2004`', $handoff);
         $this->assertStringContainsString('puerto `2003`', $handoff);
         $this->assertStringContainsString('https://embed.windy.com', $handoff);
         $this->assertStringContainsString('Persistencia tras reinicio', $handoff);
         $this->assertStringContainsString('importación controlada', $handoff);
+        $this->assertStringContainsString('agrupa marcadores', $handoff);
     }
 }
