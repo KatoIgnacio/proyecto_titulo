@@ -29,14 +29,14 @@ if ([string]::IsNullOrWhiteSpace($OutputPath)) {
 }
 
 $scenarios = @(
-    [pscustomobject]@{ Name = 'Dashboard'; Method = 'GET'; Path = '/dashboard?range=12m'; P95LimitMs = 3000; MaximumUsers = 30 },
-    [pscustomobject]@{ Name = 'Mapa'; Method = 'GET'; Path = '/contingencias/mapa?range=12m&status=active'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'Dashboard'; Method = 'GET'; Path = '/dashboard?range=all'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'Mapa'; Method = 'GET'; Path = '/contingencias/mapa?range=all&status=active'; P95LimitMs = 3000; MaximumUsers = 30 },
     [pscustomobject]@{ Name = 'Búsqueda'; Method = 'GET'; Path = '/buscador-operacional?category=code&query=SYN-CONT'; P95LimitMs = 3000; MaximumUsers = 30 },
     [pscustomobject]@{ Name = 'Registro terreno'; Method = 'POST'; Path = '/contingencias/1/antecedentes-terreno'; P95LimitMs = 3000; MaximumUsers = 30 },
     [pscustomobject]@{ Name = 'Pronóstico'; Method = 'GET'; Path = '/pronostico-meteorologico'; P95LimitMs = 3000; MaximumUsers = 30 },
-    [pscustomobject]@{ Name = 'Informes'; Method = 'GET'; Path = '/informes?range=12m'; P95LimitMs = 3000; MaximumUsers = 30 },
-    [pscustomobject]@{ Name = 'CSV'; Method = 'GET'; Path = '/informes/contingencias.csv?range=12m'; P95LimitMs = 5000; MaximumUsers = 10 },
-    [pscustomobject]@{ Name = 'PDF ejecutivo'; Method = 'GET'; Path = '/informes/contingencias.pdf?range=12m&report_type=executive'; P95LimitMs = 12000; MaximumUsers = 10 }
+    [pscustomobject]@{ Name = 'Informes'; Method = 'GET'; Path = '/informes?range=all'; P95LimitMs = 3000; MaximumUsers = 30 },
+    [pscustomobject]@{ Name = 'CSV'; Method = 'GET'; Path = '/informes/contingencias.csv?range=all'; P95LimitMs = 5000; MaximumUsers = 10 },
+    [pscustomobject]@{ Name = 'PDF ejecutivo'; Method = 'GET'; Path = '/informes/contingencias.pdf?range=all&report_type=executive'; P95LimitMs = 12000; MaximumUsers = 10 }
 )
 
 $summaries = @()

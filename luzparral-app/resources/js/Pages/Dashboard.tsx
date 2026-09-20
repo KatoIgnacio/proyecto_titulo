@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PeriodFields, { type PeriodFilterValue } from '@/Components/PeriodFields';
+import PeriodFields, { defaultCustomPeriod, type PeriodFilterValue } from '@/Components/PeriodFields';
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 
@@ -277,12 +277,22 @@ export default function Dashboard({
     };
 
     const reset = () => {
-        setForm({ range: '12m', date_day: '', date_month: '', date_year: '', date_from: '', date_to: '', commune: '', feeder: '', priority: '', status: '', search: '' });
+        setForm({ ...defaultCustomPeriod(referenceDate), commune: '', feeder: '', priority: '', status: '', search: '' });
         router.get(route('dashboard'), {}, { replace: true });
     };
 
     const maxAffected = Math.max(1, ...communeDistribution.map((commune) => commune.affected));
-    const hasFilters = Boolean(form.commune || form.feeder || form.priority || form.status || form.search || form.range !== '12m');
+    const defaultPeriod = defaultCustomPeriod(referenceDate);
+    const hasFilters = Boolean(
+        form.commune
+        || form.feeder
+        || form.priority
+        || form.status
+        || form.search
+        || form.range !== defaultPeriod.range
+        || form.date_from !== defaultPeriod.date_from
+        || form.date_to !== defaultPeriod.date_to,
+    );
 
     return (
         <AuthenticatedLayout

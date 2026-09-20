@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Support\ContingencyPeriod;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -31,10 +32,10 @@ class ContingencyReportRequest extends FormRequest
     /**
      * @return array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}
      */
-    public function reportFilters(): array
+    public function reportFilters(?CarbonImmutable $referenceDate = null): array
     {
         $validated = $this->validated();
-        $period = ContingencyPeriod::normalize($validated);
+        $period = ContingencyPeriod::normalize($validated, $referenceDate);
 
         return [
             ...$period,

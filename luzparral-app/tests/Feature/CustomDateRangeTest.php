@@ -15,6 +15,53 @@ class CustomDateRangeTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_default_period_uses_the_dataset_cut_month_across_operational_modules(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Supervisor]);
+        [$commune, $feeder] = $this->createLocation();
+
+        $this->createContingency($commune, $feeder, 'PREVIOUS-MONTH', '2026-08-31 23:59:59');
+        $this->createContingency($commune, $feeder, 'CUT-DATE', '2026-09-09 11:00:00');
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filters.range', 'custom')
+                ->where('filters.date_from', '2026-09-01')
+                ->where('filters.date_to', '2026-09-09')
+                ->where('metrics.total', 1));
+
+        $this->actingAs($user)
+            ->get('/contingencias/mapa')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filters.range', 'custom')
+                ->where('filters.date_from', '2026-09-01')
+                ->where('filters.date_to', '2026-09-09')
+                ->where('mapData.summary.events', 1));
+
+        $this->actingAs($user)
+            ->get('/informes')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filters.range', 'custom')
+                ->where('filters.date_from', '2026-09-01')
+                ->where('filters.date_to', '2026-09-09')
+                ->where('summary.total', 1));
+    }
+
+    public function test_removed_quick_periods_are_rejected(): void
+    {
+        $user = User::factory()->create(['role' => UserRole::Supervisor]);
+
+        foreach (['24h', '7d', '30d', '12m'] as $range) {
+            $this->actingAs($user)
+                ->get('/dashboard?range='.$range)
+                ->assertSessionHasErrors('range');
+        }
+    }
+
     public function test_day_month_and_year_modes_apply_complete_calendar_periods(): void
     {
         $user = User::factory()->create(['role' => UserRole::Supervisor]);

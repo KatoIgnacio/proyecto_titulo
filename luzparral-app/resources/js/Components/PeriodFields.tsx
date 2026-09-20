@@ -9,6 +9,15 @@ export type PeriodFilterValue = {
     date_to: string;
 };
 
+export const defaultCustomPeriod = (maxDate: string): PeriodFilterValue => ({
+    range: 'custom',
+    date_day: '',
+    date_month: '',
+    date_year: '',
+    date_from: `${maxDate.slice(0, 7)}-01`,
+    date_to: maxDate.slice(0, 10),
+});
+
 type PeriodFieldsProps<T extends PeriodFilterValue> = {
     value: T;
     onChange: (value: T) => void;
@@ -31,8 +40,8 @@ export default function PeriodFields<T extends PeriodFilterValue>({
             date_day: range === 'day' ? value.date_day || maxDate : '',
             date_month: range === 'month' ? value.date_month || maxDate.slice(0, 7) : '',
             date_year: range === 'year' ? value.date_year || maxDate.slice(0, 4) : '',
-            date_from: range === 'custom' ? value.date_from : '',
-            date_to: range === 'custom' ? value.date_to : '',
+            date_from: range === 'custom' ? value.date_from || `${maxDate.slice(0, 7)}-01` : '',
+            date_to: range === 'custom' ? value.date_to || maxDate.slice(0, 10) : '',
         });
     };
 
@@ -45,15 +54,11 @@ export default function PeriodFields<T extends PeriodFilterValue>({
                     onChange={(event) => updateRange(event.target.value)}
                     className={controlClassName}
                 >
-                    <option value="24h">Últimas 24 horas</option>
-                    <option value="7d">Últimos 7 días</option>
-                    <option value="30d">Últimos 30 días</option>
-                    <option value="12m">Últimos 12 meses</option>
-                    <option value="all">Todo el historial</option>
+                    <option value="custom">Rango personalizado</option>
                     <option value="day">Día específico</option>
                     <option value="month">Mes completo</option>
                     <option value="year">Año completo</option>
-                    <option value="custom">Rango personalizado</option>
+                    <option value="all">Todo el historial</option>
                 </select>
             </label>
 

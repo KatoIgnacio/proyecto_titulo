@@ -19,8 +19,8 @@ class ContingencyMapController extends Controller
 {
     public function __invoke(Request $request, ContingencyMapData $mapData): Response
     {
-        $filters = $this->validatedFilters($request);
         $referenceDate = $this->referenceDate();
+        $filters = $this->validatedFilters($request, $referenceDate);
         $canViewSensitiveLayers = $request->user()?->role?->canViewSupplyIdentifiers() ?? false;
 
         return Inertia::render('Contingencies/Map', [
@@ -48,7 +48,8 @@ class ContingencyMapController extends Controller
 
     public function data(Request $request, ContingencyMapData $mapData): JsonResponse
     {
-        $filters = $this->validatedFilters($request);
+        $referenceDate = $this->referenceDate();
+        $filters = $this->validatedFilters($request, $referenceDate);
         $viewport = $request->validate([
             'north' => ['required', 'numeric', 'between:-90,90'],
             'south' => ['required', 'numeric', 'between:-90,90'],
@@ -77,7 +78,7 @@ class ContingencyMapController extends Controller
 
         $payload = $mapData->build(
             $filters,
-            $this->referenceDate(),
+            $referenceDate,
             $bounds,
             (int) $viewport['zoom'],
             $request->user()?->role?->canViewSupplyIdentifiers() ?? false,
@@ -91,7 +92,7 @@ class ContingencyMapController extends Controller
     /**
      * @return array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: string}
      */
-    private function validatedFilters(Request $request): array
+    private function validatedFilters(Request $request, CarbonImmutable $referenceDate): array
     {
         $validated = $request->validate([
             ...ContingencyPeriod::validationRules(),
@@ -100,7 +101,7 @@ class ContingencyMapController extends Controller
             'priority' => ['nullable', Rule::in(['critical', 'high', 'medium', 'low'])],
             'status' => ['nullable', Rule::in(['active', 'reported', 'assigned', 'in_progress', 'restored', 'closed', 'all'])],
         ]);
-        $period = ContingencyPeriod::normalize($validated);
+        $period = ContingencyPeriod::normalize($validated, $referenceDate);
 
         return [
             ...$period,

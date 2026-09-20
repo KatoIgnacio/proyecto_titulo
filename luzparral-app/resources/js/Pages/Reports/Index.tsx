@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PeriodFields, { type PeriodFilterValue } from '@/Components/PeriodFields';
+import PeriodFields, { defaultCustomPeriod, type PeriodFilterValue } from '@/Components/PeriodFields';
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, ReactNode, useMemo, useState } from 'react';
 
@@ -235,7 +235,7 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
     };
 
     const reset = () => {
-        setForm({ range: '12m', date_day: '', date_month: '', date_year: '', date_from: '', date_to: '', commune: '', feeder: '', priority: '', status: '', search: '' });
+        setForm({ ...defaultCustomPeriod(referenceDate), commune: '', feeder: '', priority: '', status: '', search: '' });
         router.get(route('reports.index'), {}, { replace: true });
     };
 

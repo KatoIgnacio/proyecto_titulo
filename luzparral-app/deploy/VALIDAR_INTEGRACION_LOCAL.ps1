@@ -156,12 +156,12 @@ try {
     }
 
     Write-Host '[7/7] Probando exportaciones CSV y PDF...'
-    $csv = Assert-OkResponse -Path '/informes/contingencias.csv?range=12m' -Session $webSession
+    $csv = Assert-OkResponse -Path '/informes/contingencias.csv?range=all' -Session $webSession
     if ($csv.RawContentLength -lt 100 -or $csv.Headers['Content-Type'] -notmatch 'text/csv') {
         throw 'La exportación CSV no entregó un archivo válido.'
     }
 
-    $pdf = Assert-OkResponse -Path '/informes/contingencias.pdf?range=12m&report_type=executive' -Session $webSession
+    $pdf = Assert-OkResponse -Path '/informes/contingencias.pdf?range=all&report_type=executive' -Session $webSession
     if ($pdf.RawContentLength -lt 1000 -or $pdf.Headers['Content-Type'] -notmatch 'application/pdf') {
         throw 'La exportación PDF no entregó un archivo válido.'
     }

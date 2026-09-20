@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PeriodFields, { type PeriodFilterValue } from '@/Components/PeriodFields';
+import PeriodFields, { defaultCustomPeriod, type PeriodFilterValue } from '@/Components/PeriodFields';
 import { Head, Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import type { LatLngBoundsExpression } from 'leaflet';
@@ -389,7 +389,7 @@ export default function MapPage({
     };
 
     const reset = () => {
-        setForm({ range: '12m', date_day: '', date_month: '', date_year: '', date_from: '', date_to: '', commune: '', feeder: '', priority: '', status: 'active' });
+        setForm({ ...defaultCustomPeriod(referenceDate), commune: '', feeder: '', priority: '', status: 'active' });
         router.get(route('contingencies.map'), {}, { replace: true });
     };
 

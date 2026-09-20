@@ -34,8 +34,8 @@ class ContingencyReportController extends Controller
 
     public function index(ContingencyReportRequest $request): InertiaResponse
     {
-        $filters = $request->reportFilters();
         $referenceDate = $this->reports->referenceDate();
+        $filters = $request->reportFilters($referenceDate);
         $query = $this->reports->filteredQuery($filters, $referenceDate);
         $paginator = (clone $query)
             ->with(['commune:id,name', 'feeder:id,code,name'])
@@ -66,8 +66,9 @@ class ContingencyReportController extends Controller
 
     public function exportCsv(ContingencyReportRequest $request): StreamedResponse
     {
+        $referenceDate = $this->reports->referenceDate();
         $rows = $this->reports->exportRows(
-            $this->reports->reportCollection($request->reportFilters()),
+            $this->reports->reportCollection($request->reportFilters($referenceDate)),
         );
         $filename = 'informe-contingencias-'.CarbonImmutable::now('America/Santiago')->format('Ymd-His').'.csv';
 
@@ -119,11 +120,11 @@ class ContingencyReportController extends Controller
 
     public function exportPdf(ContingencyReportRequest $request): HttpResponse
     {
-        $filters = $request->reportFilters();
+        $referenceDate = $this->reports->referenceDate();
+        $filters = $request->reportFilters($referenceDate);
         $reportType = $request->reportType();
         $includesAnalytics = in_array($reportType, ['executive', 'complete'], true);
         $includesDetail = in_array($reportType, ['development', 'complete'], true);
-        $referenceDate = $this->reports->referenceDate();
         $query = $this->reports->filteredQuery($filters, $referenceDate);
         $contingencies = $this->reports->pdfCollection($query, $includesDetail);
         $generatedAt = CarbonImmutable::now('America/Santiago');

@@ -32,7 +32,11 @@ class DashboardController extends Controller
             'search' => ['nullable', 'string', 'max:80'],
         ]);
 
-        $period = ContingencyPeriod::normalize($validated);
+        $latestDatasetDate = Contingency::query()->max('started_at');
+        $referenceDate = $latestDatasetDate
+            ? CarbonImmutable::parse($latestDatasetDate)
+            : CarbonImmutable::now();
+        $period = ContingencyPeriod::normalize($validated, $referenceDate);
         $filters = [
             ...$period,
             'commune' => isset($validated['commune']) ? (int) $validated['commune'] : null,
@@ -41,11 +45,6 @@ class DashboardController extends Controller
             'status' => $validated['status'] ?? null,
             'search' => trim($validated['search'] ?? ''),
         ];
-
-        $latestDatasetDate = Contingency::query()->max('started_at');
-        $referenceDate = $latestDatasetDate
-            ? CarbonImmutable::parse($latestDatasetDate)
-            : CarbonImmutable::now();
 
         $query = $this->filteredQuery($filters, $referenceDate);
         $activeQuery = (clone $query)->whereIn('contingencies.status', self::ACTIVE_STATUSES);
