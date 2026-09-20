@@ -1,7 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 type ContingencyDetail = {
     id: number;
@@ -55,6 +55,7 @@ type FieldReport = {
     latitude: number | null;
     longitude: number | null;
     reporter: string | null;
+    updated_at: string;
     attachments: FieldReportAttachment[];
 };
 
@@ -176,16 +177,256 @@ function formatFileSize(bytes: number) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function toLocalDateTimeInput(value: string | null) {
+    if (!value) return '';
+
+    const date = new Date(value);
+    date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+
+    return date.toISOString().slice(0, 16);
+}
+
+function FieldReportCard({
+    contingencyId,
+    report,
+    progressOptions,
+    canManage,
+}: {
+    contingencyId: number;
+    report: FieldReport;
+    progressOptions: SelectOption[];
+    canManage: boolean;
+}) {
+    const [editing, setEditing] = useState(false);
+    const [confirmingDelete, setConfirmingDelete] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const editForm = useForm({
+        current_updated_at: report.updated_at,
+        progress_status: report.progress_status,
+        description: report.description,
+        observed_at: toLocalDateTimeInput(report.observed_at),
+        latitude: report.latitude === null ? '' : String(report.latitude),
+        longitude: report.longitude === null ? '' : String(report.longitude),
+    });
+
+    const beginEditing = () => {
+        setConfirmingDelete(false);
+        editForm.setData({
+            current_updated_at: report.updated_at,
+            progress_status: report.progress_status,
+            description: report.description,
+            observed_at: toLocalDateTimeInput(report.observed_at),
+            latitude: report.latitude === null ? '' : String(report.latitude),
+            longitude: report.longitude === null ? '' : String(report.longitude),
+        });
+        editForm.clearErrors();
+        setEditing(true);
+    };
+
+    const submitEdit = (event: React.FormEvent) => {
+        event.preventDefault();
+        editForm.patch(route('contingencies.field-reports.update', [contingencyId, report.id]), {
+            preserveScroll: true,
+            onSuccess: () => setEditing(false),
+        });
+    };
+
+    const destroy = () => {
+        router.delete(route('contingencies.field-reports.destroy', [contingencyId, report.id]), {
+            data: { confirmation: true },
+            preserveScroll: true,
+            onStart: () => setDeleting(true),
+            onFinish: () => setDeleting(false),
+        });
+    };
+
+    return (
+        <li className="rounded-xl border border-slate-200 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">{report.progress_label}</span>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                    <time className="text-xs text-slate-500">{formatDate(report.observed_at)}</time>
+                    {canManage && !editing && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={beginEditing}
+                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                            >
+                                Editar
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setConfirmingDelete(true)}
+                                className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+                            >
+                                Eliminar
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            {editing ? (
+                <form onSubmit={submitEdit} className="mt-4 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                    <h3 className="text-sm font-bold text-slate-900">Editar antecedente</h3>
+                    <p className="mt-1 text-xs text-slate-500">Las evidencias ya adjuntas se conservarán sin cambios.</p>
+
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <label className="text-xs font-semibold text-slate-700">
+                            Avance observado
+                            <select
+                                value={editForm.data.progress_status}
+                                onChange={(event) => editForm.setData('progress_status', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                                {progressOptions.map((option) => (
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
+                            </select>
+                            {editForm.errors.progress_status && <span className="mt-1 block text-rose-600">{editForm.errors.progress_status}</span>}
+                        </label>
+
+                        <label className="text-xs font-semibold text-slate-700">
+                            Fecha y hora observada
+                            <input
+                                type="datetime-local"
+                                value={editForm.data.observed_at}
+                                onChange={(event) => editForm.setData('observed_at', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            {editForm.errors.observed_at && <span className="mt-1 block text-rose-600">{editForm.errors.observed_at}</span>}
+                        </label>
+                    </div>
+
+                    <label className="mt-4 block text-xs font-semibold text-slate-700">
+                        Descripción del trabajo o hallazgo
+                        <textarea
+                            value={editForm.data.description}
+                            onChange={(event) => editForm.setData('description', event.target.value)}
+                            rows={4}
+                            maxLength={2000}
+                            className="mt-1 block w-full resize-y rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                        />
+                        {editForm.errors.description && <span className="mt-1 block text-rose-600">{editForm.errors.description}</span>}
+                    </label>
+
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <label className="text-xs font-semibold text-slate-700">
+                            Latitud (opcional)
+                            <input
+                                type="number"
+                                step="0.0000001"
+                                value={editForm.data.latitude}
+                                onChange={(event) => editForm.setData('latitude', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            {editForm.errors.latitude && <span className="mt-1 block text-rose-600">{editForm.errors.latitude}</span>}
+                        </label>
+                        <label className="text-xs font-semibold text-slate-700">
+                            Longitud (opcional)
+                            <input
+                                type="number"
+                                step="0.0000001"
+                                value={editForm.data.longitude}
+                                onChange={(event) => editForm.setData('longitude', event.target.value)}
+                                className="mt-1 block w-full rounded-lg border-slate-300 bg-white text-sm focus:border-blue-500 focus:ring-blue-500"
+                            />
+                            {editForm.errors.longitude && <span className="mt-1 block text-rose-600">{editForm.errors.longitude}</span>}
+                        </label>
+                    </div>
+
+                    {editForm.errors.current_updated_at && (
+                        <p className="mt-3 text-xs font-medium text-rose-600">{editForm.errors.current_updated_at}</p>
+                    )}
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        <button
+                            type="submit"
+                            disabled={editForm.processing || editForm.data.description.trim().length < 10}
+                            className="rounded-lg bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            {editForm.processing ? 'Guardando...' : 'Guardar cambios'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setEditing(false)}
+                            disabled={editForm.processing}
+                            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            ) : (
+                <>
+                    <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-700">{report.description}</p>
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                        <span>{report.reporter ? `Registrado por ${report.reporter}` : 'Responsable no disponible'}</span>
+                        {report.latitude !== null && report.longitude !== null && (
+                            <span className="font-mono">{report.latitude.toFixed(5)}, {report.longitude.toFixed(5)}</span>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {report.attachments.length > 0 && (
+                <ul className="mt-3 flex flex-wrap gap-2">
+                    {report.attachments.map((attachment) => (
+                        <li key={attachment.id}>
+                            <a
+                                href={attachment.download_url}
+                                className="inline-flex rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+                            >
+                                {attachment.name} · {formatFileSize(attachment.size_bytes)}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {canManage && confirmingDelete && !editing && (
+                <div role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4">
+                    <p className="text-sm font-bold text-rose-900">¿Eliminar este antecedente?</p>
+                    <p className="mt-1 text-xs leading-relaxed text-rose-700">
+                        Se eliminarán el registro y sus evidencias. La acción quedará anotada en la bitácora.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            onClick={destroy}
+                            disabled={deleting}
+                            className="rounded-lg bg-rose-700 px-4 py-2 text-xs font-bold text-white hover:bg-rose-800 disabled:opacity-50"
+                        >
+                            {deleting ? 'Eliminando...' : 'Confirmar eliminación'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setConfirmingDelete(false)}
+                            disabled={deleting}
+                            className="rounded-lg border border-rose-200 bg-white px-4 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                        >
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            )}
+        </li>
+    );
+}
+
 function FieldReportsPanel({
     contingencyId,
     reports,
     progressOptions,
     canRegister,
+    canManage,
 }: {
     contingencyId: number;
     reports: FieldReport[];
     progressOptions: SelectOption[];
     canRegister: boolean;
+    canManage: boolean;
 }) {
     const fileInput = useRef<HTMLInputElement>(null);
     const form = useForm<{
@@ -329,33 +570,13 @@ function FieldReportsPanel({
             {reports.length > 0 ? (
                 <ol className="mt-5 space-y-4">
                     {reports.map((report) => (
-                        <li key={report.id} className="rounded-xl border border-slate-200 p-4">
-                            <div className="flex flex-wrap items-start justify-between gap-2">
-                                <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-700">{report.progress_label}</span>
-                                <time className="text-xs text-slate-500">{formatDate(report.observed_at)}</time>
-                            </div>
-                            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-slate-700">{report.description}</p>
-                            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                                <span>{report.reporter ? `Registrado por ${report.reporter}` : 'Responsable no disponible'}</span>
-                                {report.latitude !== null && report.longitude !== null && (
-                                    <span className="font-mono">{report.latitude.toFixed(5)}, {report.longitude.toFixed(5)}</span>
-                                )}
-                            </div>
-                            {report.attachments.length > 0 && (
-                                <ul className="mt-3 flex flex-wrap gap-2">
-                                    {report.attachments.map((attachment) => (
-                                        <li key={attachment.id}>
-                                            <a
-                                                href={attachment.download_url}
-                                                className="inline-flex rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50"
-                                            >
-                                                {attachment.name} · {formatFileSize(attachment.size_bytes)}
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </li>
+                        <FieldReportCard
+                            key={report.id}
+                            contingencyId={contingencyId}
+                            report={report}
+                            progressOptions={progressOptions}
+                            canManage={canManage}
+                        />
                     ))}
                 </ol>
             ) : (
@@ -554,6 +775,7 @@ export default function Show({ contingency, impactSummary, history, fieldReports
                             reports={fieldReports}
                             progressOptions={fieldReportProgressOptions}
                             canRegister={auth.permissions.registerFieldReports}
+                            canManage={auth.permissions.manageFieldReports}
                         />
 
                         <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">

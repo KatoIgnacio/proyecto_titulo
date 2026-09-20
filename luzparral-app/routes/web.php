@@ -28,6 +28,14 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::post('/contingencias/{contingency}/antecedentes-terreno', [FieldReportController::class, 'store'])
         ->middleware('role:admin,supervisor,operator')
         ->name('contingencies.field-reports.store');
+    Route::patch('/contingencias/{contingency}/antecedentes-terreno/{fieldReport}', [FieldReportController::class, 'update'])
+        ->middleware('role:admin')
+        ->scopeBindings()
+        ->name('contingencies.field-reports.update');
+    Route::delete('/contingencias/{contingency}/antecedentes-terreno/{fieldReport}', [FieldReportController::class, 'destroy'])
+        ->middleware('role:admin')
+        ->scopeBindings()
+        ->name('contingencies.field-reports.destroy');
     Route::get('/antecedentes-terreno/{attachment}/evidencia', [FieldReportAttachmentController::class, 'download'])
         ->name('field-reports.attachments.download');
 

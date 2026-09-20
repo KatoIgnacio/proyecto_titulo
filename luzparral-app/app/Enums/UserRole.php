@@ -41,6 +41,11 @@ enum UserRole: string
         return $this->canUpdateContingencies();
     }
 
+    public function canManageFieldReports(): bool
+    {
+        return $this === self::Admin;
+    }
+
     public function canImportContingencies(): bool
     {
         return in_array($this, [

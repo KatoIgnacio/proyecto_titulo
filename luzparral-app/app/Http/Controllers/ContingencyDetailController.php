@@ -88,6 +88,7 @@ class ContingencyDetailController extends Controller
                     'latitude' => $report->latitude === null ? null : (float) $report->latitude,
                     'longitude' => $report->longitude === null ? null : (float) $report->longitude,
                     'reporter' => $report->reporter?->name,
+                    'updated_at' => $report->updated_at?->toIso8601String(),
                     'attachments' => $report->attachments->map(fn ($attachment) => [
                         'id' => $attachment->id,
                         'name' => $attachment->original_name,
