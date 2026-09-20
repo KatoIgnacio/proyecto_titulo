@@ -303,7 +303,7 @@ export default function Dashboard({
                             Dashboard operacional
                         </h1>
                         <p className="mt-1 text-sm text-slate-500">
-                            Monitoreo consolidado de contingencias eléctricas sintéticas.
+                            Monitoreo consolidado de contingencias eléctricas.
                         </p>
                     </div>
                     <div className="flex items-center gap-2 self-start rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 sm:self-auto">
@@ -394,7 +394,7 @@ export default function Dashboard({
                     <MetricCard label="Clientes afectados" value={formatNumber(metrics.affected)} note="en contingencias activas" accent="border-b-4 border-b-slate-700" icon={<MiniIcon path={<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m7-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87" />} />} />
                     <MetricCard label="Clientes repuestos" value={formatNumber(metrics.restored)} note="registros de reposición del período" accent="border-b-4 border-b-emerald-500" icon={<MiniIcon path={<path d="m20 6-11 11-5-5" />} />} />
                     <MetricCard label="Clientes críticos" value={formatNumber(metrics.critical)} note="afectados en eventos activos" accent="border-b-4 border-b-orange-500" icon={<MiniIcon path={<path d="M12 3 3 7v5c0 5 3.8 8.5 9 9 5.2-.5 9-4 9-9V7l-9-4Zm0 5v5m0 4h.01" />} />} />
-                    <MetricCard label="Electrodependientes" value={formatNumber(metrics.electrodependent)} note="conteo agregado y anonimizado" accent="border-b-4 border-b-blue-600" icon={<MiniIcon path={<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />} />} />
+                    <MetricCard label="Electrodependientes" value={formatNumber(metrics.electrodependent)} note="afectados en eventos activos" accent="border-b-4 border-b-blue-600" icon={<MiniIcon path={<path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />} />} />
                     <MetricCard label="Tiempo promedio" value={metrics.averageMinutes === null ? '—' : `${formatNumber(metrics.averageMinutes)} min`} note="interrupciones con duración registrada" accent="border-b-4 border-b-slate-400" icon={<MiniIcon path={<path d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />} />} />
                 </section>
 

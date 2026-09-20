@@ -453,7 +453,7 @@ export default function Show({ contingency, impactSummary, history, fieldReports
             header={
                 <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
                     <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-600">Expediente operacional sintético</p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-600">Expediente operacional</p>
                         <h1 className="mt-1 font-mono text-xl font-black text-slate-900 sm:text-2xl">{contingency.code}</h1>
                         <p className="mt-1 text-sm text-slate-500">Registro consolidado del evento y su trazabilidad histórica.</p>
                     </div>
@@ -506,13 +506,13 @@ export default function Show({ contingency, impactSummary, history, fieldReports
                     <SummaryCard
                         label="Clientes críticos"
                         value={numberFormatter.format(contingency.critical_affected)}
-                        note="Conteo agregado de instalaciones prioritarias"
+                        note="Instalaciones prioritarias afectadas"
                         accent="border-b-4 border-b-orange-500"
                     />
                     <SummaryCard
                         label="Electrodependientes"
                         value={numberFormatter.format(contingency.electrodependent_affected)}
-                        note="Información anonimizada y agregada"
+                        note="Afectados durante la contingencia"
                         accent="border-b-4 border-b-blue-600"
                     />
                 </section>
@@ -559,7 +559,7 @@ export default function Show({ contingency, impactSummary, history, fieldReports
                         <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                             <div className="border-b border-slate-100 pb-4">
                                 <h2 className="font-bold text-slate-900">Impacto y reposición</h2>
-                                <p className="mt-1 text-xs text-slate-500">Resumen agregado de los puntos de suministro relacionados.</p>
+                                <p className="mt-1 text-xs text-slate-500">Estado de los puntos de suministro relacionados.</p>
                             </div>
 
                             <div className="mt-5 grid gap-5 sm:grid-cols-4">

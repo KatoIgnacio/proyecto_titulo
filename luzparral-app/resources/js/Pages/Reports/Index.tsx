@@ -328,7 +328,6 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
                     <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                             <h2 className="text-lg font-black text-slate-900">¿Qué informe necesita generar?</h2>
-                            <p className="mt-1 text-sm text-slate-500">La selección usa los filtros aplicados y no cambia los datos del sistema.</p>
                         </div>
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
                             {numberFormatter.format(results.total)} contingencias seleccionadas

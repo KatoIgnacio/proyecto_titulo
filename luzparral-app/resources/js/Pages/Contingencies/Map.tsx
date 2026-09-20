@@ -402,7 +402,7 @@ export default function MapPage({
                             Mapa de contingencias
                         </h1>
                         <p className="mt-1 text-sm text-slate-500">
-                            Ubicación referencial de eventos eléctricos generados sintéticamente.
+                            Ubicación referencial de contingencias eléctricas.
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
@@ -562,11 +562,6 @@ export default function MapPage({
                                     El tamaño crece según los eventos agrupados al nivel de acercamiento actual.
                                 </p>
                             </div>
-                            {data.meta.can_view_sensitive_layers && (
-                                <p className="mt-3 border-t border-slate-200 pt-3 text-[10px] leading-4 text-slate-500">
-                                    Las capas críticas y electrodependientes muestran zonas agregadas, nunca ubicaciones ni identificadores individuales.
-                                </p>
-                            )}
                         </div>
                     </div>
 
@@ -576,7 +571,7 @@ export default function MapPage({
                                 <div className="border-b border-slate-200 p-5">
                                     <div className="flex items-start justify-between gap-3">
                                         <div>
-                                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Expediente sintético</p>
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Expediente operacional</p>
                                             <h2 className="mt-1 font-mono text-lg font-black text-slate-900">{selected.code}</h2>
                                             <p className="mt-1 font-mono text-xs text-slate-500">{selected.osf_code}</p>
                                         </div>

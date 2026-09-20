@@ -155,10 +155,6 @@ export default function Authenticated({
             <div className="flex-1 py-5">{navigation}</div>
 
             <div className="space-y-3 border-t border-slate-800 p-4">
-                <div className="rounded-lg border border-slate-700 bg-slate-950/40 p-3 text-[11px] leading-relaxed text-slate-400">
-                    <p className="font-semibold text-slate-200">Resguardo ético</p>
-                    <p className="mt-1">Datos sintéticos y anonimizados para fines académicos.</p>
-                </div>
                 <Link
                     href={route('logout')}
                     method="post"
