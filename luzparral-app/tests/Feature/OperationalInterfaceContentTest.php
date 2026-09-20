@@ -52,4 +52,15 @@ class OperationalInterfaceContentTest extends TestCase
         $this->assertStringContainsString('trazabilidad', mb_strtolower($reports));
         $this->assertStringContainsString('Los valores presentados son sintéticos y agregados.', $pdf);
     }
+
+    public function test_import_results_explain_partial_rejections_and_synthetic_test_cases(): void
+    {
+        $imports = (string) file_get_contents(base_path('resources/js/Pages/Imports/Index.tsx'));
+
+        $this->assertStringContainsString('las filas válidas se incorporaron y las rechazadas no se agregaron', $imports);
+        $this->assertStringContainsString('Ver detalle', $imports);
+        $this->assertStringContainsString("UNKNOWN_FEEDER: 'Alimentador no registrado'", $imports);
+        $this->assertStringContainsString('los rechazos son casos de prueba deliberados', $imports);
+        $this->assertStringContainsString('no provienen de registros reales', $imports);
+    }
 }

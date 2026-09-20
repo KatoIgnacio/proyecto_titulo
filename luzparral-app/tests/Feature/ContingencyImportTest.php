@@ -92,7 +92,10 @@ class ContingencyImportTest extends TestCase
                 'checksum' => hash('sha256', $contents),
             ])
             ->assertRedirect()
-            ->assertSessionHas('success');
+            ->assertSessionHas(
+                'success',
+                'Importación IMP-000001 completada con observaciones. Filas incorporadas: 1; filas rechazadas: 1. Revise los motivos indicados.',
+            );
 
         $batch = ImportBatch::query()->firstOrFail();
         $this->assertSame('completed_with_warnings', $batch->status);

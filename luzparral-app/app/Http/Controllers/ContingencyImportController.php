@@ -80,7 +80,7 @@ class ContingencyImportController extends Controller
 
         return redirect()
             ->route('imports.index', ['batch' => $batch->id])
-            ->with('success', "Importación {$batch->id} completada: {$batch->accepted_rows} aceptadas y {$batch->rejected_rows} rechazadas.");
+            ->with('success', $this->importResultMessage($batch));
     }
 
     public function template(): HttpResponse
@@ -113,5 +113,16 @@ class ContingencyImportController extends Controller
             'user' => $batch->importedBy?->name,
             'reference' => 'IMP-'.Str::padLeft((string) $batch->id, 6, '0'),
         ];
+    }
+
+    private function importResultMessage(ImportBatch $batch): string
+    {
+        $reference = 'IMP-'.Str::padLeft((string) $batch->id, 6, '0');
+
+        return match ($batch->status) {
+            'completed' => "Importación {$reference} completada. Filas incorporadas: {$batch->accepted_rows}.",
+            'completed_with_warnings' => "Importación {$reference} completada con observaciones. Filas incorporadas: {$batch->accepted_rows}; filas rechazadas: {$batch->rejected_rows}. Revise los motivos indicados.",
+            default => "Importación {$reference} rechazada. No se incorporaron filas; {$batch->rejected_rows} filas fueron rechazadas. Revise los motivos indicados.",
+        };
     }
 }

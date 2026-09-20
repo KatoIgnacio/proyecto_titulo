@@ -45,11 +45,18 @@ importarla se debe usar un código distinto de los ya existentes.
 
 ## Resultado y trazabilidad
 
-Un lote puede quedar `Completada`, `Con observaciones` o `Rechazada`. Las filas
-válidas generan la contingencia y su primer evento de historial; las inválidas
-se registran en `import_errors` con fila, campo, código de error y referencia
-sintética. La interfaz permite revisar los diez lotes más recientes y hasta las
-primeras cien observaciones del lote seleccionado.
+Un lote puede quedar `Completada`, si todas las filas se incorporaron; `Con
+observaciones`, si se incorporaron las filas válidas y se descartaron otras; o
+`Rechazada`, si no se incorporó ninguna fila. Las filas válidas generan la
+contingencia y su primer evento de historial; las inválidas se registran en
+`import_errors` con fila, campo, código de error y referencia sintética. La
+interfaz permite revisar los diez lotes más recientes y hasta las primeras cien
+observaciones del lote seleccionado.
+
+Los lotes sintéticos precargados incluyen anomalías deliberadas, como duraciones
+negativas, coordenadas ausentes, estados inválidos y problemas de codificación.
+Sirven para demostrar la validación y no reproducen errores ni registros reales
+de documentos de la empresa.
 
 El lote, sus errores, las contingencias aceptadas y su historial se escriben en
 una sola transacción. Un fallo inesperado revierte todo el lote. Los índices

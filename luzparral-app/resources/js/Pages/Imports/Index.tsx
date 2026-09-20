@@ -69,6 +69,31 @@ const statusStyles: Record<string, string> = {
     rejected: 'bg-rose-100 text-rose-700',
 };
 
+const errorCodeLabels: Record<string, string> = {
+    EMPTY_FILE: 'Archivo vacío',
+    INVALID_HEADER: 'Estructura de archivo incorrecta',
+    ROW_LIMIT_EXCEEDED: 'Límite de filas excedido',
+    COLUMN_COUNT: 'Cantidad de columnas incorrecta',
+    INVALID_SYNTHETIC_CODE: 'Código de contingencia inválido',
+    INVALID_SYNTHETIC_OSF: 'Código OSF inválido',
+    DUPLICATE_IN_FILE: 'Registro repetido en el archivo',
+    UNKNOWN_COMMUNE: 'Comuna no registrada',
+    UNKNOWN_FEEDER: 'Alimentador no registrado',
+    FEEDER_COMMUNE_MISMATCH: 'Alimentador y comuna no coinciden',
+    INVALID_STATUS: 'Estado no reconocido',
+    INVALID_PRIORITY: 'Criticidad no reconocida',
+    INVALID_CAUSE: 'Causa no reconocida',
+    INVALID_DESCRIPTION: 'Descripción inválida',
+    INVALID_DATE: 'Fecha inválida',
+    INVALID_CHRONOLOGY: 'Cronología inconsistente',
+    MISSING_RESTORATION: 'Fecha de reposición requerida',
+    INVALID_COORDINATE: 'Coordenada inválida',
+    DUPLICATE_DATABASE: 'Registro ya existente',
+    NEGATIVE_MINUTES: 'Duración negativa',
+    MISSING_COORDINATE: 'Coordenada faltante',
+    INVALID_ENCODING: 'Codificación no válida',
+};
+
 function formatDate(value: string | null) {
     if (!value) return 'Sin registro';
 
@@ -79,6 +104,30 @@ function formatDate(value: string | null) {
         hour: '2-digit',
         minute: '2-digit',
     }).format(new Date(value));
+}
+
+function batchOutcome(batch: ImportBatch) {
+    if (batch.status === 'completed') {
+        return {
+            style: 'border-emerald-200 bg-emerald-50 text-emerald-800',
+            title: 'Importación completada',
+            description: `Filas incorporadas: ${batch.accepted_rows}. No se registraron rechazos.`,
+        };
+    }
+
+    if (batch.status === 'completed_with_warnings') {
+        return {
+            style: 'border-amber-200 bg-amber-50 text-amber-900',
+            title: 'Importación completada con observaciones',
+            description: `Filas incorporadas: ${batch.accepted_rows}. Filas rechazadas: ${batch.rejected_rows}; no se agregaron al sistema. Revise cada motivo.`,
+        };
+    }
+
+    return {
+        style: 'border-rose-200 bg-rose-50 text-rose-800',
+        title: 'Importación rechazada',
+        description: `No se incorporaron filas. Filas rechazadas: ${batch.rejected_rows}; revise cada motivo.`,
+    };
 }
 
 function errorValue(error: ImportError, preview: boolean) {
@@ -101,7 +150,7 @@ function ErrorTable({ errors, preview = false }: { errors: ImportError[]; previe
                         <th className="px-3 py-2">Fila</th>
                         <th className="px-3 py-2">Referencia</th>
                         <th className="px-3 py-2">Campo</th>
-                        <th className="px-3 py-2">Código</th>
+                        <th className="px-3 py-2">Motivo</th>
                         <th className="px-3 py-2">Detalle</th>
                     </tr>
                 </thead>
@@ -113,7 +162,10 @@ function ErrorTable({ errors, preview = false }: { errors: ImportError[]; previe
                                 <td className="px-3 py-2 font-mono">{values.row ?? '—'}</td>
                                 <td className="px-3 py-2 font-mono">{values.reference ?? '—'}</td>
                                 <td className="px-3 py-2">{values.field ?? '—'}</td>
-                                <td className="px-3 py-2 font-mono">{values.code ?? '—'}</td>
+                                <td className="px-3 py-2">
+                                    <p className="font-semibold text-slate-800">{errorCodeLabels[values.code ?? ''] ?? 'Validación no superada'}</p>
+                                    <p className="mt-0.5 font-mono text-[10px] text-slate-500">{values.code ?? '—'}</p>
+                                </td>
                                 <td className="px-3 py-2">{error.message}</td>
                             </tr>
                         );
@@ -139,6 +191,7 @@ export default function Index({ sources, recentBatches, selectedBatch }: ImportP
         file: null,
         checksum: '',
     });
+    const selectedOutcome = selectedBatch ? batchOutcome(selectedBatch) : null;
 
     const resetPreview = () => {
         setPreview(null);
@@ -285,9 +338,9 @@ export default function Index({ sources, recentBatches, selectedBatch }: ImportP
 
                         {preview.errors.length > 0 && (
                             <div className="mt-5 space-y-2">
-                                <h3 className="text-sm font-bold text-slate-900">Observaciones detectadas</h3>
+                                <h3 className="text-sm font-bold text-slate-900">Filas rechazadas y motivos</h3>
                                 <ErrorTable errors={preview.errors} preview />
-                                {preview.errors_truncated > 0 && <p className="text-xs text-slate-500">Hay {preview.errors_truncated} observaciones adicionales.</p>}
+                                {preview.errors_truncated > 0 && <p className="text-xs text-slate-500">Hay {preview.errors_truncated} motivos registrados adicionales.</p>}
                             </div>
                         )}
 
@@ -323,22 +376,30 @@ export default function Index({ sources, recentBatches, selectedBatch }: ImportP
                             <div><p className="text-xs text-emerald-700">Aceptadas</p><p className="text-xl font-black text-emerald-800">{selectedBatch.accepted_rows}</p></div>
                             <div><p className="text-xs text-rose-700">Rechazadas</p><p className="text-xl font-black text-rose-800">{selectedBatch.rejected_rows}</p></div>
                         </div>
+                        {selectedOutcome && (
+                            <div className={`mb-5 rounded-lg border px-4 py-3 text-sm ${selectedOutcome.style}`}>
+                                <p className="font-bold">{selectedOutcome.title}</p>
+                                <p className="mt-1 text-xs leading-relaxed">{selectedOutcome.description}</p>
+                            </div>
+                        )}
                         <ErrorTable errors={selectedBatch.errors} />
                         {selectedBatch.errors.length === 0 && <p className="rounded-lg bg-emerald-50 p-4 text-sm text-emerald-800">El lote no registró observaciones.</p>}
-                        {selectedBatch.errors_truncated > 0 && <p className="mt-2 text-xs text-slate-500">Hay {selectedBatch.errors_truncated} observaciones adicionales.</p>}
+                        {selectedBatch.errors_truncated > 0 && <p className="mt-2 text-xs text-slate-500">Hay {selectedBatch.errors_truncated} motivos registrados adicionales.</p>}
                     </section>
                 )}
 
                 <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-100 p-5 sm:p-6">
                         <h2 className="font-bold text-slate-900">Importaciones recientes</h2>
-                        <p className="mt-1 text-xs text-slate-500">Últimos diez lotes procesados.</p>
+                        <p className="mt-1 text-xs text-slate-500">
+                            Últimos diez lotes procesados. “Con observaciones” indica que las filas válidas se incorporaron y las rechazadas no se agregaron.
+                        </p>
                     </div>
                     {recentBatches.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
                                 <thead className="bg-slate-50 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                                    <tr><th className="px-5 py-3">Lote</th><th className="px-5 py-3">Archivo</th><th className="px-5 py-3">Resultado</th><th className="px-5 py-3">Filas</th><th className="px-5 py-3">Responsable</th><th className="px-5 py-3">Fecha</th></tr>
+                                    <tr><th className="px-5 py-3">Lote</th><th className="px-5 py-3">Archivo</th><th className="px-5 py-3">Resultado</th><th className="px-5 py-3">Filas</th><th className="px-5 py-3">Responsable</th><th className="px-5 py-3">Fecha</th><th className="px-5 py-3">Acción</th></tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {recentBatches.map((batch) => (
@@ -349,6 +410,7 @@ export default function Index({ sources, recentBatches, selectedBatch }: ImportP
                                             <td className="px-5 py-3 text-xs"><span className="text-emerald-700">{batch.accepted_rows} aceptadas</span><br /><span className="text-rose-700">{batch.rejected_rows} rechazadas</span></td>
                                             <td className="px-5 py-3 text-xs text-slate-600">{batch.user ?? 'Sin registro'}</td>
                                             <td className="px-5 py-3 text-xs text-slate-600">{formatDate(batch.completed_at)}</td>
+                                            <td className="px-5 py-3"><Link href={route('imports.index', { batch: batch.id })} className="text-xs font-semibold text-blue-700 hover:underline">Ver detalle</Link></td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -357,6 +419,9 @@ export default function Index({ sources, recentBatches, selectedBatch }: ImportP
                     ) : (
                         <p className="p-6 text-sm text-slate-500">Aún no se han ejecutado importaciones controladas.</p>
                     )}
+                    <p className="border-t border-slate-100 px-5 py-4 text-xs leading-relaxed text-slate-500 sm:px-6">
+                        En los lotes sintéticos, los rechazos son casos de prueba deliberados —por ejemplo, duplicados, estados no válidos o coordenadas incompletas— y no provienen de registros reales.
+                    </p>
                 </section>
             </div>
         </AuthenticatedLayout>
