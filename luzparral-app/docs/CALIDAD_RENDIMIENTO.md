@@ -1,15 +1,16 @@
 # Calidad y rendimiento local
 
-Este documento registra la validación local acumulada hasta el Segmento 13.
+Este documento registra la validación local acumulada hasta el Segmento 19.
 Las mediciones usan exclusivamente datos sintéticos y no reemplazan la
 verificación posterior en el servidor Parra.
 
 ## Alcance validado
 
-- Filtros rápidos y calendario por día, mes, año o rango personalizado.
+- Filtros calendario por día, mes, año, rango personalizado o historial
+  completo; el rango personalizado es la selección inicial.
 - Aplicación consistente del período en dashboard, mapa, informes, CSV y PDF.
-- Dashboard, búsqueda operacional, registro de antecedentes, mapa, informes y
-  pronóstico autenticados.
+- Dashboard, búsqueda operacional, registro y mantenimiento administrativo de
+  antecedentes, mapa, informes, importaciones y pronóstico autenticados.
 - Windy aislado como dependencia externa y protegido por CSP.
 - Suite automatizada, compilación frontend y ejecución integral en Docker.
 - Carga autenticada de 5, 10 y 30 sesiones para operaciones ordinarias.

@@ -46,8 +46,12 @@ antecedente y origen. La aplicación no expone rutas para editar o eliminar
 eventos históricos.
 
 Los reportes de terreno agregados mediante RF06 también incorporan un evento
-manual en esta bitácora. Su contenido estructurado y sus evidencias se conservan
-en tablas separadas, según
+manual en esta bitácora. Administración puede editar o eliminar el registro
+estructurado mediante rutas controladas; cada operación agrega un nuevo evento
+manual y nunca modifica ni elimina los eventos históricos existentes. La
+edición conserva las evidencias y el informante original. La eliminación retira
+el antecedente y sus archivos privados después de una confirmación explícita,
+pero mantiene la constancia de auditoría. El detalle se describe en
 [`ANTECEDENTES_TERRENO.md`](ANTECEDENTES_TERRENO.md).
 
 ## Verificación

@@ -22,6 +22,17 @@ El registro crea además un evento manual en `contingency_history`. El
 antecedente y su entrada de trazabilidad se confirman dentro de la misma
 transacción.
 
+Administración puede corregir los datos estructurados de un antecedente. La
+edición conserva al informante original y las evidencias, comprueba que el
+registro no haya cambiado desde que se abrió el formulario y agrega un nuevo
+evento a la bitácora con el usuario administrador responsable.
+
+La eliminación requiere una confirmación explícita. El antecedente y sus
+metadatos de evidencia se eliminan de la base, los archivos se retiran del
+almacenamiento privado y la bitácora conserva un evento con la referencia, el
+avance y la descripción eliminados. Los eventos históricos no pueden editarse
+ni eliminarse desde la aplicación.
+
 ## Evidencias y seguridad
 
 Los archivos se almacenan en el disco privado `local`, bajo
@@ -36,20 +47,21 @@ ni coordenadas de clientes reales.
 ## Permisos
 
 - Administración, Supervisión y Operación pueden registrar antecedentes.
+- Solo Administración puede editar o eliminar antecedentes existentes.
 - Consulta puede revisar antecedentes y descargar sus evidencias, pero no
   crearlos.
-- No existen rutas para editar o eliminar reportes históricos desde la
-  interfaz.
 
-La autorización se aplica en middleware, en la solicitud validada y en la
-interfaz.
+La autorización se aplica en middleware, en las solicitudes validadas y en la
+interfaz. Editar o eliminar también exige que el antecedente pertenezca a la
+contingencia indicada en la ruta.
 
 ## Verificación
 
 `FieldReportTest` comprueba autenticación, roles, validación temporal y
 geográfica, creación conjunta de trazabilidad, carga privada, restricciones de
-tipo de archivo, descarga autenticada y ausencia de rutas privadas en las
-propiedades entregadas al navegador.
+tipo de archivo, descarga autenticada, edición exclusiva para Administración,
+control de concurrencia, conservación de evidencias, eliminación confirmada y
+permanencia del evento de auditoría.
 
 Para cerrar el segmento se ejecutan:
 

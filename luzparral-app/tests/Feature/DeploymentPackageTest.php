@@ -91,6 +91,8 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('filtros por dia, mes, año y rango', $deployment);
         $this->assertStringContainsString('pronostico Windy', $deployment);
         $this->assertStringContainsString('importacion controlada', $deployment);
+        $this->assertStringContainsString('explicar las', $deployment);
+        $this->assertStringContainsString('editar y eliminar', $deployment);
         $this->assertStringContainsString('mapa debe actualizar el area visible', $deployment);
         $this->assertStringContainsString('Pendiente exclusivamente en Parra', $handoff);
         $this->assertStringContainsString('puerto `2004`', $handoff);
@@ -98,6 +100,12 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('https://embed.windy.com', $handoff);
         $this->assertStringContainsString('Persistencia tras reinicio', $handoff);
         $this->assertStringContainsString('importación controlada', $handoff);
+        $this->assertStringContainsString('motivo de cada rechazo', $handoff);
+        $this->assertStringContainsString('Solo Administración puede editar o eliminar antecedentes', $handoff);
         $this->assertStringContainsString('agrupa marcadores', $handoff);
+        $this->assertStringContainsString('137 pruebas aprobadas y 1.434 aserciones', $handoff);
+        $this->assertStringContainsString('luzparral-app-f0a05a164686-linux-amd64.tar', $handoff);
+        $this->assertStringContainsString('quedan **obsoletos**', $handoff);
+        $this->assertStringContainsString('después del commit limpio de este segmento', $handoff);
     }
 }

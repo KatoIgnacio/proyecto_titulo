@@ -27,12 +27,12 @@ evaluación del profesor guía ni la validación con usuarios.
 
 | ID | HU | Alcance implementado | Pantalla o ruta | Evidencia automatizada | Estado |
 |---|---|---|---|---|---|
-| RF01 | HU01 | Importación controlada, previsualización, rechazo de duplicados y trazabilidad de lote | `/importaciones` | `ContingencyImportTest` | Verificado en local |
+| RF01 | HU01 | Importación controlada, previsualización, resultado parcial comprensible, causas de rechazo, prevención de duplicados y trazabilidad de lote | `/importaciones` | `ContingencyImportTest`, `OperationalInterfaceContentTest` | Verificado en local |
 | RF02 | HU02 | Indicadores, evolución, comunas y listado consolidado | `/dashboard` | `DashboardTest` | Verificado en local |
 | RF03 | HU03 | Filtros por día, mes, año, rango, comuna, alimentador, criticidad, estado y texto | Dashboard, mapa e informes | `CustomDateRangeTest`, `DashboardTest` | Verificado en local |
 | RF04 | HU04 | Mapa por área visible, agrupación de puntos y capas agregadas protegidas | `/contingencias/mapa` | `ContingencyMapTest` | Verificado en local |
 | RF05 | HU05 | Búsqueda paginada por contingencia, OSF, cliente y suministro sintéticos | `/buscador-operacional` | `OperationalSearchTest` | Verificado en local |
-| RF06 | HU06 | Registro de antecedentes de terreno y evidencias privadas | Detalle de contingencia | `FieldReportTest` | Verificado en local |
+| RF06 | HU06 | Registro de antecedentes y evidencias privadas; edición y eliminación administrativa con confirmación y auditoría | Detalle de contingencia | `FieldReportTest` | Verificado en local |
 | RF07 | HU07 | Secuencia de estados, control de concurrencia y bitácora histórica | Detalle de contingencia | `ContingencyStatusTransitionTest` | Verificado en local |
 | RF08 | HU08 | Informe completo, resumen gráfico y evolución; exportación CSV y PDF | `/informes` | `ContingencyReportTest` | Verificado en local |
 | RF09 | HU09 | Autenticación, cuentas activas y permisos por rol aplicados en backend | `/login` y módulos protegidos | `AuthenticationTest`, `RoleAuthorizationTest`, `ProductionSecurityTest` | Verificado en local |
@@ -46,7 +46,7 @@ evaluación del profesor guía ni la validación con usuarios.
 | RNF03 | Hasta 30 usuarios concurrentes manteniendo RNF01 | 360 solicitudes ordinarias con 30 sesiones, cero fallos y P95 máximo de 392,45 ms | Verificado en local |
 | RNF04 | Acceso autenticado y protegido | Pruebas de autenticación, sesión, encabezados y roles | Verificado en local |
 | RNF05 | Al menos 80 % de tareas principales sin ayuda directa del desarrollador | Guion, métrica y plantillas de evaluación | Preparado; no se declara cumplimiento sin participantes reales |
-| RNF06 | Trazabilidad de modificaciones | Historial atómico de estados, usuario responsable y antecedentes de terreno | Verificado en local |
+| RNF06 | Trazabilidad de modificaciones | Historial atómico de estados, usuario responsable y eventos permanentes ante edición o eliminación de antecedentes | Verificado en local |
 | RNF07 | Actualización y consistencia de la información | Transacciones de importación, prevención de duplicados y validaciones de integridad | Verificado en local |
 
 Las exportaciones PDF son operaciones intensivas y se miden por separado con un

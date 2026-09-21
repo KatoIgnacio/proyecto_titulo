@@ -107,7 +107,9 @@ indispensable, pero no modifica la base. Ademas de los comandos, se deben probar
 manualmente inicio de sesion, dashboard, filtros por dia, mes, año y rango,
 mapa, detalle, busqueda, pronostico Windy y las tres variantes de informe. La
 importacion controlada debe permitir descargar la plantilla, previsualizar un
-lote sintetico y confirmar el resultado sin duplicar codigos. La
+lote sintetico, confirmar el resultado sin duplicar codigos y explicar las
+filas rechazadas. En el detalle, Administracion debe poder editar y eliminar
+antecedentes con confirmacion y constancia en la bitacora. La
 busqueda protegida de cliente y suministro debe respetar los perfiles, y el
 mapa debe actualizar el area visible, agrupar marcadores y permitir activar las
 capas de zonas criticas y electrodependientes. La

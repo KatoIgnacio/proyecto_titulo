@@ -29,6 +29,8 @@ class AcademicTraceabilityDocumentationTest extends TestCase
 
         $this->assertStringContainsString('392,45 ms', $contents);
         $this->assertStringContainsString('resultados reales pendientes', $contents);
+        $this->assertStringContainsString('resultado parcial comprensible', $contents);
+        $this->assertStringContainsString('edición y eliminación administrativa', $contents);
     }
 
     public function test_user_validation_protocol_defines_the_metric_and_protects_participants(): void

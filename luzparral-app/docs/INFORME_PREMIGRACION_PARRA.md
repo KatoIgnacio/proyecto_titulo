@@ -22,8 +22,11 @@ institucional aprobado.
 - Las operaciones ordinarias se midieron con 5, 10 y 30 sesiones concurrentes,
   sin fallos y con un peor P95 local de 392,45 ms frente al límite de 3.000 ms.
 - La importación controlada permite validar archivos sintéticos antes de
-  escribir, registra aceptaciones y rechazos, evita duplicados y revierte el
-  lote completo ante un fallo inesperado.
+  escribir, distingue las filas incorporadas de las rechazadas, explica sus
+  causas, evita duplicados y revierte el lote completo ante un fallo inesperado.
+- Administración puede editar y eliminar antecedentes de terreno con
+  confirmación; la bitácora conserva la autoría y el contenido relevante de
+  cada operación, mientras las evidencias permanecen privadas.
 - El buscador pagina contingencias y protege las consultas de identificadores
   sintéticos. El mapa consulta el área visible, agrupa marcadores y expone zonas
   críticas o electrodependientes únicamente como agregados autorizados.
@@ -34,6 +37,30 @@ institucional aprobado.
   puerto `2003`, comprueban la salud y conservan una ruta de reversión.
 - La matriz académica y el protocolo de usuarios separan los requisitos
   verificados de RNF05 y OE4, que requieren evaluación empírica autorizada.
+
+## Verificación local del segmento 19
+
+La revisión ejecutada el 20 de septiembre de 2026 cerró la integración local
+con los siguientes resultados:
+
+- `composer validate --strict`, Pint y la construcción de producción con Vite
+  finalizaron correctamente;
+- la suite completa registró **137 pruebas aprobadas y 1.434 aserciones**;
+- `deploy/VALIDAR_INTEGRACION_LOCAL.ps1` aprobó migraciones, generación e
+  integridad de 360 contingencias sintéticas, autenticación, módulos HTTP y
+  exportaciones CSV/PDF sobre MySQL 8.4;
+- las pruebas de autorización recorrieron Administración, Supervisión,
+  Operación y Consulta, incluidas las restricciones de importación, búsqueda y
+  mantenimiento de antecedentes;
+- la inspección visual verificó dashboard, mapa, detalle, buscador, informes e
+  importaciones. Confirmó el rango personalizado, la ausencia de los cuatro
+  períodos rápidos retirados, los controles Editar/Eliminar para
+  Administración y el detalle de filas rechazadas.
+
+El paquete `luzparral-app-f0a05a164686-linux-amd64.tar` y sus archivos
+adyacentes quedan **obsoletos** porque anteceden a los segmentos 15 a 19. No se
+deben transferir a Parra. El único candidato institucional será el paquete que
+genere `deploy/EXPORTAR_IMAGEN.ps1` después del commit limpio de este segmento.
 
 ## Archivos que se transferirán
 
@@ -109,6 +136,11 @@ No promover a producción hasta marcar todos los controles:
 - [ ] Administración y Supervisión pueden previsualizar e importar la plantilla
       sintética; Operación y Consulta reciben acceso denegado.
 - [ ] Un código repetido queda rechazado y no crea otra contingencia.
+- [ ] Los lotes parciales indican cuántas filas se incorporaron y permiten
+      revisar el motivo de cada rechazo.
+- [ ] Solo Administración puede editar o eliminar antecedentes; Supervisión,
+      Operación y Consulta reciben acceso denegado y la bitácora conserva el
+      evento correspondiente.
 - [ ] Los informes completo, resumen gráfico y evolución se generan.
 - [ ] CSV y PDF conservan los filtros aplicados.
 - [ ] Windy carga cuando existe salida a Internet y su falla no bloquea el resto.

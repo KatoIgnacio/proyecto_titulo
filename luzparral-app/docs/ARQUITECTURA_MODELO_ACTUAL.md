@@ -1,7 +1,7 @@
 # Arquitectura y modelo de información vigentes
 
 Este documento representa la solución implementada al cierre local del
-Segmento 13. Complementa el diseño conceptual del anteproyecto con las
+Segmento 19. Complementa el diseño conceptual del anteproyecto con las
 decisiones necesarias para seguridad, trazabilidad, importación y despliegue.
 
 ## Vista de componentes
@@ -35,7 +35,7 @@ no forma parte de la imagen de aplicación.
 | Consulta y filtros | Consultas paginadas, filtros comunes y rangos calendario |
 | Dashboard | Agregaciones operativas, evolución y distribución comunal |
 | Georreferenciación | Leaflet, consulta por área visible y agrupación de marcadores |
-| Reportes de terreno | Antecedentes, georreferencia opcional y archivos privados |
+| Reportes de terreno | Antecedentes, georreferencia opcional, archivos privados y mantenimiento administrativo auditado |
 | Informes | Consulta consolidada y exportaciones CSV/PDF en tres modalidades |
 | Importación | Previsualización, validación, lotes, errores y persistencia atómica |
 

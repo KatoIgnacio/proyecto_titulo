@@ -46,8 +46,10 @@ futuro la generación asíncrona si crece la demanda.
 - Calendario por día, mes, año o rango y filtros comunes entre módulos.
 - Mapa escalable con selección, agrupación y capas agregadas protegidas.
 - Búsqueda paginada por referencias operativas y códigos sintéticos.
-- Detalle con evolución temporal, cambio de estado y antecedentes de terreno.
-- Importación previsualizada, transaccional y auditable.
+- Detalle con evolución temporal, cambio de estado y antecedentes de terreno;
+  Administración puede corregirlos o eliminarlos con confirmación y auditoría.
+- Importación previsualizada, transaccional y auditable, con resultados
+  parciales y causas de rechazo explicadas en la interfaz.
 - Informes completo, resumen gráfico y evolución, con exportación filtrada.
 - Roles en backend, cuentas activas, archivos privados y diagnóstico de salud.
 - Contenedorización reproducible y proceso de promoción 2004 a 2003 con
