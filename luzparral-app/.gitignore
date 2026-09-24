@@ -20,7 +20,7 @@ yarn-error.log
 *.tar.gz
 /backups
 /artifacts
-/deploy/parra/parra.env
+/deploy/parra/*.env
 /deploy/parra/.state
 /auth.json
 luzparral-users*.json

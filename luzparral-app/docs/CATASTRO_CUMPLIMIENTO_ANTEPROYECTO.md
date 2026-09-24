@@ -18,10 +18,19 @@ externa que todavía no corresponde fabricar.
 | RNF06-RNF07 | Trazabilidad, consistencia e importación atómica verificadas |
 | OE1-OE3 | Materializados en levantamiento, modelo, requisitos e implementación |
 | OE4 | Preparado; exige sesiones reales autorizadas con usuarios |
-| Despliegue Parra | Paquete y procedimiento preparados; staging 2004 y producción 2003 pendientes |
+| Despliegue Parra | Servidor inspeccionado y paquete con MySQL privado preparado; staging 2004 y producción 2003 pendientes |
 
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
+
+## Evidencia técnica del Segmento 20
+
+El 24 de septiembre de 2026 se repitió el ensayo integral con MySQL 8.4.11 y
+una topología equivalente a Parra: base únicamente en red interna y aplicación
+en redes de datos y entrada. Se aprobaron 139 pruebas con 1.482 aserciones, la
+construcción de producción y el recorrido HTTP completo. El servidor ya fue
+confirmado como `x86_64`, Podman 5.8.2 rootless, `Linger=yes`, puertos libres y
+espacio suficiente. Falta transferir y aceptar staging en el entorno real.
 
 ## Evidencia técnica del Segmento 13
 

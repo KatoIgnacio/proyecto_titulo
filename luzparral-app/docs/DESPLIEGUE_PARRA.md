@@ -1,156 +1,242 @@
-# Paquete de despliegue para Parra
+# Despliegue de SIGCEL en Parra
 
-Este procedimiento prepara la migracion sin asumir acceso administrativo al
-servidor. El puerto `2004` se utiliza para validar una version candidata y el
-puerto `2003` para la version estable.
+Este procedimiento publica primero una versión candidata en el puerto `2004` y
+reserva `2003` para producción. MySQL 8.4 se ejecuta en la misma cuenta como un
+contenedor rootless separado, con volumen persistente y sin publicar `3306`.
 
-## Limites de este segmento
+## Estado comprobado del servidor
 
-El paquete queda construido y verificable en local, pero no demuestra todavia:
+La inspección realizada con la cuenta institucional confirmó:
 
-- conectividad desde Parra hacia MySQL institucional;
-- arquitectura y version exacta de Podman disponibles en Parra;
-- apertura externa efectiva de los puertos `2003` y `2004`;
-- persistencia de contenedores despues de un reinicio del servidor;
-- disponibilidad de HTTPS, SMTP, cuota de disco y politica de respaldos.
+- arquitectura `x86_64` y espacio disponible suficiente en `/home`;
+- Podman `5.8.2` en modo `Rootless=true`;
+- `Linger=yes`, necesario para persistencia de servicios del usuario;
+- puertos `2003` y `2004` libres;
+- ausencia de contenedores e imágenes previas en la cuenta.
 
-Estas comprobaciones requieren acceso al servidor y se registraran durante la
-migracion. Ningun script de este paquete ejecuta migraciones de base de datos.
+Todavía deben comprobarse durante el despliegue la apertura externa de los
+puertos, el reinicio efectivo de contenedores y la salida del navegador hacia
+OpenStreetMap y Windy.
 
-## 1. Generar el artefacto en Windows
+## Arquitectura resultante
 
-El repositorio debe estar sin cambios pendientes. Desde PowerShell:
+- Una instancia `mysql:8.4.11` llamada `luzparral-mysql`.
+- Un volumen `luzparral-mysql-data` que no se elimina al recrear el contenedor.
+- Una red `luzparral-private` creada con `--internal`, utilizada por MySQL y
+  las aplicaciones.
+- Una red `luzparral-edge`, utilizada solo por las aplicaciones para publicar
+  `2004` y `2003`.
+- Bases y usuarios distintos: `sigcel_staging` y `sigcel_production`.
+- Aplicaciones separadas, con sus propios archivos privados y volúmenes de
+  `storage`.
+- MySQL se conecta solo a la red privada. Solo `2004` y `2003` se publican en
+  el host; MySQL no utiliza `--publish`.
+
+Las razones y escenarios de calidad se documentan en
+[`DECISIONES_ARQUITECTURA_DESPLIEGUE.md`](DECISIONES_ARQUITECTURA_DESPLIEGUE.md).
+
+## 1. Crear el paquete local después del commit
+
+El repositorio debe estar limpio. Desde PowerShell, en `luzparral-app`:
 
 ```powershell
 .\deploy\EXPORTAR_IMAGEN.ps1
 ```
 
-El script construye una imagen etiquetada con el commit actual y crea en
-`artifacts/` tres archivos:
+El comando construye la aplicación y exporta dos imágenes Linux `amd64`:
 
-- la imagen Linux en formato `tar`;
-- su suma SHA-256 en `.tar.sha256`;
-- metadatos con imagen, commit, plataforma y fecha en `.tar.metadata.json`.
+- `luzparral-app-COMMIT-linux-amd64.tar`;
+- `mysql-8.4.11-linux-amd64.tar`.
 
-`artifacts/` esta ignorado por Git. No se deben incluir `.env`, credenciales,
-respaldos ni datos CIOP en la transferencia.
+Cada TAR posee un `.sha256` y un `.metadata.json`. No utilizar el paquete
+antiguo `luzparral-app-f0a05a164686-linux-amd64.tar`.
 
 ## 2. Transferir con FileZilla
 
-Conectarse por SFTP a `parra.chillan.ubiobio.cl` en el puerto `22` y transferir:
-
-- los tres archivos generados en `artifacts/`;
-- `deploy/parra/load-image.sh`;
-- `deploy/parra/deploy.sh`;
-- `deploy/parra/verify.sh`;
-- `deploy/parra/parra.env.example`.
-
-Una estructura sugerida dentro de la cuenta institucional es:
+Conectar por SFTP a `parra.chillan.ubiobio.cl`, puerto `22`, y organizar:
 
 ```text
 ~/luzparral/
 |-- artifacts/
+|-- backups/
 |-- config/
 `-- scripts/
 ```
 
-## 3. Comprobar el servidor antes de desplegar
+Transferir a `artifacts/` los dos TAR y sus archivos adyacentes. Transferir a
+`scripts/`:
+
+- `load-image.sh`;
+- `database.sh`;
+- `backup-database.sh`;
+- `restore-database.sh`;
+- `test-backup-restore.sh`;
+- `deploy.sh`;
+- `verify.sh`;
+- `initialize-staging.sh`.
+
+Transferir temporalmente a `config/` las plantillas `mysql.env.example`,
+`parra.env.example`, `parra-production.env.example` y
+`staging-seed.env.example`. Las plantillas no contienen claves.
+
+## 3. Preparar permisos y cargar las imágenes
+
+En la sesión SSH:
 
 ```bash
-uname -m
-podman --version
-podman info
-df -h
-```
-
-La arquitectura informada por `uname -m` debe corresponder con la indicada en
-el archivo de metadatos. La imagen local validada actualmente es `linux/amd64`,
-que normalmente aparece como `x86_64` en Linux.
-
-## 4. Crear la configuracion privada
-
-Crear un archivo independiente para staging y otro para produccion:
-
-```bash
-cp parra.env.example ~/luzparral/config/parra-staging.env
-cp parra.env.example ~/luzparral/config/parra-production.env
-chmod 600 ~/luzparral/config/parra-staging.env
-chmod 600 ~/luzparral/config/parra-production.env
-```
-
-Reemplazar todos los marcadores `REEMPLAZAR_*`. En staging, `APP_URL` debe usar
-el puerto `2004`; en produccion debe usar `2003`. Las credenciales no se agregan
-al repositorio ni se incluyen en capturas. `APP_KEY` se puede generar localmente
-con `php artisan key:generate --show` y debe copiarse de forma privada.
-
-## 5. Verificar y cargar la imagen
-
-```bash
+mkdir -p ~/luzparral/{artifacts,backups,config,scripts}
+chmod 700 ~/luzparral/config ~/luzparral/backups
 chmod 755 ~/luzparral/scripts/*.sh
-~/luzparral/scripts/load-image.sh ~/luzparral/artifacts/NOMBRE_IMAGEN.tar
-podman images luzparral-app
+
+~/luzparral/scripts/load-image.sh ~/luzparral/artifacts/mysql-8.4.11-linux-amd64.tar
+~/luzparral/scripts/load-image.sh ~/luzparral/artifacts/luzparral-app-COMMIT-linux-amd64.tar
+podman images
 ```
 
-`load-image.sh` detiene el proceso si el SHA-256 no coincide. Podman puede cargar
-directamente el archivo generado por `docker save`.
+`load-image.sh` detiene la carga si la suma SHA-256 no coincide.
 
-## 6. Publicar primero en staging
+## 4. Crear las configuraciones privadas
 
 ```bash
-~/luzparral/scripts/deploy.sh staging luzparral-app:TAG_COMMIT ~/luzparral/config/parra-staging.env
-~/luzparral/scripts/verify.sh staging
+cp ~/luzparral/config/mysql.env.example ~/luzparral/config/mysql.env
+cp ~/luzparral/config/parra.env.example ~/luzparral/config/parra-staging.env
+cp ~/luzparral/config/parra-production.env.example ~/luzparral/config/parra-production.env
+cp ~/luzparral/config/staging-seed.env.example ~/luzparral/config/staging-seed.env
+chmod 600 ~/luzparral/config/*.env
+```
+
+Editar los cuatro archivos y reemplazar todos los valores `REEMPLAZAR_*`. Las
+claves MySQL deben tener al menos 24 caracteres y usar letras, números, punto,
+guion, guion bajo o virgulilla. Se recomienda generarlas con un gestor de
+contraseñas. No pegarlas en correos, capturas, Git ni comandos de chat.
+
+Las correspondencias deben ser exactas:
+
+| Archivo de aplicación | Base/usuario/clave en `mysql.env` |
+| --- | --- |
+| `parra-staging.env` | `MYSQL_STAGING_DATABASE`, `MYSQL_STAGING_USER`, `MYSQL_STAGING_PASSWORD` |
+| `parra-production.env` | `MYSQL_PRODUCTION_DATABASE`, `MYSQL_PRODUCTION_USER`, `MYSQL_PRODUCTION_PASSWORD` |
+
+`APP_KEY` debe ser distinta en cada entorno. Puede generarse localmente con
+`php artisan key:generate --show`. Mientras la URL use HTTP,
+`SESSION_SECURE_COOKIE=false`; con HTTPS debe cambiarse a `true`.
+
+## 5. Iniciar MySQL privado
+
+```bash
+~/luzparral/scripts/database.sh start mysql:8.4.11 ~/luzparral/config/mysql.env
+~/luzparral/scripts/database.sh status
+```
+
+El segundo comando debe mostrar `healthy`, red interna, que MySQL no está unido
+a la red de entrada y `Puerto 3306: no publicado`. No se debe agregar
+`-p 3306:3306` ni una regla de firewall para MySQL.
+
+## 6. Desplegar staging en 2004
+
+```bash
+~/luzparral/scripts/deploy.sh \
+  staging \
+  luzparral-app:TAG_COMMIT \
+  ~/luzparral/config/parra-staging.env \
+  ~/luzparral/config/mysql.env
+```
+
+El script valida las configuraciones, crea un respaldo, detiene brevemente la
+versión anterior si existe, ejecuta `php artisan migrate --force` en un
+contenedor efímero y publica la nueva imagen. Si la migración falla, vuelve a
+iniciar la aplicación anterior. Si falla `/up`, revierte su imagen; una
+reversión de esquema se realiza únicamente mediante un respaldo verificado.
+
+En el primer despliegue, inicializar una sola vez el conjunto de demostración:
+
+```bash
+~/luzparral/scripts/initialize-staging.sh \
+  ~/luzparral/config/parra-staging.env \
+  ~/luzparral/config/staging-seed.env
+
+rm ~/luzparral/config/staging-seed.env
+```
+
+El generador se niega a reemplazar información no reconocida. Staging debe
+contener exclusivamente datos sintéticos.
+
+## 7. Verificación técnica y funcional
+
+```bash
+~/luzparral/scripts/verify.sh staging --database
+podman ps
+podman port luzparral-mysql
+```
+
+El último comando no debe imprimir nada. Desde otro equipo abrir:
+
+`http://parra.chillan.ubiobio.cl:2004`
+
+La aceptación manual debe revisar inicio y cierre de sesión, dashboard,
+**filtros por dia, mes, año y rango**, mapa, detalle, búsqueda, pronostico
+Windy y los tres informes. La importacion controlada debe permitir previsualizar
+el lote sintético, confirmar sin duplicar códigos y **explicar las** causas de
+rechazo. Administración debe poder **editar y eliminar** antecedentes con
+confirmación y bitácora. El **mapa debe actualizar el area visible**, agrupar
+marcadores y conservar las capas agregadas autorizadas.
+
+## 8. Probar respaldo y restauración sin alterar staging
+
+Generar un respaldo manual y tomar la ruta informada:
+
+```bash
+~/luzparral/scripts/backup-database.sh \
+  staging \
+  ~/luzparral/config/mysql.env \
+  ~/luzparral/backups
+
+~/luzparral/scripts/test-backup-restore.sh \
+  staging \
+  ~/luzparral/backups/staging-FECHA.sql
+```
+
+El ensayo verifica SHA-256, restaura en una base temporal, cuenta sus tablas y
+la elimina. No modifica `sigcel_staging`.
+
+`restore-database.sh` queda reservado para una recuperación real: exige la
+aplicación detenida, metadatos coincidentes, checksum válido y destino vacío.
+Nunca elimina tablas ni ejecuta `migrate:fresh`.
+
+## 9. Probar persistencia
+
+Sin reiniciar el servidor completo durante horario no autorizado, se puede
+validar primero el reinicio de contenedores:
+
+```bash
+podman restart luzparral-mysql luzparral-staging
 ~/luzparral/scripts/verify.sh staging --database
 ```
 
-La ultima comprobacion valida la conexion MySQL y la presencia del esquema
-indispensable, pero no modifica la base. Ademas de los comandos, se deben probar
-manualmente inicio de sesion, dashboard, filtros por dia, mes, año y rango,
-mapa, detalle, busqueda, pronostico Windy y las tres variantes de informe. La
-importacion controlada debe permitir descargar la plantilla, previsualizar un
-lote sintetico, confirmar el resultado sin duplicar codigos y explicar las
-filas rechazadas. En el detalle, Administracion debe poder editar y eliminar
-antecedentes con confirmacion y constancia en la bitacora. La
-busqueda protegida de cliente y suministro debe respetar los perfiles, y el
-mapa debe actualizar el area visible, agrupar marcadores y permitir activar las
-capas de zonas criticas y electrodependientes. La
-lectura de respuestas 503 y logs se documenta en
-[`DIAGNOSTICO_OPERATIVO.md`](DIAGNOSTICO_OPERATIVO.md).
+La comprobación definitiva tras reinicio del servidor debe coordinarse con la
+Universidad y registrarse como evidencia.
 
-Después de preparar la base y antes de probar el inicio de sesión, se deben
-aprovisionar las cinco cuentas siguiendo
-[`SEGURIDAD_OPERATIVA.md`](SEGURIDAD_OPERATIVA.md). No se ejecutan seeders en
-Parra y la recuperación web permanece deshabilitada mientras no exista SMTP.
+## 10. Promover a producción en el puerto `2003`
 
-## 7. Promover al puerto estable
-
-Solo despues de aprobar staging:
+Solo después de aprobar staging:
 
 ```bash
-~/luzparral/scripts/deploy.sh production luzparral-app:TAG_COMMIT ~/luzparral/config/parra-production.env
+~/luzparral/scripts/deploy.sh \
+  production \
+  luzparral-app:TAG_COMMIT \
+  ~/luzparral/config/parra-production.env \
+  ~/luzparral/config/mysql.env
+
 ~/luzparral/scripts/verify.sh production --database
 ```
 
-Cada entorno usa un volumen persistente diferente para `storage`. Si la nueva
-version no responde en `/up`, el script intenta restaurar automaticamente la
-imagen anterior. Una reversion manual tambien se realiza ejecutando `deploy.sh`
-con el tag anterior.
+Producción se crea vacía mediante migraciones. No se ejecuta el generador
+sintético ni seeders. Las cuentas autorizadas se aprovisionan con el mecanismo
+descrito en [`SEGURIDAD_OPERATIVA.md`](SEGURIDAD_OPERATIVA.md).
 
-## Alternativa: construir en Parra
+## Límites antes de uso empresarial
 
-Si el servidor tiene acceso saliente a los repositorios de Debian, Composer y
-npm, se puede transferir el codigo y ejecutar:
-
-```bash
-podman build --pull --tag luzparral-app:TAG_COMMIT --file Containerfile .
-```
-
-La transferencia de la imagen ya construida es preferible mientras esa salida a
-Internet no este confirmada.
-
-## Criterio de cierre y pendientes institucionales
-
-El estado comprobado localmente, la aceptación de staging y las verificaciones
-que requieren acceso al servidor se consolidan en
-[`INFORME_PREMIGRACION_PARRA.md`](INFORME_PREMIGRACION_PARRA.md). El paquete no
-debe declararse productivo hasta completar esa lista en el entorno
-institucional.
+Hasta disponer de HTTPS, política institucional de copias externas y cuentas
+reales autorizadas, la instancia debe tratarse como demostración académica. El
+despliegue universitario no equivale al despliegue definitivo dentro de la
+empresa.

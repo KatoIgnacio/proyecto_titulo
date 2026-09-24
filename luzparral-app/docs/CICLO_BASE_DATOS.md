@@ -139,8 +139,12 @@ tener migraciones pendientes.
 
 ## Aplicacion al servidor institucional
 
-En Parra se debe confirmar primero si la universidad ya realiza respaldos de la
-base MySQL y si la cuenta asignada posee permisos para `mysqldump`. Ninguna
-migracion institucional se ejecutara antes de obtener y comprobar un respaldo.
-Las cuentas finales se crean mediante el procedimiento de
+Parra utiliza MySQL 8.4 en un contenedor rootless privado. `deploy.sh` invoca
+`backup-database.sh` antes de cada migracion y cancela si el respaldo falla. El
+archivo SQL queda acompañado por SHA-256 y metadatos; `test-backup-restore.sh`
+lo restaura en una base temporal y la elimina al finalizar.
+
+`restore-database.sh` se reserva para recuperacion real: exige checksum y
+metadatos coincidentes, aplicacion detenida y destino sin tablas. Nunca elimina
+el esquema activo. Las cuentas finales se crean mediante
 [`SEGURIDAD_OPERATIVA.md`](SEGURIDAD_OPERATIVA.md), nunca mediante seeders.

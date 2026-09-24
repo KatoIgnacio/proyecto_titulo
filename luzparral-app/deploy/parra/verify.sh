@@ -21,6 +21,10 @@ case "$1" in
         ;;
 esac
 
+script_directory=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+network_name=luzparral-private
+edge_network_name=luzparral-edge
+
 database_check=${2:-}
 if [[ -n "$database_check" && "$database_check" != --database ]]; then
     echo "Opcion invalida: $database_check" >&2
@@ -38,6 +42,18 @@ for command_name in curl grep; do
         exit 69
     fi
 done
+
+"$script_directory/database.sh" status >/dev/null
+
+application_networks=$(podman inspect --format '{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}' "$container_name")
+if ! grep --fixed-strings --line-regexp --quiet "$network_name" <<< "$application_networks"; then
+    echo "ERROR: $container_name no esta conectado a la red privada $network_name." >&2
+    exit 1
+fi
+if ! grep --fixed-strings --line-regexp --quiet "$edge_network_name" <<< "$application_networks"; then
+    echo "ERROR: $container_name no esta conectado a la red de entrada $edge_network_name." >&2
+    exit 1
+fi
 
 container_state=$(podman inspect --format '{{.State.Status}}' "$container_name")
 container_health=$(podman inspect --format '{{.State.Health.Status}}' "$container_name")
@@ -67,6 +83,7 @@ fi
 echo "Aplicacion: OK"
 echo "Contenedor: $container_state / $container_health"
 echo "Puerto: $host_port -> 8080"
+echo "MySQL: red privada verificada; 3306 no publicado"
 echo "Encabezados y recuperacion web: OK"
 
 if [[ "$database_check" == --database ]]; then

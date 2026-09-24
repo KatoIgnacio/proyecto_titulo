@@ -56,7 +56,7 @@ sin reemplazar sus marcadores.
 
 La imagen compatible con Docker y Podman y su ejecución local están descritas en
 [`docs/CONTENEDORES.md`](docs/CONTENEDORES.md).
-Esa guía incluye el ensayo integral aislado con Docker, MySQL 8.4.9 y el
+Esa guía incluye el ensayo integral aislado con Docker, MySQL 8.4.11 y el
 conjunto sintético completo.
 
 Los escenarios de migración, generación sintética, respaldo, restauración y
@@ -69,6 +69,9 @@ protecciones de sesión están documentados en
 La exportación verificable de la imagen y el procedimiento para los puertos
 institucionales `2003` y `2004` están documentados en
 [`docs/DESPLIEGUE_PARRA.md`](docs/DESPLIEGUE_PARRA.md).
+La instancia MySQL 8.4 de Parra permanece en una red interna sin publicar
+`3306`; sus decisiones y escenarios de calidad se justifican en
+[`docs/DECISIONES_ARQUITECTURA_DESPLIEGUE.md`](docs/DECISIONES_ARQUITECTURA_DESPLIEGUE.md).
 El cierre local y los controles que solo pueden resolverse dentro del servidor
 se separan en
 [`docs/INFORME_PREMIGRACION_PARRA.md`](docs/INFORME_PREMIGRACION_PARRA.md).

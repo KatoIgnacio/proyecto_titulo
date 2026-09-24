@@ -11,13 +11,27 @@ class ContainerIntegrationConfigurationTest extends TestCase
         $contents = file_get_contents(base_path('compose.integration.yaml'));
 
         $this->assertIsString($contents);
-        $this->assertStringContainsString('image: mysql:8.4.9', $contents);
+        $this->assertStringContainsString('image: mysql:8.4.11', $contents);
         $this->assertStringContainsString('DB_HOST: db', $contents);
         $this->assertStringContainsString('condition: service_healthy', $contents);
         $this->assertStringContainsString('127.0.0.1:8080:8080', $contents);
         $this->assertStringNotContainsString('3306:3306', $contents);
+        $this->assertStringContainsString('internal: true', $contents);
         $this->assertStringContainsString('LOG_CHANNEL: stderr_json', $contents);
         $this->assertStringContainsString('SESSION_ENCRYPT: "true"', $contents);
+
+        $databaseSection = substr(
+            $contents,
+            strpos($contents, '  db:'),
+            strpos($contents, '  app:') - strpos($contents, '  db:'),
+        );
+        $applicationStart = strpos($contents, '  app:');
+        $rootVolumesStart = strpos($contents, "\nvolumes:", $applicationStart);
+        $applicationSection = substr($contents, $applicationStart, $rootVolumesStart - $applicationStart);
+        $this->assertStringContainsString('- integration-private', $databaseSection);
+        $this->assertStringNotContainsString('- integration-edge', $databaseSection);
+        $this->assertStringContainsString('- integration-private', $applicationSection);
+        $this->assertStringContainsString('- integration-edge', $applicationSection);
     }
 
     public function test_integration_script_uses_ephemeral_secrets_and_complete_checks(): void

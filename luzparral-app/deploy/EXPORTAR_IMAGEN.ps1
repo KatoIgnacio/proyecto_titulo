@@ -3,7 +3,9 @@ param(
     [string] $Repository = 'luzparral-app',
     [string] $Tag = '',
     [string] $OutputDirectory = '',
+    [string] $DatabaseImage = 'mysql:8.4.11',
     [switch] $SkipBuild,
+    [switch] $SkipDatabaseExport,
     [switch] $AllowDirty
 )
 
@@ -93,6 +95,51 @@ try {
     Write-Output "Archivo: $archivePath"
     Write-Output "SHA-256: $($hash.Hash.ToLowerInvariant())"
     Write-Output "Plataforma: $operatingSystem/$architecture"
+
+    if (-not $SkipDatabaseExport) {
+        & docker image inspect $DatabaseImage *> $null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Output "Descargando la imagen de base de datos $DatabaseImage..."
+            & docker pull $DatabaseImage
+            if ($LASTEXITCODE -ne 0) {
+                throw "No fue posible descargar $DatabaseImage."
+            }
+        }
+
+        $databaseOperatingSystem = (& docker image inspect $DatabaseImage --format '{{.Os}}').Trim()
+        $databaseArchitecture = (& docker image inspect $DatabaseImage --format '{{.Architecture}}').Trim()
+        if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($databaseArchitecture)) {
+            throw "La imagen $DatabaseImage no se puede inspeccionar."
+        }
+
+        $safeDatabaseReference = $DatabaseImage -replace '[^A-Za-z0-9_.-]', '-'
+        $databaseFileName = "$safeDatabaseReference-$databaseOperatingSystem-$databaseArchitecture.tar"
+        $databaseArchivePath = Join-Path $resolvedOutputDirectory $databaseFileName
+        & docker save --output $databaseArchivePath $DatabaseImage
+        if ($LASTEXITCODE -ne 0) {
+            throw 'La exportacion de la imagen MySQL fallo.'
+        }
+
+        $databaseHash = Get-FileHash -Algorithm SHA256 -LiteralPath $databaseArchivePath
+        $databaseChecksumPath = "$databaseArchivePath.sha256"
+        $databaseChecksumLine = "$($databaseHash.Hash.ToLowerInvariant())  $databaseFileName`n"
+        [System.IO.File]::WriteAllText($databaseChecksumPath, $databaseChecksumLine, [System.Text.Encoding]::ASCII)
+
+        $databaseMetadata = [ordered]@{
+            image = $DatabaseImage
+            role = 'private-database'
+            os = $databaseOperatingSystem
+            architecture = $databaseArchitecture
+            sha256 = $databaseHash.Hash.ToLowerInvariant()
+            created_at_utc = [DateTime]::UtcNow.ToString('o')
+        }
+        $databaseMetadata | ConvertTo-Json | Set-Content -Encoding utf8 -Path "$databaseArchivePath.metadata.json"
+
+        Write-Output "Imagen MySQL: $DatabaseImage"
+        Write-Output "Archivo MySQL: $databaseArchivePath"
+        Write-Output "SHA-256 MySQL: $($databaseHash.Hash.ToLowerInvariant())"
+        Write-Output "Plataforma MySQL: $databaseOperatingSystem/$databaseArchitecture"
+    }
 }
 finally {
     Pop-Location

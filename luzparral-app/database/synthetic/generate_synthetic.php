@@ -99,12 +99,12 @@ $supplyPointCount = max(500, (int) ($options['supply-points'] ?? DEFAULT_SUPPLY_
 $contingencyCount = max(50, (int) ($options['contingencies'] ?? DEFAULT_CONTINGENCIES));
 $reset = array_key_exists('reset', $options);
 
-$host = envValue('LUZPARRAL_DB_HOST', '127.0.0.1');
-$port = envValue('LUZPARRAL_DB_PORT', '3306');
-$database = envValue('LUZPARRAL_DB_DATABASE', 'luzparral');
-$allowedDatabase = envValue('LUZPARRAL_DB_ALLOWED_DATABASE', 'luzparral');
-$username = envValue('LUZPARRAL_DB_USERNAME', 'luzparral_app');
-$password = envValue('LUZPARRAL_DB_PASSWORD');
+$host = envValue('LUZPARRAL_DB_HOST', envValue('DB_HOST', '127.0.0.1'));
+$port = envValue('LUZPARRAL_DB_PORT', envValue('DB_PORT', '3306'));
+$database = envValue('LUZPARRAL_DB_DATABASE', envValue('DB_DATABASE', 'luzparral'));
+$allowedDatabase = envValue('LUZPARRAL_DB_ALLOWED_DATABASE', $database);
+$username = envValue('LUZPARRAL_DB_USERNAME', envValue('DB_USERNAME', 'luzparral_app'));
+$password = envValue('LUZPARRAL_DB_PASSWORD', envValue('DB_PASSWORD'));
 $demoPassword = envValue('LUZPARRAL_DEMO_PASSWORD');
 
 if ($password === null) {

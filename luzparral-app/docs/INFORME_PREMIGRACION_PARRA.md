@@ -1,164 +1,151 @@
 # Informe de cierre local y premigración a Parra
 
-Este documento delimita qué está terminado y reproducible en el equipo local y
-qué debe comprobarse todavía en la infraestructura de la Universidad del
-Bío-Bío. Una compilación local correcta no equivale por sí sola a un despliegue
-institucional aprobado.
+Este informe distingue lo reproducible en local, lo comprobado mediante acceso
+SSH a Parra y lo que solo puede cerrarse después de publicar staging. El
+despliegue institucional sigue siendo académico y utiliza datos sintéticos.
 
 ## Estado cerrado en local
 
-- La aplicación se construye como una imagen Linux `amd64` compatible con
-  Docker y destinada a ejecución rootless con Podman.
-- El ensayo integral crea una base MySQL 8.4.9 aislada, aplica migraciones,
-  genera el conjunto sintético, valida el esquema y recorre los módulos
-  autenticados sin utilizar información operacional real.
-- Dashboard, mapa, detalle, búsqueda e informes comparten los filtros de
-  período. Se verificaron las selecciones por día, mes, año y rango, incluida
-  su conservación en las exportaciones CSV y PDF.
-- El pronóstico Windy está aislado como dependencia externa. Una falla de Windy
-  no impide consultar los módulos respaldados por MySQL.
-- Los roles, cuentas inactivas, recuperación sin SMTP, sesiones, encabezados de
-  seguridad y límite de usuarios poseen pruebas automatizadas.
-- Las operaciones ordinarias se midieron con 5, 10 y 30 sesiones concurrentes,
-  sin fallos y con un peor P95 local de 392,45 ms frente al límite de 3.000 ms.
-- La importación controlada permite validar archivos sintéticos antes de
-  escribir, distingue las filas incorporadas de las rechazadas, explica sus
-  causas, evita duplicados y revierte el lote completo ante un fallo inesperado.
-- Administración puede editar y eliminar antecedentes de terreno con
-  confirmación; la bitácora conserva la autoría y el contenido relevante de
-  cada operación, mientras las evidencias permanecen privadas.
-- El buscador pagina contingencias y protege las consultas de identificadores
-  sintéticos. El mapa consulta el área visible, agrupa marcadores y expone zonas
-  críticas o electrodependientes únicamente como agregados autorizados.
-- La imagen se exporta junto con su suma SHA-256 y metadatos del commit mediante
-  `deploy/EXPORTAR_IMAGEN.ps1`. El script rechaza por defecto un repositorio con
-  cambios pendientes.
-- Los scripts de Parra separan staging en el puerto `2004` y producción en el
-  puerto `2003`, comprueban la salud y conservan una ruta de reversión.
-- La matriz académica y el protocolo de usuarios separan los requisitos
-  verificados de RNF05 y OE4, que requieren evaluación empírica autorizada.
+- La aplicación se construye como imagen Linux `amd64` para Podman rootless.
+- El banco integral usa MySQL 8.4.11 privado, aplica migraciones, genera 360
+  contingencias sintéticas y recorre módulos y exportaciones.
+- Dashboard, tabla, mapa e informes conservan los filtros de día, mes, año y
+  rango personalizado.
+- Windy es una dependencia degradable; su falla no bloquea MySQL ni los módulos
+  internos.
+- Roles, sesiones, encabezados, importación controlada, búsqueda, antecedentes
+  y bitácora poseen pruebas automatizadas.
+- La imagen de aplicación y la imagen MySQL se exportan con SHA-256 y metadatos.
+- El despliegue crea un respaldo antes de migrar, mantiene rollback de imagen y
+  separa la recuperación de base de datos.
+- MySQL no publica `3306`; staging y producción usan bases y usuarios distintos.
+- La decisión se vincula a escenarios medibles de disponibilidad, seguridad,
+  aislamiento, recuperabilidad, modificabilidad y trazabilidad.
 
-## Verificación local del segmento 19
+## Infraestructura confirmada en Parra
 
-La revisión ejecutada el 20 de septiembre de 2026 cerró la integración local
-con los siguientes resultados:
+La sesión SSH confirmó el 22 de septiembre de 2026:
 
-- `composer validate --strict`, Pint y la construcción de producción con Vite
-  finalizaron correctamente;
-- la suite completa registró **137 pruebas aprobadas y 1.434 aserciones**;
-- `deploy/VALIDAR_INTEGRACION_LOCAL.ps1` aprobó migraciones, generación e
-  integridad de 360 contingencias sintéticas, autenticación, módulos HTTP y
-  exportaciones CSV/PDF sobre MySQL 8.4;
-- las pruebas de autorización recorrieron Administración, Supervisión,
-  Operación y Consulta, incluidas las restricciones de importación, búsqueda y
-  mantenimiento de antecedentes;
-- la inspección visual verificó dashboard, mapa, detalle, buscador, informes e
-  importaciones. Confirmó el rango personalizado, la ausencia de los cuatro
-  períodos rápidos retirados, los controles Editar/Eliminar para
-  Administración y el detalle de filas rechazadas.
+| Control | Resultado |
+| --- | --- |
+| Cuenta y directorio | Acceso correcto; `/home/katobello2101` |
+| Arquitectura | `x86_64`, compatible con los artefactos `linux/amd64` |
+| Motor de contenedores | Podman `5.8.2` |
+| Modalidad | `Rootless=true` |
+| Persistencia de sesión | `Linger=yes` |
+| Almacenamiento | 832 GiB disponibles al momento de la revisión |
+| Puertos asignados | `2003` y `2004` libres |
+| Estado inicial | Sin contenedores ni imágenes previas |
+
+La conectividad SSH funciona desde la red institucional. La clave privada
+permanece únicamente en el equipo autorizado.
+
+## Verificación local del Segmento 20
+
+La revisión del 24 de septiembre de 2026 registró:
+
+- `composer validate --strict`, Pint y la construcción Vite aprobados;
+- **139 pruebas aprobadas y 1.482 aserciones**;
+- sintaxis PHP, PowerShell y Bash validada;
+- integración completa aprobada con MySQL 8.4.11, 20 tablas, 360
+  contingencias, autenticación, módulos HTTP y exportaciones CSV/PDF;
+- MySQL conectado únicamente a la red interna, sin puertos publicados;
+- aplicación conectada a la red interna de datos y a una red de entrada, con
+  `8080` accesible solo como `127.0.0.1:8080` en el ensayo local.
+
+El primer ensayo conectó ambos contenedores únicamente a la red interna: las
+comprobaciones dentro del contenedor eran saludables, pero el puerto publicado
+no era accesible desde el host. La topología fue corregida a dos redes y el
+ensayo completo se repitió satisfactoriamente. Este hallazgo evita trasladar el
+problema al servidor institucional.
+
+## Decisión sobre la base de datos
+
+La base MySQL institucional inicialmente considerada no es utilizable. Se
+preparó MySQL Community 8.4 dentro de Parra con estas restricciones:
+
+- una instancia para reducir consumo de memoria;
+- esquemas y usuarios independientes para staging y producción;
+- red interna `luzparral-private` para aplicación y MySQL;
+- red de entrada `luzparral-edge` solo para las aplicaciones;
+- volumen `luzparral-mysql-data`;
+- MySQL no se une a la red de entrada ni publica el puerto `3306`;
+- respaldos por entorno con checksum y ensayo de restauración temporal.
+
+Esto no expone MySQL a Internet. Solo se publican los puertos de la aplicación.
+
+## Paquete que debe generarse
 
 El paquete `luzparral-app-f0a05a164686-linux-amd64.tar` y sus archivos
-adyacentes quedan **obsoletos** porque anteceden a los segmentos 15 a 19. No se
-deben transferir a Parra. El único candidato institucional será el paquete que
-genere `deploy/EXPORTAR_IMAGEN.ps1` después del commit limpio de este segmento.
-
-## Archivos que se transferirán
-
-Después del commit definitivo se debe ejecutar:
+adyacentes quedan **obsoletos**. El candidato se genera únicamente **después del
+commit limpio de este segmento** mediante:
 
 ```powershell
 .\deploy\EXPORTAR_IMAGEN.ps1
 ```
 
-Se transfieren por SFTP, sin renombrarlos:
+Se transferirán:
 
-- `artifacts/luzparral-app-COMMIT-linux-amd64.tar`;
-- el archivo `.tar.sha256` adyacente;
-- el archivo `.tar.metadata.json` adyacente;
-- `deploy/parra/load-image.sh`;
-- `deploy/parra/deploy.sh`;
-- `deploy/parra/verify.sh`;
-- `deploy/parra/parra.env.example`.
+- `artifacts/luzparral-app-COMMIT-linux-amd64.tar` y sus dos archivos de control;
+- `artifacts/mysql-8.4.11-linux-amd64.tar` y sus dos archivos de control;
+- todos los `.sh` de `deploy/parra/`;
+- `mysql.env.example`, `parra.env.example`,
+  `parra-production.env.example` y `staging-seed.env.example`.
 
-No se transfieren `.env`, contraseñas, respaldos locales, datos CIOP ni archivos
-de usuarios reales.
+No se transfieren `.env` privados, contraseñas, respaldos locales, datos CIOP
+ni archivos de usuarios reales.
 
 ## Pendiente exclusivamente en Parra
 
-Estos puntos no pueden certificarse desde el equipo local:
-
-1. **Capacidad del servidor:** confirmar arquitectura con `uname -m`, versión y
-   modo rootless de Podman, espacio y cuota de disco.
-2. **Persistencia tras reinicio:** validar que el contenedor vuelva a iniciar
-   después de reiniciar el servidor. Si la política `unless-stopped` no basta en
-   la cuenta rootless, la Universidad debe habilitar `systemd --user` y
-   persistencia de sesión, o indicar su mecanismo oficial.
-3. **Puertos institucionales:** comprobar desde otro equipo que `2004` y `2003`
-   son accesibles según la política de firewall, y que no existe otro servicio
-   ocupándolos.
-4. **MySQL institucional:** confirmar host utilizable desde Parra, permisos de
-   conexión y migración, nombre de la base, codificación `utf8mb4` y latencia.
-   Las credenciales se guardan únicamente en los archivos privados con modo
-   `600`.
-5. **Respaldo y restauración:** confirmar si la Universidad respalda MySQL, su
-   retención y el responsable de restaurar. Antes de cualquier migración debe
-   existir un respaldo verificable o una base vacía expresamente autorizada.
-6. **HTTPS:** confirmar si habrá proxy inverso o certificado institucional. Con
-   HTTP, `SESSION_SECURE_COOKIE=false` permite operar, pero no se deben ingresar
-   datos ni credenciales reales por una red no protegida. Con HTTPS debe quedar
-   en `true`.
-7. **Salida a Internet:** verificar acceso HTTPS a las teselas de OpenStreetMap
-   y a `https://embed.windy.com`. Si están bloqueados, solo se degradan el fondo
-   cartográfico o el pronóstico, respectivamente.
-8. **Cuentas finales:** recibir nombres, correos y roles autorizados; crear las
-   cinco cuentas mediante el comando documentado y retirar las cuentas de
-   demostración. Las claves se entregan por un canal privado.
-9. **Operación:** acordar responsable, retención de logs, monitoreo, ventana de
-   mantenimiento, procedimiento de incidentes y disponibilidad futura de SMTP.
+1. Cargar los dos artefactos y comprobar sus SHA-256.
+2. Crear los archivos privados con modo `600`, sin capturas ni envío por correo.
+3. Iniciar MySQL y demostrar que `podman port luzparral-mysql` no entrega salida.
+4. Publicar staging en el puerto `2004` y comprobar su acceso desde otro equipo.
+5. Inicializar y validar exclusivamente el conjunto sintético.
+6. Crear un respaldo y aprobar el ensayo no destructivo de restauración.
+7. Validar la persistencia tras reinicio de contenedores y, cuando se autorice,
+   tras reinicio del servidor.
+8. Verificar acceso del navegador a OpenStreetMap y
+   `https://embed.windy.com`; sus fallas no deben bloquear el sistema.
+9. Confirmar HTTPS o mantener la restricción de no usar datos ni claves reales
+   sobre HTTP.
+10. Acordar retención de respaldos, monitoreo, incidentes y responsables.
 
 ## Aceptación obligatoria en staging — puerto 2004
 
-No promover a producción hasta marcar todos los controles:
-
-- [ ] La suma SHA-256 de la imagen coincide antes de cargarla.
-- [ ] `deploy.sh staging` termina correctamente y `/up` responde.
+- [ ] Ambos SHA-256 coinciden antes de cargar las imágenes.
+- [ ] `database.sh status` informa MySQL saludable, red interna y 3306 privado.
+- [ ] `deploy.sh staging` genera respaldo, migra y termina correctamente.
 - [ ] `verify.sh staging --database` confirma aplicación, conexión y esquema.
-- [ ] El inicio y cierre de sesión funcionan con cada rol autorizado.
+- [ ] `test-backup-restore.sh` restaura el respaldo en una base temporal.
+- [ ] Inicio y cierre de sesión funcionan con cada rol autorizado.
 - [ ] Las restricciones de administración e informes se cumplen en backend.
 - [ ] Dashboard y tabla responden a día, mes, año y rango personalizado.
-- [ ] El mapa agrupa marcadores, actualiza el área visible y, si hay Internet,
+- [ ] El mapa agrupa marcadores, actualiza el área visible y, con Internet,
       carga OpenStreetMap.
-- [ ] Las capas críticas y electrodependientes se pueden activar, no revelan
-      identificadores individuales y no aparecen para el perfil Consulta.
+- [ ] Las capas críticas y electrodependientes no revelan identificadores
+      individuales ni aparecen para Consulta.
 - [ ] Detalle, búsqueda y trazabilidad muestran datos consistentes.
-- [ ] La búsqueda de cliente y suministro sintético funciona para los perfiles
-      autorizados, pagina resultados y rechaza al perfil Consulta.
-- [ ] Administración y Supervisión pueden previsualizar e importar la plantilla
-      sintética; Operación y Consulta reciben acceso denegado.
-- [ ] Un código repetido queda rechazado y no crea otra contingencia.
-- [ ] Los lotes parciales indican cuántas filas se incorporaron y permiten
-      revisar el motivo de cada rechazo.
-- [ ] Solo Administración puede editar o eliminar antecedentes; Supervisión,
-      Operación y Consulta reciben acceso denegado y la bitácora conserva el
-      evento correspondiente.
-- [ ] Los informes completo, resumen gráfico y evolución se generan.
-- [ ] CSV y PDF conservan los filtros aplicados.
-- [ ] Windy carga cuando existe salida a Internet y su falla no bloquea el resto.
-- [ ] No aparecen datos reales no autorizados ni credenciales en interfaz o logs.
-- [ ] Se repite una medición gradual con 5, 10 y 30 sesiones ordinarias y se
-      revisan latencia, errores 5xx y recursos del servidor.
-- [ ] Se ejecuta el protocolo de usuarios o se documenta formalmente la fecha y
-      responsables de su ejecución posterior, sin declarar RNF05 antes de medirlo.
-- [ ] Se prueba una reversión al tag anterior o se documenta su simulación.
+- [ ] La importación controlada respeta roles, evita duplicados y muestra el
+      motivo de cada rechazo.
+- [ ] Solo Administración puede editar o eliminar antecedentes y la bitácora
+      conserva cada operación.
+- [ ] Los informes completo, resumen gráfico y evolución conservan filtros.
+- [ ] Windy carga cuando existe salida y su falla no bloquea el resto.
+- [ ] No aparecen datos reales no autorizados ni credenciales en interfaz/logs.
+- [ ] Se repite la medición gradual con 5, 10 y 30 sesiones y se revisan P95,
+      errores 5xx, CPU y memoria.
+- [ ] Se ejecuta el protocolo de usuarios o se documenta su fecha posterior sin
+      declarar OE4/RNF05 antes de medirlo.
+- [ ] Se prueba una reversión al tag anterior y se identifica el respaldo previo.
+- [ ] Se verifica la persistencia después de reiniciar los contenedores.
 
 ## Promoción y cierre — puerto 2003
 
-Con staging aprobado, se crea un archivo de producción independiente, se cambia
-`APP_URL` al puerto `2003` y se ejecutan `deploy.sh production` y
-`verify.sh production --database`. Finalmente se registra el tag, commit,
-SHA-256, fecha, responsable, resultado de la aceptación y plan de reversión.
+Producción solo se publica tras aprobar staging. Utiliza
+`parra-production.env`, `sigcel_production`, su usuario exclusivo y un volumen
+de aplicación separado. No recibe seeders ni datos sintéticos automáticamente.
 
-El segmento local queda finalizado cuando las pruebas, construcción y
-exportación se ejecutan sobre un commit limpio. La migración institucional queda
-finalizada únicamente cuando todos los controles anteriores poseen evidencia en
-Parra.
+El cierre debe registrar tag, commit, SHA-256, fecha, responsable, resultado de
+aceptación, respaldo previo y plan de reversión. La aprobación académica no
+autoriza por sí sola el posterior despliegue empresarial con datos reales.

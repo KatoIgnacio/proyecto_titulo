@@ -66,7 +66,7 @@ diagnóstico se encuentra en
 ## Ensayo integral local aislado
 
 `compose.integration.yaml` levanta temporalmente la imagen de la aplicación y
-un MySQL 8.4.9 exclusivo para pruebas. MySQL continúa separado de la imagen de
+un MySQL 8.4.11 exclusivo para pruebas. MySQL continúa separado de la imagen de
 Luzparral: este servicio adicional es solo un banco de integración local y no
 forma parte del despliegue en Parra.
 

@@ -18,10 +18,10 @@ php artisan config:clear
 
 ## Producción institucional
 
-`.env.production.example` documenta las variables necesarias para Parra. En el
-servidor se debe crear un archivo privado `.env.production` a partir de esta
-plantilla y reemplazar los marcadores de MySQL. Ese archivo ya está ignorado por
-Git y no debe incorporarse a una imagen ni transferirse a terceros.
+Las plantillas de `deploy/parra/` documentan las variables necesarias para
+Parra. En el servidor se crean `mysql.env`, `parra-staging.env` y
+`parra-production.env` con modo `600`. Los tres archivos quedan fuera de Git y
+no deben incorporarse a imágenes, respaldos compartidos ni capturas.
 
 La clave `APP_KEY` de producción debe ser distinta de la clave local. Se puede
 generar sin modificar el entorno actual con:
@@ -44,7 +44,8 @@ configuración.
 - `SESSION_ENCRYPT=true`, cookie HTTP-only y `SameSite=lax`.
 - `QUEUE_CONNECTION=sync`, porque la versión actual no requiere un proceso
   worker separado.
-- Credenciales institucionales de MySQL almacenadas solo como secreto.
+- Credenciales de la instancia MySQL privada almacenadas solo en archivos con
+  modo `600`. `DB_HOST=luzparral-mysql`; el puerto `3306` no se publica.
 
 Mientras la aplicación se publique mediante HTTP, `SESSION_SECURE_COOKIE` debe
 permanecer en `false` para que el inicio de sesión funcione. Cuando exista HTTPS,
