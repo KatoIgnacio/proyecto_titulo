@@ -183,6 +183,11 @@ start_container() {
         --network "$network_name" \
         --network "$edge_network_name" \
         --env-file "$application_environment_file" \
+        --health-cmd 'php -r "exit(@file_get_contents(\"http://127.0.0.1:8080/up\") === false ? 1 : 0);"' \
+        --health-interval 30s \
+        --health-timeout 5s \
+        --health-start-period 20s \
+        --health-retries 3 \
         --publish "${host_port}:8080" \
         --volume "${storage_volume}:/var/www/html/storage" \
         "$selected_image" >/dev/null

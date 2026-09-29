@@ -36,7 +36,7 @@ if ! podman container exists "$container_name"; then
     exit 69
 fi
 
-for command_name in curl grep; do
+for command_name in curl grep podman; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         echo "ERROR: $command_name no esta disponible." >&2
         exit 69
@@ -56,13 +56,23 @@ if ! grep --fixed-strings --line-regexp --quiet "$edge_network_name" <<< "$appli
 fi
 
 container_state=$(podman inspect --format '{{.State.Status}}' "$container_name")
-container_health=$(podman inspect --format '{{.State.Health.Status}}' "$container_name")
 
-if [[ "$container_state" != running || "$container_health" != healthy ]]; then
-    echo "ERROR: estado=$container_state salud=$container_health" >&2
+if [[ "$container_state" != running ]]; then
+    echo "ERROR: estado=$container_state" >&2
     podman logs --tail 100 "$container_name" >&2
     exit 1
 fi
+
+# Docker conserva el HEALTHCHECK en la imagen original, pero ciertas cargas de
+# docker save en Podman pueden omitir ese metadato. deploy.sh lo vuelve a
+# declarar al crear el contenedor y esta ejecucion comprueba el comando real,
+# sin depender de campos opcionales de podman inspect.
+if ! podman healthcheck run "$container_name" >/dev/null; then
+    echo "ERROR: el HEALTHCHECK de $container_name no esta configurado o fallo." >&2
+    podman logs --tail 100 "$container_name" >&2
+    exit 1
+fi
+container_health=healthy
 
 curl --silent --show-error --fail --max-time 10 "http://127.0.0.1:${host_port}/up" >/dev/null
 login_headers=$(curl --silent --show-error --fail --max-time 10 --dump-header - --output /dev/null "http://127.0.0.1:${host_port}/login")
