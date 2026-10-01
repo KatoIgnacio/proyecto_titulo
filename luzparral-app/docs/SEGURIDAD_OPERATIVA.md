@@ -112,6 +112,22 @@ El contenedor asigna `storage` y `bootstrap/cache` a `www-data` con permisos
 para propietario y grupo, sin acceso para otros usuarios. El archivo privado de
 variables de Parra debe conservar modo `600`.
 
+## Protección frente a inyección SQL
+
+Los filtros de dashboard, buscador, mapa e informes validan tipo, longitud y
+valores permitidos antes de construir consultas. Los valores libres se entregan
+a Eloquent o Query Builder como parámetros enlazados; no se concatenan en SQL.
+Las expresiones Raw son constantes del sistema. En el mapa, la precisión
+interpolada se obtiene de un zoom entero validado y se transforma a uno de
+cuatro valores internos.
+
+SqlInjectionProtectionTest envía cargas de unión, tautología y eliminación como
+texto libre, comprueba que no devuelvan registros y verifica que la tabla
+permanezca intacta. También confirma que fragmentos introducidos en estado,
+categoría, tipo de informe y zoom sean rechazados por validación. Todo nuevo
+filtro debe conservar estas reglas: nunca interpolar texto de la solicitud en
+métodos Raw.
+
 ## Control previo a publicar
 
 Ejecutar desde la raíz del repositorio:
