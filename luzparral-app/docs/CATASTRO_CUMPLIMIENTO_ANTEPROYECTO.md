@@ -11,17 +11,32 @@ promoción a producción y la evaluación empírica permanecen pendientes.
 |---|---|
 | RF01-RF09 y HU01-HU09 | Implementados y cubiertos por pruebas locales |
 | RNF01 | Cumplido en el ensayo local: peor P95 ordinario de 392,45 ms frente a 3.000 ms |
-| RNF02 | Aplicación, MySQL y esquema saludables en staging Parra; acceso externo y reinicio institucional pendientes |
+| RNF02 | Staging Parra saludable; restauración y reinicio de contenedores aprobados; acceso externo y reinicio del servidor pendientes |
 | RNF03 | Cumplido en local con 30 sesiones concurrentes, cero fallos ordinarios |
 | RNF04 | Autenticación y autorización verificadas en backend |
 | RNF05 | Protocolo completo; medición real del umbral de 80 % pendiente |
 | RNF06-RNF07 | Trazabilidad, consistencia e importación atómica verificadas |
 | OE1-OE3 | Materializados en levantamiento, modelo, requisitos e implementación |
 | OE4 | Preparado; exige sesiones reales autorizadas con usuarios |
-| Despliegue Parra | Staging operativo en `8004` con MySQL privado; acceso externo y producción `8003` pendientes |
+| Despliegue Parra | `ef209b7d3d9e` operativo en `8004`; acceso externo, reinicio del servidor y producción `8003` pendientes |
 
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
+
+## Evidencia técnica del Segmento 23
+
+El 1 de octubre de 2026 staging se actualizó a
+`luzparral-app:ef209b7d3d9e`, cuyo TAR `linux/amd64` fue comprobado con
+SHA-256
+`186f65f03ceb617c06fba7a1cfc4f5be6e1455174b242e86ce6d81191eab3cd1`.
+`operational-check.sh` aprobó aplicación, MySQL, esquema, encabezados,
+Podman rootless, `Linger=yes`, políticas de reinicio, volúmenes, puertos,
+permisos, respaldo y espacio. El respaldo
+`staging-20261001T231650Z.sql` se restauró en una base temporal y verificó
+20 tablas. Después se creó `staging-20261001T231915Z.sql` y el reinicio
+controlado de MySQL y la aplicación terminó con
+`Prueba de persistencia de contenedores: OK`. No se reinició el servidor
+completo.
 
 ## Evidencia técnica del Segmento 21
 
@@ -95,8 +110,8 @@ futuro la generación asíncrona si crece la demanda.
 
 1. Ejecutar el protocolo de usuarios, consolidar resultados y corregir los
    hallazgos críticos antes de cerrar OE4 y RNF05.
-2. Completar en staging `8004` la restauración, persistencia y acceso externo;
-   recién después de la aceptación promover al puerto `8003`.
+2. Confirmar en staging `8004` el acceso externo y la persistencia tras
+   reiniciar el servidor; recién después de la aceptación promover a `8003`.
 3. Incorporar adaptadores de fuentes reales solo con autorización, diccionario
    de datos, reglas de calidad y resguardo de información definidos.
 4. Mover exportaciones PDF a una cola si la medición institucional o el volumen

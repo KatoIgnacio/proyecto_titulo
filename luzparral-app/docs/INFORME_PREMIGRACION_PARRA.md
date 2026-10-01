@@ -44,6 +44,24 @@ MySQL y el esquema en staging `8004`; desde la red externa ensayada, el acceso
 directo agotó el tiempo de espera y el recorrido se completó mediante túnel
 SSH. La Universidad debe confirmar el alcance de red autorizado para `8004`.
 
+## Cierre técnico del Segmento 23 en Parra
+
+El 1 de octubre de 2026 se desplegó
+`luzparral-app:ef209b7d3d9e` en el puerto `8004`. Su artefacto
+`linux/amd64` aprobó el SHA-256
+`186f65f03ceb617c06fba7a1cfc4f5be6e1455174b242e86ce6d81191eab3cd1`.
+La auditoría operativa confirmó aplicación y MySQL saludables, `3306`
+privado, Podman rootless, `Linger=yes`, volúmenes persistentes, permisos,
+respaldo reciente, 3 % de uso de disco y ausencia de listeners en
+`2003/2004`.
+
+El respaldo `staging-20261001T231650Z.sql` fue restaurado en una base
+temporal y se verificaron 20 tablas. La prueba de persistencia creó el respaldo
+`staging-20261001T231915Z.sql`, reinició MySQL y la aplicación y terminó
+con `Prueba de persistencia de contenedores: OK`. Quedan pendientes el
+reinicio completo del servidor y las decisiones institucionales de acceso
+externo, HTTPS, retención y producción.
+
 ## Verificación local del Segmento 20
 
 La revisión del 24 de septiembre de 2026 registró:
@@ -80,10 +98,11 @@ Esto no expone MySQL a Internet. Solo se publican los puertos de la aplicación.
 
 ## Paquete desplegado y siguiente candidato
 
-El paquete `luzparral-app-f0a05a164686-linux-amd64.tar` y sus archivos
-adyacentes quedan **obsoletos**. Staging ejecuta la imagen
-`luzparral-app:4c9d0b8e1833`; el siguiente candidato se genera únicamente
-**después del commit limpio de este segmento** mediante:
+Los paquetes `luzparral-app-f0a05a164686-linux-amd64.tar`,
+`luzparral-app-9913388c32f9-linux-amd64.tar` y
+`luzparral-app-4c9d0b8e1833-linux-amd64.tar` quedan **obsoletos**.
+Staging ejecuta `luzparral-app:ef209b7d3d9e`, generado **después del
+commit limpio de este segmento**. El próximo candidato se construye mediante:
 
 ```powershell
 .\deploy\EXPORTAR_IMAGEN.ps1
@@ -107,12 +126,13 @@ ni archivos de usuarios reales.
 3. [x] Iniciar MySQL y comprobar que `3306` no está publicado.
 4. [x] Publicar staging en el puerto asignado `8004` y verificar su salud.
 5. [x] Inicializar y validar exclusivamente el conjunto sintético.
-6. [ ] Aprobar el ensayo no destructivo de restauración en una base temporal.
-7. [ ] Validar persistencia tras reinicio de contenedores y del servidor.
-8. [x] Recorrer OpenStreetMap y `https://embed.windy.com` mediante staging.
-9. [ ] Transferir y ejecutar los controles operativos del Segmento 22.
-10. [ ] Confirmar acceso directo, HTTPS o la restricción institucional aplicable.
-11. [ ] Acordar retención de respaldos, monitoreo, incidentes y responsables.
+6. [x] Aprobar el ensayo no destructivo de restauración en una base temporal.
+7. [x] Validar persistencia tras reiniciar MySQL y la aplicación.
+8. [ ] Validar persistencia tras reiniciar el servidor en una ventana autorizada.
+9. [x] Recorrer OpenStreetMap y `https://embed.windy.com` mediante staging.
+10. [x] Transferir y ejecutar los controles operativos del Segmento 22.
+11. [ ] Confirmar acceso directo, HTTPS o la restricción institucional aplicable.
+12. [ ] Acordar retención de respaldos, monitoreo, incidentes y responsables.
 
 ## Aceptación obligatoria en staging — puerto 8004
 
@@ -120,8 +140,8 @@ ni archivos de usuarios reales.
 - [x] `database.sh status` informa MySQL saludable, red interna y 3306 privado.
 - [x] `deploy.sh staging` genera respaldo, migra y termina correctamente.
 - [x] `verify.sh staging --database` confirma aplicación, conexión y esquema.
-- [ ] `operational-check.sh staging` aprueba puertos, persistencia y respaldo.
-- [ ] `test-backup-restore.sh` restaura el respaldo en una base temporal.
+- [x] `operational-check.sh staging` aprueba puertos, persistencia y respaldo.
+- [x] `test-backup-restore.sh` restaura 20 tablas en una base temporal.
 - [ ] Inicio y cierre de sesión funcionan con cada rol autorizado.
 - [ ] Las restricciones de administración e informes se cumplen en backend.
 - [ ] Dashboard y tabla responden a día, mes, año y rango personalizado.
@@ -142,7 +162,7 @@ ni archivos de usuarios reales.
 - [ ] Se ejecuta el protocolo de usuarios o se documenta su fecha posterior sin
       declarar OE4/RNF05 antes de medirlo.
 - [ ] Se prueba una reversión al tag anterior y se identifica el respaldo previo.
-- [ ] Se verifica la persistencia después de reiniciar los contenedores.
+- [x] Se verifica la persistencia después de reiniciar los contenedores.
 
 ## Promoción y cierre — puerto 8003
 

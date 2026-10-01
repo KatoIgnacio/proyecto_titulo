@@ -159,6 +159,9 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('quedan **obsoletos**', $handoff);
         $this->assertStringContainsString('después del', $handoff);
         $this->assertStringContainsString('commit limpio de este segmento', $handoff);
+        $this->assertStringContainsString('luzparral-app:ef209b7d3d9e', $handoff);
+        $this->assertStringContainsString('se verificaron 20 tablas', $handoff);
+        $this->assertStringContainsString('Prueba de persistencia de contenedores: OK', $handoff);
     }
 
     public function test_deployment_architecture_records_quality_scenarios_and_limits(): void

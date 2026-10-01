@@ -16,9 +16,11 @@ La inspección realizada con la cuenta institucional confirmó:
 - puertos asignados `8004` para staging y `8003` para producción;
 - ausencia inicial de contenedores e imágenes previas en la cuenta.
 
-El 29 de septiembre de 2026 staging quedó saludable en `8004`, con MySQL
-privado y el esquema validado. Permanecen pendientes la apertura externa, el
-reinicio efectivo del servidor y la promoción a producción.
+El 1 de octubre de 2026 staging quedó saludable en `8004` con la imagen
+`luzparral-app:ef209b7d3d9e`. MySQL permaneció privado, la restauración
+temporal verificó 20 tablas y el reinicio de contenedores conservó aplicación,
+base y esquema. Permanecen pendientes la apertura externa, el reinicio completo
+del servidor y la promoción a producción.
 
 ## Arquitectura resultante
 
