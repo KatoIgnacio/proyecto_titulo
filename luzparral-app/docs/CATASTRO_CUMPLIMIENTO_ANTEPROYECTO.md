@@ -62,7 +62,8 @@ servidor y la promoción controlada a producción.
 El ensayo integral del 17 de septiembre de 2026 utilizó MySQL 8.4.9 aislado y
 un conjunto de demostración compuesto exclusivamente por datos sintéticos:
 
-- 5 usuarios por rol, 5 comunas, 10 alimentadores y 5.000 suministros;
+- 5 usuarios sintéticos: 1 de administración, 1 de supervisión, 2 de operación
+  y 1 de consulta; además, 5 comunas, 10 alimentadores y 5.000 suministros;
 - 360 contingencias, 25.283 impactos y 1.729 eventos de historial;
 - 144 antecedentes de terreno y 18 lotes de importación;
 - 20 controles de integridad aprobados;

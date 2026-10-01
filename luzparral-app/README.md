@@ -111,6 +111,10 @@ La cobertura de objetivos, RF, RNF e historias de usuario se consolida en
 La evaluación requerida para OE4 y RNF05 se prepara, sin resultados inventados,
 en [`docs/VALIDACION_USUARIOS.md`](docs/VALIDACION_USUARIOS.md).
 
+La aceptación técnica previa en staging, separada de la evaluación con usuarios,
+se ejecuta por cuenta y rol según
+[`docs/ACEPTACION_FUNCIONAL_STAGING.md`](docs/ACEPTACION_FUNCIONAL_STAGING.md).
+
 La arquitectura y el modelo de información implementados se describen en
 [`docs/ARQUITECTURA_MODELO_ACTUAL.md`](docs/ARQUITECTURA_MODELO_ACTUAL.md), y el
 balance final de logros, límites y trabajo futuro se mantiene en

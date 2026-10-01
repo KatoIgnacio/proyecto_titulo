@@ -5,6 +5,15 @@ una demostración informal con evidencia de usabilidad. No contiene resultados:
 el porcentaje solo se calculará después de realizar sesiones autorizadas con
 participantes reales.
 
+## Relación con la aceptación técnica
+
+Antes de convocar participantes se ejecuta la aceptación interna descrita en
+`ACEPTACION_FUNCIONAL_STAGING.md`. Esa revisión confirma que las cuentas, los
+permisos y los recorridos funcionan en staging, pero **no** mide usabilidad ni
+permite declarar cumplidos OE4 o RNF05. Los códigos `A01`, `S01`, `O01`, `O02`
+y `C01` pertenecen a cuentas técnicas sintéticas; los códigos `P01`, `P02`,
+etc. se reservan para participantes reales seudonimizados.
+
 ## Participantes y resguardo
 
 Se consideran personas adultas vinculadas al proceso de gestión de

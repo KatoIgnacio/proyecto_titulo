@@ -52,6 +52,33 @@ class AcademicTraceabilityDocumentationTest extends TestCase
         $this->assertStringContainsString('pendientes de validación real', $contents);
     }
 
+    public function test_staging_acceptance_separates_technical_checks_from_user_validation(): void
+    {
+        $contents = $this->document('ACEPTACION_FUNCIONAL_STAGING.md');
+
+        foreach (['A01', 'S01', 'O01', 'O02', 'C01'] as $account) {
+            $this->assertStringContainsString($account, $contents);
+        }
+
+        foreach (range(1, 14) as $number) {
+            $identifier = str_pad((string) $number, 2, '0', STR_PAD_LEFT);
+            $this->assertStringContainsString('AF'.$identifier, $contents);
+        }
+
+        $inventory = $this->document('CATASTRO_CUMPLIMIENTO_ANTEPROYECTO.md');
+        $this->assertStringContainsString('1 de administración', $inventory);
+        $this->assertStringContainsString('2 de operación', $inventory);
+        $this->assertStringContainsString('no acredita OE4 ni RNF05', $contents);
+        $this->assertStringContainsString('ruta no autorizada directamente', $contents);
+        $this->assertStringContainsString('operational-check.sh', $contents);
+
+        $template = file_get_contents(base_path('docs/templates/aceptacion_funcional_staging.csv'));
+        $this->assertSame(
+            "execution_code,executed_at,environment,image_tag,account_code,role,case_code,expected_result,actual_result,status,evidence_reference,observation\n",
+            str_replace("\r\n", "\n", $template),
+        );
+    }
+
     public function test_architecture_and_final_inventory_distinguish_local_evidence_from_external_work(): void
     {
         $architecture = $this->document('ARQUITECTURA_MODELO_ACTUAL.md');
