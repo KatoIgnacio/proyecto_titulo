@@ -101,8 +101,8 @@ En un equipo con Podman puede construirse con:
 
 ```bash
 podman build --pull --tag luzparral-app:local --file Containerfile .
-podman run --rm --env-file .env.production -p 2004:8080 luzparral-app:local
+podman run --rm --env-file .env.production -p 8004:8080 luzparral-app:local
 ```
 
-El comando definitivo del servidor, la persistencia, el puerto 2003 y el
+El comando definitivo del servidor, la persistencia, el puerto 8003 y el
 procedimiento de reversión se documentarán en el paquete de migración.

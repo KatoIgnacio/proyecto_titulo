@@ -28,7 +28,7 @@ no forma parte de la imagen de aplicación.
 
 En Parra, MySQL se conecta únicamente a `luzparral-private`, una red interna
 sin puertos publicados. Las aplicaciones se conectan también a
-`luzparral-edge`, desde donde exponen staging en `2004` y producción en `2003`.
+`luzparral-edge`, desde donde exponen staging en `8004` y producción en `8003`.
 Las bases, usuarios, configuraciones y volúmenes de aplicación permanecen
 separados por entorno. La justificación, los ASR y los límites se detallan en
 [`DECISIONES_ARQUITECTURA_DESPLIEGUE.md`](DECISIONES_ARQUITECTURA_DESPLIEGUE.md).

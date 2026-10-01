@@ -8,11 +8,11 @@ fi
 
 case "$1" in
     staging)
-        host_port=2004
+        host_port=8004
         container_name=luzparral-staging
         ;;
     production)
-        host_port=2003
+        host_port=8003
         container_name=luzparral-production
         ;;
     *)

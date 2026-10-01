@@ -26,7 +26,9 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('SECURITY_MAX_ACTIVE_USERS=10', $contents);
         $this->assertStringContainsString('DB_HOST=luzparral-mysql', $contents);
         $this->assertStringContainsString('DB_DATABASE=sigcel_staging', $contents);
+        $this->assertStringContainsString('APP_URL=http://parra.chillan.ubiobio.cl:8004', $contents);
         $this->assertStringContainsString('DB_DATABASE=sigcel_production', $production);
+        $this->assertStringContainsString('APP_URL=http://parra.chillan.ubiobio.cl:8003', $production);
         $this->assertStringContainsString('MYSQL_ROOT_PASSWORD=REEMPLAZAR_', $mysql);
         $this->assertStringContainsString('MYSQL_STAGING_DATABASE=sigcel_staging', $mysql);
         $this->assertStringContainsString('MYSQL_PRODUCTION_DATABASE=sigcel_production', $mysql);
@@ -38,8 +40,10 @@ class DeploymentPackageTest extends TestCase
         $contents = file_get_contents(base_path('deploy/parra/deploy.sh'));
 
         $this->assertIsString($contents);
-        $this->assertStringContainsString('host_port=2004', $contents);
-        $this->assertStringContainsString('host_port=2003', $contents);
+        $this->assertStringContainsString('host_port=8004', $contents);
+        $this->assertStringContainsString('host_port=8003', $contents);
+        $this->assertStringNotContainsString('host_port=2004', $contents);
+        $this->assertStringNotContainsString('host_port=2003', $contents);
         $this->assertStringContainsString('--env-file "$application_environment_file"', $contents);
         $this->assertStringContainsString('--network "$network_name"', $contents);
         $this->assertStringContainsString(':/var/www/html/storage', $contents);
@@ -141,10 +145,10 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('explicar las', $deployment);
         $this->assertStringContainsString('editar y eliminar', $deployment);
         $this->assertStringContainsString('mapa debe actualizar el area visible', $deployment);
-        $this->assertStringContainsString('Pendiente exclusivamente en Parra', $handoff);
-        $this->assertStringContainsString('puerto `2004`', $handoff);
-        $this->assertStringContainsString('puerto `2004`', $deployment);
-        $this->assertStringContainsString('puerto `2003`', $deployment);
+        $this->assertStringContainsString('Estado de ejecución en Parra', $handoff);
+        $this->assertStringContainsString('puerto asignado `8004`', $handoff);
+        $this->assertStringContainsString('puerto `8004`', $deployment);
+        $this->assertStringContainsString('puerto `8003`', $deployment);
         $this->assertStringContainsString('https://embed.windy.com', $handoff);
         $this->assertStringContainsString('persistencia después de reiniciar', $handoff);
         $this->assertStringContainsString('importación controlada', $handoff);

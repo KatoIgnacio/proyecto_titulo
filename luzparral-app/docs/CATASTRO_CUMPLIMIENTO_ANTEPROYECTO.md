@@ -1,9 +1,9 @@
 # Catastro de cumplimiento del anteproyecto
 
-El cierre local demuestra que SIGCEL implementa el núcleo funcional definido
-en el anteproyecto. El resultado no debe presentarse como despliegue productivo
-ni como validación definitiva con usuarios: ambos hitos dependen de evidencia
-externa que todavía no corresponde fabricar.
+El cierre local y el staging institucional demuestran que SIGCEL implementa el
+núcleo funcional definido en el anteproyecto. El resultado no debe presentarse
+como despliegue productivo ni como validación definitiva con usuarios: la
+promoción a producción y la evaluación empírica permanecen pendientes.
 
 ## Resultado ejecutivo
 
@@ -11,26 +11,36 @@ externa que todavía no corresponde fabricar.
 |---|---|
 | RF01-RF09 y HU01-HU09 | Implementados y cubiertos por pruebas locales |
 | RNF01 | Cumplido en el ensayo local: peor P95 ordinario de 392,45 ms frente a 3.000 ms |
-| RNF02 | Salud y degradación comprobadas localmente; disponibilidad institucional pendiente |
+| RNF02 | Aplicación, MySQL y esquema saludables en staging Parra; acceso externo y reinicio institucional pendientes |
 | RNF03 | Cumplido en local con 30 sesiones concurrentes, cero fallos ordinarios |
 | RNF04 | Autenticación y autorización verificadas en backend |
 | RNF05 | Protocolo completo; medición real del umbral de 80 % pendiente |
 | RNF06-RNF07 | Trazabilidad, consistencia e importación atómica verificadas |
 | OE1-OE3 | Materializados en levantamiento, modelo, requisitos e implementación |
 | OE4 | Preparado; exige sesiones reales autorizadas con usuarios |
-| Despliegue Parra | Servidor inspeccionado y paquete con MySQL privado preparado; staging 2004 y producción 2003 pendientes |
+| Despliegue Parra | Staging operativo en `8004` con MySQL privado; acceso externo y producción `8003` pendientes |
 
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
+
+## Evidencia técnica del Segmento 21
+
+El 1 de octubre de 2026 se reconciliaron los puertos asignados por la
+Universidad: staging `8004` y producción `8003`. Los scripts, plantillas,
+pruebas y documentos quedaron alineados con Parra. La validación local aprobó
+139 pruebas con 1.486 aserciones, la construcción Vite, `composer validate
+--strict` y Pint.
 
 ## Evidencia técnica del Segmento 20
 
 El 24 de septiembre de 2026 se repitió el ensayo integral con MySQL 8.4.11 y
 una topología equivalente a Parra: base únicamente en red interna y aplicación
 en redes de datos y entrada. Se aprobaron 139 pruebas con 1.482 aserciones, la
-construcción de producción y el recorrido HTTP completo. El servidor ya fue
-confirmado como `x86_64`, Podman 5.8.2 rootless, `Linger=yes`, puertos libres y
-espacio suficiente. Falta transferir y aceptar staging en el entorno real.
+construcción de producción y el recorrido HTTP completo. El 29 de septiembre
+de 2026 se verificó en Parra el staging `luzparral-app:4c9d0b8e1833` en `8004`,
+con MySQL saludable en red privada, `3306` sin publicar y recorrido funcional
+mediante túnel SSH. Falta confirmar la apertura externa, el reinicio del
+servidor y la promoción controlada a producción.
 
 ## Evidencia técnica del Segmento 13
 
@@ -61,7 +71,7 @@ futuro la generación asíncrona si crece la demanda.
   parciales y causas de rechazo explicadas en la interfaz.
 - Informes completo, resumen gráfico y evolución, con exportación filtrada.
 - Roles en backend, cuentas activas, archivos privados y diagnóstico de salud.
-- Contenedorización reproducible y proceso de promoción 2004 a 2003 con
+- Contenedorización reproducible y proceso de promoción 8004 a 8003 con
   comprobación de integridad y reversión.
 
 ## Limitaciones declaradas
@@ -71,8 +81,9 @@ futuro la generación asíncrona si crece la demanda.
 - No existe sincronización automática con PowerOn, CIOP u otra fuente externa;
   la integración futura debe usar adaptadores autorizados.
 - No ejecuta maniobras ni controla la red eléctrica.
-- La disponibilidad, latencia y persistencia tras reinicio de Parra solo pueden
-  medirse en el servidor institucional.
+- La salud de aplicación y base se verificó en Parra; la disponibilidad desde
+  redes externas, la latencia institucional y la persistencia tras reiniciar
+  el servidor aún requieren coordinación con la Universidad.
 - OpenStreetMap y Windy dependen de acceso HTTPS externo y pueden degradarse de
   forma independiente.
 - RNF05 y OE4 no están cumplidos hasta ejecutar la evaluación autorizada con
@@ -84,8 +95,8 @@ futuro la generación asíncrona si crece la demanda.
 
 1. Ejecutar el protocolo de usuarios, consolidar resultados y corregir los
    hallazgos críticos antes de cerrar OE4 y RNF05.
-2. Desplegar en staging institucional por el puerto 2004, completar la lista de
-   aceptación y recién entonces promover al puerto 2003.
+2. Completar en staging `8004` la restauración, persistencia y acceso externo;
+   recién después de la aceptación promover al puerto `8003`.
 3. Incorporar adaptadores de fuentes reales solo con autorización, diccionario
    de datos, reglas de calidad y resguardo de información definidos.
 4. Mover exportaciones PDF a una cola si la medición institucional o el volumen
@@ -97,5 +108,5 @@ futuro la generación asíncrona si crece la demanda.
 
 El anteproyecto está ampliamente cubierto desde la perspectiva de construcción
 y verificación local. La afirmación académicamente correcta es: **núcleo
-funcional y requisitos técnicos verificados en local; evaluación empírica con
-usuarios y validación de infraestructura institucional pendientes**.
+funcional verificado en local y staging institucional operativo; evaluación
+empírica con usuarios, acceso externo y producción pendientes**.

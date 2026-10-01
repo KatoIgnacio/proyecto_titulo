@@ -3,7 +3,7 @@
 ## Contexto y alcance
 
 SIGCEL debe ejecutarse en la cuenta institucional de Parra mediante Podman
-rootless, publicar staging en el puerto `2004` y reservar `2003` para la versión
+rootless, publicar staging en el puerto `8004` y reservar `8003` para la versión
 estable. La base institucional inicialmente considerada no es utilizable para
 este proyecto. La solución mantiene el alcance de prototipo académico: usa
 datos sintéticos o autorizados, no controla la red eléctrica y no incorpora
@@ -27,7 +27,7 @@ servicios distribuidos innecesarios.
 | ASR-03 Aislamiento | Staging y producción no deben compartir esquema ni credencial de aplicación. | Bases y usuarios diferentes dentro de una sola instancia MySQL; plantillas separadas. |
 | ASR-04 Recuperabilidad | Antes de una migración debe existir un `mysqldump` consistente con SHA-256 y metadatos. | `backup-database.sh`; `deploy.sh` cancela si el respaldo falla. |
 | ASR-05 Restauración segura | Una restauración no debe sobrescribir una base con tablas ni ejecutarse mientras la aplicación escribe. | `restore-database.sh` exige checksum, metadatos, destino vacío y aplicación detenida. |
-| ASR-06 Modificabilidad | Una versión candidata debe probarse sin reemplazar la estable. | Staging `2004`, producción `2003`, volúmenes y configuraciones separados. |
+| ASR-06 Modificabilidad | Una versión candidata debe probarse sin reemplazar la estable. | Staging `8004`, producción `8003`, volúmenes y configuraciones separados. |
 | ASR-07 Trazabilidad | Cada paquete debe asociarse a imagen, commit, plataforma y suma SHA-256. | `EXPORTAR_IMAGEN.ps1` genera artefactos y metadatos para aplicación y MySQL. |
 
 ## ADR-01: aplicación monolítica y MySQL en el mismo servidor
@@ -58,7 +58,7 @@ generan por base y la promoción no copia automáticamente datos de staging.
 
 **Decisión.** Conectar aplicación y base mediante `luzparral-private`, creada
 con `podman network create --internal`, sin mapear `3306` al host. Las
-aplicaciones se conectan además a `luzparral-edge` para publicar `2004/2003`;
+aplicaciones se conectan además a `luzparral-edge` para publicar `8004/8003`;
 MySQL nunca se une a esa red de entrada.
 
 **Motivo.** Solo Laravel necesita conectarse a MySQL. La administración se
@@ -90,8 +90,8 @@ flowchart LR
         S[Aplicación staging]
         P[Aplicación producción]
     end
-    U -->|2004| S
-    U -->|2003| P
+    U -->|8004| S
+    U -->|8003| P
     subgraph R[Red interna luzparral-private]
         S -->|3306 / usuario staging| DB[(MySQL 8.4)]
         P -->|3306 / usuario producción| DB
@@ -102,7 +102,7 @@ flowchart LR
 ```
 
 El puerto `3306` existe únicamente dentro de la red privada de contenedores.
-Los únicos puertos publicados por este diseño son `2004` y `2003`.
+Los únicos puertos publicados por este diseño son `8004` y `8003`.
 
 ## Límites y evolución posterior
 

@@ -17,7 +17,7 @@ evaluación del profesor guía ni la validación con usuarios.
 
 | Objetivo del anteproyecto | Requisitos relacionados | Evidencia principal | Estado |
 |---|---|---|---|
-| Objetivo general: diseñar e implementar un sistema que centralice, complemente y visualice información para apoyar la gestión de contingencias | RF01-RF09, RNF01-RNF07, HU01-HU09 | Módulos operativos, pruebas funcionales, integración Docker y documentación de los segmentos | Verificado en local; despliegue institucional pendiente |
+| Objetivo general: diseñar e implementar un sistema que centralice, complemente y visualice información para apoyar la gestión de contingencias | RF01-RF09, RNF01-RNF07, HU01-HU09 | Módulos operativos, pruebas funcionales, integración Docker y documentación de los segmentos | Verificado en local y staging institucional; producción pendiente |
 | OE1: identificar flujos, usuarios y puntos críticos del proceso actual | RF01, RF05, RF06, RF07; HU01, HU05, HU06, HU07 | Levantamiento incorporado en el anteproyecto, diagnóstico operativo, roles y flujos implementados | Documentado e incorporado al diseño |
 | OE2: definir el modelo de información y los requisitos | Todos los RF, RNF y HU | Modelo vigente, migraciones, validación de esquema y esta matriz | Verificado en local |
 | OE3: implementar centralización, consulta, georreferenciación, trazabilidad e informes | RF01-RF09; HU01-HU09 | Aplicación ejecutable, rutas, pruebas de características y ensayo integral | Verificado en local |
@@ -42,7 +42,7 @@ evaluación del profesor guía ni la validación con usuarios.
 | ID | Criterio | Evidencia | Estado y conclusión |
 |---|---|---|---|
 | RNF01 | Consultas, filtros y registros ordinarios en un máximo de 3 segundos | Ensayo HTTP con 5, 10 y 30 sesiones; peor P95 ordinario: 392,45 ms | Verificado en local |
-| RNF02 | Disponibilidad mientras la infraestructura esté operativa | `/up`, comando de salud, manejo controlado de base no disponible e integración Docker | Verificado en local; disponibilidad en Parra pendiente |
+| RNF02 | Disponibilidad mientras la infraestructura esté operativa | `/up`, comando de salud, manejo controlado de base no disponible e integración Docker | Aplicación y base saludables en staging Parra; acceso externo y reinicio institucional pendientes |
 | RNF03 | Hasta 30 usuarios concurrentes manteniendo RNF01 | 360 solicitudes ordinarias con 30 sesiones, cero fallos y P95 máximo de 392,45 ms | Verificado en local |
 | RNF04 | Acceso autenticado y protegido | Pruebas de autenticación, sesión, encabezados y roles | Verificado en local |
 | RNF05 | Al menos 80 % de tareas principales sin ayuda directa del desarrollador | Guion, métrica y plantillas de evaluación | Preparado; no se declara cumplimiento sin participantes reales |

@@ -1,8 +1,10 @@
 # Despliegue de SIGCEL en Parra
 
-Este procedimiento publica primero una versión candidata en el puerto `2004` y
-reserva `2003` para producción. MySQL 8.4 se ejecuta en la misma cuenta como un
+Este procedimiento publica primero una versión candidata en el puerto `8004` y
+reserva `8003` para producción. MySQL 8.4 se ejecuta en la misma cuenta como un
 contenedor rootless separado, con volumen persistente y sin publicar `3306`.
+Los puertos `8004/8003` corresponden a la asignación confirmada por la
+administración de Parra; no deben sustituirse por puertos libres no asignados.
 
 ## Estado comprobado del servidor
 
@@ -11,12 +13,12 @@ La inspección realizada con la cuenta institucional confirmó:
 - arquitectura `x86_64` y espacio disponible suficiente en `/home`;
 - Podman `5.8.2` en modo `Rootless=true`;
 - `Linger=yes`, necesario para persistencia de servicios del usuario;
-- puertos `2003` y `2004` libres;
-- ausencia de contenedores e imágenes previas en la cuenta.
+- puertos asignados `8004` para staging y `8003` para producción;
+- ausencia inicial de contenedores e imágenes previas en la cuenta.
 
-Todavía deben comprobarse durante el despliegue la apertura externa de los
-puertos, el reinicio efectivo de contenedores y la salida del navegador hacia
-OpenStreetMap y Windy.
+El 29 de septiembre de 2026 staging quedó saludable en `8004`, con MySQL
+privado y el esquema validado. Permanecen pendientes la apertura externa, el
+reinicio efectivo del servidor y la promoción a producción.
 
 ## Arquitectura resultante
 
@@ -25,11 +27,11 @@ OpenStreetMap y Windy.
 - Una red `luzparral-private` creada con `--internal`, utilizada por MySQL y
   las aplicaciones.
 - Una red `luzparral-edge`, utilizada solo por las aplicaciones para publicar
-  `2004` y `2003`.
+  `8004` y `8003`.
 - Bases y usuarios distintos: `sigcel_staging` y `sigcel_production`.
 - Aplicaciones separadas, con sus propios archivos privados y volúmenes de
   `storage`.
-- MySQL se conecta solo a la red privada. Solo `2004` y `2003` se publican en
+- MySQL se conecta solo a la red privada. Solo `8004` y `8003` se publican en
   el host; MySQL no utiliza `--publish`.
 
 Las razones y escenarios de calidad se documentan en
@@ -132,7 +134,7 @@ El segundo comando debe mostrar `healthy`, red interna, que MySQL no está unido
 a la red de entrada y `Puerto 3306: no publicado`. No se debe agregar
 `-p 3306:3306` ni una regla de firewall para MySQL.
 
-## 6. Desplegar staging en 2004
+## 6. Desplegar staging en 8004
 
 ```bash
 ~/luzparral/scripts/deploy.sh \
@@ -169,9 +171,19 @@ podman ps
 podman port luzparral-mysql
 ```
 
-El último comando no debe imprimir nada. Desde otro equipo abrir:
+El último comando no debe imprimir nada. Desde una red autorizada abrir:
 
-`http://parra.chillan.ubiobio.cl:2004`
+`http://parra.chillan.ubiobio.cl:8004`
+
+Si el alcance de red institucional impide el acceso directo, el diagnóstico
+puede realizarse por SSH sin cambiar el puerto del contenedor:
+
+```powershell
+ssh -N -L 127.0.0.1:28004:127.0.0.1:8004 USUARIO@parra.chillan.ubiobio.cl
+```
+
+Mientras el túnel permanezca abierto, usar `http://127.0.0.1:28004`. Este
+puerto es local al equipo autorizado; Parra continúa publicando `8004`.
 
 La aceptación manual debe revisar inicio y cierre de sesión, dashboard,
 **filtros por dia, mes, año y rango**, mapa, detalle, búsqueda, pronostico
@@ -216,7 +228,7 @@ podman restart luzparral-mysql luzparral-staging
 La comprobación definitiva tras reinicio del servidor debe coordinarse con la
 Universidad y registrarse como evidencia.
 
-## 10. Promover a producción en el puerto `2003`
+## 10. Promover a producción en el puerto `8003`
 
 Solo después de aprobar staging:
 

@@ -1,7 +1,7 @@
-# Informe de cierre local y premigración a Parra
+# Informe de cierre local y staging institucional en Parra
 
 Este informe distingue lo reproducible en local, lo comprobado mediante acceso
-SSH a Parra y lo que solo puede cerrarse después de publicar staging. El
+SSH a Parra y lo que solo puede cerrarse después de aceptar staging. El
 despliegue institucional sigue siendo académico y utiliza datos sintéticos.
 
 ## Estado cerrado en local
@@ -24,7 +24,8 @@ despliegue institucional sigue siendo académico y utiliza datos sintéticos.
 
 ## Infraestructura confirmada en Parra
 
-La sesión SSH confirmó el 22 de septiembre de 2026:
+La sesión SSH confirmó la capacidad técnica el 22 de septiembre de 2026. La
+administración de Parra confirmó la asignación `8004/8003` el 29 de septiembre:
 
 | Control | Resultado |
 | --- | --- |
@@ -34,11 +35,14 @@ La sesión SSH confirmó el 22 de septiembre de 2026:
 | Modalidad | `Rootless=true` |
 | Persistencia de sesión | `Linger=yes` |
 | Almacenamiento | 832 GiB disponibles al momento de la revisión |
-| Puertos asignados | `2003` y `2004` libres |
-| Estado inicial | Sin contenedores ni imágenes previas |
+| Puertos asignados | Staging `8004`; producción reservada en `8003` |
+| Estado inicial | Sin contenedores ni imágenes previas antes del primer despliegue |
 
-La conectividad SSH funciona desde la red institucional. La clave privada
-permanece únicamente en el equipo autorizado.
+La conectividad SSH funciona con la clave privada conservada únicamente en el
+equipo autorizado. El 29 de septiembre de 2026 se verificaron la aplicación,
+MySQL y el esquema en staging `8004`; desde la red externa ensayada, el acceso
+directo agotó el tiempo de espera y el recorrido se completó mediante túnel
+SSH. La Universidad debe confirmar el alcance de red autorizado para `8004`.
 
 ## Verificación local del Segmento 20
 
@@ -74,11 +78,12 @@ preparó MySQL Community 8.4 dentro de Parra con estas restricciones:
 
 Esto no expone MySQL a Internet. Solo se publican los puertos de la aplicación.
 
-## Paquete que debe generarse
+## Paquete desplegado y siguiente candidato
 
 El paquete `luzparral-app-f0a05a164686-linux-amd64.tar` y sus archivos
-adyacentes quedan **obsoletos**. El candidato se genera únicamente **después del
-commit limpio de este segmento** mediante:
+adyacentes quedan **obsoletos**. Staging ejecuta la imagen
+`luzparral-app:4c9d0b8e1833`; el siguiente candidato se genera únicamente
+**después del commit limpio de este segmento** mediante:
 
 ```powershell
 .\deploy\EXPORTAR_IMAGEN.ps1
@@ -95,28 +100,25 @@ Se transferirán:
 No se transfieren `.env` privados, contraseñas, respaldos locales, datos CIOP
 ni archivos de usuarios reales.
 
-## Pendiente exclusivamente en Parra
+## Estado de ejecución en Parra
 
-1. Cargar los dos artefactos y comprobar sus SHA-256.
-2. Crear los archivos privados con modo `600`, sin capturas ni envío por correo.
-3. Iniciar MySQL y demostrar que `podman port luzparral-mysql` no entrega salida.
-4. Publicar staging en el puerto `2004` y comprobar su acceso desde otro equipo.
-5. Inicializar y validar exclusivamente el conjunto sintético.
-6. Crear un respaldo y aprobar el ensayo no destructivo de restauración.
-7. Validar la persistencia tras reinicio de contenedores y, cuando se autorice,
-   tras reinicio del servidor.
-8. Verificar acceso del navegador a OpenStreetMap y
-   `https://embed.windy.com`; sus fallas no deben bloquear el sistema.
-9. Confirmar HTTPS o mantener la restricción de no usar datos ni claves reales
-   sobre HTTP.
-10. Acordar retención de respaldos, monitoreo, incidentes y responsables.
+1. [x] Cargar la imagen de aplicación y comprobar su SHA-256.
+2. [x] Crear los archivos privados con modo `600`, sin versionar credenciales.
+3. [x] Iniciar MySQL y comprobar que `3306` no está publicado.
+4. [x] Publicar staging en el puerto asignado `8004` y verificar su salud.
+5. [x] Inicializar y validar exclusivamente el conjunto sintético.
+6. [ ] Aprobar el ensayo no destructivo de restauración en una base temporal.
+7. [ ] Validar persistencia tras reinicio de contenedores y del servidor.
+8. [x] Recorrer OpenStreetMap y `https://embed.windy.com` mediante staging.
+9. [ ] Confirmar acceso directo, HTTPS o la restricción institucional aplicable.
+10. [ ] Acordar retención de respaldos, monitoreo, incidentes y responsables.
 
-## Aceptación obligatoria en staging — puerto 2004
+## Aceptación obligatoria en staging — puerto 8004
 
-- [ ] Ambos SHA-256 coinciden antes de cargar las imágenes.
-- [ ] `database.sh status` informa MySQL saludable, red interna y 3306 privado.
-- [ ] `deploy.sh staging` genera respaldo, migra y termina correctamente.
-- [ ] `verify.sh staging --database` confirma aplicación, conexión y esquema.
+- [x] El SHA-256 de la imagen de aplicación coincide antes de cargarla.
+- [x] `database.sh status` informa MySQL saludable, red interna y 3306 privado.
+- [x] `deploy.sh staging` genera respaldo, migra y termina correctamente.
+- [x] `verify.sh staging --database` confirma aplicación, conexión y esquema.
 - [ ] `test-backup-restore.sh` restaura el respaldo en una base temporal.
 - [ ] Inicio y cierre de sesión funcionan con cada rol autorizado.
 - [ ] Las restricciones de administración e informes se cumplen en backend.
@@ -140,7 +142,7 @@ ni archivos de usuarios reales.
 - [ ] Se prueba una reversión al tag anterior y se identifica el respaldo previo.
 - [ ] Se verifica la persistencia después de reiniciar los contenedores.
 
-## Promoción y cierre — puerto 2003
+## Promoción y cierre — puerto 8003
 
 Producción solo se publica tras aprobar staging. Utiliza
 `parra-production.env`, `sigcel_production`, su usuario exclusivo y un volumen

@@ -67,7 +67,7 @@ protecciones de sesión están documentados en
 [`docs/SEGURIDAD_OPERATIVA.md`](docs/SEGURIDAD_OPERATIVA.md).
 
 La exportación verificable de la imagen y el procedimiento para los puertos
-institucionales `2003` y `2004` están documentados en
+institucionales `8003` y `8004` están documentados en
 [`docs/DESPLIEGUE_PARRA.md`](docs/DESPLIEGUE_PARRA.md).
 La instancia MySQL 8.4 de Parra permanece en una red interna sin publicar
 `3306`; sus decisiones y escenarios de calidad se justifican en

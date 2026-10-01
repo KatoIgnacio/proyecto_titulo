@@ -31,8 +31,8 @@ php artisan key:generate --show
 ```
 
 El valor resultante se guarda únicamente en el archivo privado del servidor.
-La primera validación utilizará el puerto 2004; al promover la versión estable,
-`APP_URL` debe cambiar al puerto 2003 y se debe reconstruir la caché de
+La primera validación utilizará el puerto 8004; al promover la versión estable,
+`APP_URL` debe cambiar al puerto 8003 y se debe reconstruir la caché de
 configuración.
 
 ## Valores obligatorios en producción

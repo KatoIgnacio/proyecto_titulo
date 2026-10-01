@@ -64,7 +64,7 @@ class AcademicTraceabilityDocumentationTest extends TestCase
         $this->assertStringContainsString('FIELD_REPORT_ATTACHMENTS', $architecture);
         $this->assertStringContainsString('IMPORT_BATCHES', $architecture);
 
-        $this->assertStringContainsString('núcleo funcional y requisitos técnicos verificados en local', $inventory);
+        $this->assertStringContainsString('núcleo funcional verificado en local y staging institucional operativo', $inventory);
         $this->assertStringContainsString('evaluación empírica con usuarios', $inventory);
         $this->assertStringContainsString('staging institucional', $inventory);
         $this->assertStringContainsString('datos sintéticos', $inventory);
