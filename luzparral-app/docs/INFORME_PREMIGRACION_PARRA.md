@@ -110,8 +110,9 @@ ni archivos de usuarios reales.
 6. [ ] Aprobar el ensayo no destructivo de restauración en una base temporal.
 7. [ ] Validar persistencia tras reinicio de contenedores y del servidor.
 8. [x] Recorrer OpenStreetMap y `https://embed.windy.com` mediante staging.
-9. [ ] Confirmar acceso directo, HTTPS o la restricción institucional aplicable.
-10. [ ] Acordar retención de respaldos, monitoreo, incidentes y responsables.
+9. [ ] Transferir y ejecutar los controles operativos del Segmento 22.
+10. [ ] Confirmar acceso directo, HTTPS o la restricción institucional aplicable.
+11. [ ] Acordar retención de respaldos, monitoreo, incidentes y responsables.
 
 ## Aceptación obligatoria en staging — puerto 8004
 
@@ -119,6 +120,7 @@ ni archivos de usuarios reales.
 - [x] `database.sh status` informa MySQL saludable, red interna y 3306 privado.
 - [x] `deploy.sh staging` genera respaldo, migra y termina correctamente.
 - [x] `verify.sh staging --database` confirma aplicación, conexión y esquema.
+- [ ] `operational-check.sh staging` aprueba puertos, persistencia y respaldo.
 - [ ] `test-backup-restore.sh` restaura el respaldo en una base temporal.
 - [ ] Inicio y cierre de sesión funcionan con cada rol autorizado.
 - [ ] Las restricciones de administración e informes se cumplen en backend.

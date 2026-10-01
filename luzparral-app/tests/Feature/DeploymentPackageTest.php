@@ -174,4 +174,58 @@ class DeploymentPackageTest extends TestCase
         $this->assertStringContainsString('puerto `3306` existe únicamente', $contents);
         $this->assertStringContainsString('punto único de falla', $contents);
     }
+
+    public function test_operational_audit_covers_host_persistence_ports_and_backups(): void
+    {
+        $contents = file_get_contents(base_path('deploy/parra/operational-check.sh'));
+
+        $this->assertIsString($contents);
+        $this->assertStringContainsString('verify.sh" "$environment_name" --database', $contents);
+        $this->assertStringContainsString('{{.Host.Security.Rootless}}', $contents);
+        $this->assertStringContainsString('Linger=yes', $contents);
+        $this->assertStringContainsString('{{.HostConfig.RestartPolicy.Name}}', $contents);
+        $this->assertStringContainsString('{{.HostConfig.AutoRemove}}', $contents);
+        $this->assertStringContainsString('host_port=8004', $contents);
+        $this->assertStringContainsString('host_port=8003', $contents);
+        $this->assertStringContainsString(':(2003|2004)', $contents);
+        $this->assertStringContainsString('podman volume exists', $contents);
+        $this->assertStringContainsString('sha256sum --check', $contents);
+        $this->assertStringContainsString('.metadata.json', $contents);
+        $this->assertStringContainsString("stat -c '%a'", $contents);
+        $this->assertStringContainsString('691200', $contents);
+    }
+
+    public function test_persistence_drill_requires_confirmation_and_backs_up_before_restart(): void
+    {
+        $contents = file_get_contents(base_path('deploy/parra/test-persistence.sh'));
+
+        $this->assertIsString($contents);
+        $this->assertStringContainsString('--confirm-restart', $contents);
+        $this->assertStringContainsString('backup-database.sh', $contents);
+        $this->assertStringContainsString('podman restart "$database_container"', $contents);
+        $this->assertStringContainsString('podman restart "$application_container"', $contents);
+        $this->assertStringContainsString('operational-check.sh', $contents);
+        $this->assertLessThan(
+            strpos($contents, 'podman restart "$database_container"'),
+            strpos($contents, 'backup-database.sh'),
+        );
+        $this->assertLessThan(
+            strpos($contents, 'podman restart "$application_container"'),
+            strpos($contents, 'podman restart "$database_container"'),
+        );
+    }
+
+    public function test_parra_runbook_separates_local_controls_from_institutional_dependencies(): void
+    {
+        $contents = file_get_contents(base_path('docs/OPERACION_PARRA.md'));
+
+        $this->assertIsString($contents);
+        $this->assertStringContainsString('demostración académica', $contents);
+        $this->assertStringContainsString('HTTPS y su certificado', $contents);
+        $this->assertStringContainsString('copia de respaldos fuera del mismo servidor', $contents);
+        $this->assertStringContainsString('propuesta técnica, no una política aprobada', $contents);
+        $this->assertStringContainsString('no convierte `8004` en acceso público', $contents);
+        $this->assertStringContainsString('reiniciar el servidor completo', $contents);
+        $this->assertStringContainsString('Las contraseñas, archivos `.env`, claves SSH', $contents);
+    }
 }

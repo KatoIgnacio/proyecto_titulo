@@ -75,6 +75,9 @@ La instancia MySQL 8.4 de Parra permanece en una red interna sin publicar
 El cierre local y los controles que solo pueden resolverse dentro del servidor
 se separan en
 [`docs/INFORME_PREMIGRACION_PARRA.md`](docs/INFORME_PREMIGRACION_PARRA.md).
+La auditoría rutinaria, la prueba protegida de persistencia, los respaldos y la
+respuesta a incidentes se reúnen en
+[`docs/OPERACION_PARRA.md`](docs/OPERACION_PARRA.md).
 
 La comprobación de salud, los errores controlados de base de datos y la lectura
 de logs están documentados en

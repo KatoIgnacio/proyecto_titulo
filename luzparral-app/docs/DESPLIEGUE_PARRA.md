@@ -75,6 +75,8 @@ Transferir a `artifacts/` los dos TAR y sus archivos adyacentes. Transferir a
 - `test-backup-restore.sh`;
 - `deploy.sh`;
 - `verify.sh`;
+- `operational-check.sh`;
+- `test-persistence.sh`;
 - `initialize-staging.sh`.
 
 Transferir temporalmente a `config/` las plantillas `mysql.env.example`,
@@ -167,11 +169,15 @@ contener exclusivamente datos sintéticos.
 
 ```bash
 ~/luzparral/scripts/verify.sh staging --database
+~/luzparral/scripts/operational-check.sh staging
 podman ps
 podman port luzparral-mysql
 ```
 
-El último comando no debe imprimir nada. Desde una red autorizada abrir:
+La auditoría adicional comprueba Podman rootless, `Linger`, políticas de
+reinicio, volúmenes, puertos asignados, espacio disponible y el checksum del
+respaldo más reciente. El último comando no debe imprimir nada.
+Desde una red autorizada abrir:
 
 `http://parra.chillan.ubiobio.cl:8004`
 
@@ -217,17 +223,24 @@ Nunca elimina tablas ni ejecuta `migrate:fresh`.
 
 ## 9. Probar persistencia
 
-Sin reiniciar el servidor completo durante horario no autorizado, se puede
-validar primero el reinicio de contenedores:
+Fuera de una demostración, ejecutar la prueba protegida por confirmación:
 
 ```bash
-podman restart luzparral-mysql luzparral-staging
-~/luzparral/scripts/verify.sh staging --database
+~/luzparral/scripts/test-persistence.sh \
+  staging \
+  --confirm-restart \
+  ~/luzparral/config/mysql.env \
+  ~/luzparral/backups
 ```
 
-La comprobación definitiva tras reinicio del servidor debe coordinarse con la
-Universidad y registrarse como evidencia.
+El script genera un respaldo antes de reiniciar MySQL y la aplicación, espera
+que ambos queden saludables y termina con `operational-check.sh`. No elimina
+contenedores, volúmenes ni bases. La comprobación definitiva tras reiniciar el
+servidor completo debe coordinarse con la Universidad y registrarse como
+evidencia.
 
+La rutina, retención propuesta y respuesta a incidentes se documentan en
+[`OPERACION_PARRA.md`](OPERACION_PARRA.md).
 ## 10. Promover a producción en el puerto `8003`
 
 Solo después de aprobar staging:
