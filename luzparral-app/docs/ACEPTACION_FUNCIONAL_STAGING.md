@@ -148,3 +148,11 @@ Los cambios de AF10-AF13 son evidencia auditable sobre datos sintéticos. No se
 restaura la base automáticamente: si se necesita recuperar la línea base para
 la presentación, se utiliza el respaldo identificado y el procedimiento de
 `CICLO_BASE_DATOS.md`, con una nueva verificación operativa al terminar.
+
+## Ejecuciones registradas
+
+La ejecución AF-STG-20261005 del 5 de octubre de 2026 terminó aprobada. Su
+resultado narrativo se conserva en RESULTADO_ACEPTACION_FUNCIONAL_STAGING_20261005.md
+y las 35 comprobaciones por cuenta y caso se encuentran en
+evidence/aceptacion_funcional_staging-20261005.csv. Esta aceptación técnica no
+acredita la evaluación de usuarios: OE4 y RNF05 permanecen pendientes.

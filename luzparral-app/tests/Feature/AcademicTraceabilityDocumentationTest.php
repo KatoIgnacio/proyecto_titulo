@@ -79,6 +79,39 @@ class AcademicTraceabilityDocumentationTest extends TestCase
         );
     }
 
+    public function test_staging_acceptance_result_records_all_cases_without_claiming_user_validation(): void
+    {
+        $result = $this->document('RESULTADO_ACEPTACION_FUNCIONAL_STAGING_20261005.md');
+
+        foreach (range(1, 14) as $number) {
+            $identifier = str_pad((string) $number, 2, '0', STR_PAD_LEFT);
+            $this->assertStringContainsString('AF'.$identifier.' | OK', $result);
+        }
+
+        $this->assertStringContainsString('INC-AF-01', $result);
+        $this->assertStringContainsString('staging-20261005T230556Z.sql', $result);
+        $this->assertStringContainsString('OE4 y RNF05 permanecen pendientes', $result);
+        $this->assertStringNotContainsString('LUZPARRAL_DEMO_PASSWORD=', $result);
+
+        $csv = file_get_contents(base_path('docs/evidence/aceptacion_funcional_staging-20261005.csv'));
+        $this->assertIsString($csv);
+        $this->assertStringNotContainsString('password', strtolower($csv));
+
+        $lines = preg_split('/\r\n|\r|\n/', trim($csv));
+        $this->assertIsArray($lines);
+        $this->assertCount(36, $lines);
+
+        $header = str_getcsv(array_shift($lines), ',', '"', '');
+        $this->assertSame('execution_code', $header[0]);
+        $this->assertSame('status', $header[9]);
+
+        foreach ($lines as $line) {
+            $row = str_getcsv($line, ',', '"', '');
+            $this->assertSame('AF-STG-20261005', $row[0]);
+            $this->assertSame('OK', $row[9]);
+        }
+    }
+
     public function test_architecture_and_final_inventory_distinguish_local_evidence_from_external_work(): void
     {
         $architecture = $this->document('ARQUITECTURA_MODELO_ACTUAL.md');

@@ -23,6 +23,24 @@ promoción a producción y la evaluación empírica permanecen pendientes.
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
 
+## Evidencia técnica del Segmento 24
+
+El 5 de octubre de 2026 se completó la aceptación funcional técnica de staging
+con las cinco cuentas sintéticas. AF01 a AF14 terminaron OK: se verificaron
+módulos comunes, restricciones de identificadores, informes, importaciones,
+cambios de estado, antecedentes de terreno y respuestas 403 para acciones no
+autorizadas. La incidencia INC-AF-01 de credencial divergente en S01 se resolvió
+mediante mantenimiento controlado limitado a las cinco cuentas sintéticas, sin
+exponer secretos, y los cinco accesos se comprobaron nuevamente.
+
+La ejecución utilizó luzparral-app:ef209b7d3d9e en 8004. Antes de las pruebas
+mutables se creó y verificó staging-20261005T230556Z.sql. La auditoría posterior
+aprobó aplicación, contenedor, base privada, esquema, encabezados, persistencia,
+uso de disco y puertos asignados. El resultado completo y sus 35 comprobaciones
+estructuradas están en RESULTADO_ACEPTACION_FUNCIONAL_STAGING_20261005.md y
+evidence/aceptacion_funcional_staging-20261005.csv. OE4 y RNF05 permanecen
+pendientes de evaluación con participantes reales.
+
 ## Evidencia técnica del Segmento 23
 
 El 1 de octubre de 2026 staging se actualizó a

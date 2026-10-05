@@ -115,6 +115,8 @@ La aceptación técnica previa en staging, separada de la evaluación con usuari
 se ejecuta por cuenta y rol según
 [`docs/ACEPTACION_FUNCIONAL_STAGING.md`](docs/ACEPTACION_FUNCIONAL_STAGING.md).
 
+El resultado aprobado del 5 de octubre de 2026 se registra en
+[docs/RESULTADO_ACEPTACION_FUNCIONAL_STAGING_20261005.md](docs/RESULTADO_ACEPTACION_FUNCIONAL_STAGING_20261005.md).
 La arquitectura y el modelo de información implementados se describen en
 [`docs/ARQUITECTURA_MODELO_ACTUAL.md`](docs/ARQUITECTURA_MODELO_ACTUAL.md), y el
 balance final de logros, límites y trabajo futuro se mantiene en
