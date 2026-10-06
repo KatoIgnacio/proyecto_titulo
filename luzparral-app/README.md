@@ -64,7 +64,15 @@ validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DAT
 
 El aprovisionamiento de las cinco cuentas, la recuperación sin SMTP y las
 protecciones de sesión están documentados en
-[`docs/SEGURIDAD_OPERATIVA.md`](docs/SEGURIDAD_OPERATIVA.md).
+[`docs/SEGURIDAD_OPERATIVA.md`](docs/SEGURIDAD_OPERATIVA.md). Esa guía también
+describe la creación administrativa de cuentas temporales de visita, su
+vencimiento automático, la revocación de sesiones y sus permisos de solo
+lectura.
+
+Los informes permiten filtrar contingencias con o sin clientes críticos y
+electrodependientes. Los PDF ejecutivo, de desarrollo e integral incorporan un
+mapa esquemático generado localmente a partir de coordenadas sintéticas, sin
+consultar teselas ni servicios externos.
 
 La exportación verificable de la imagen y el procedimiento para los puertos
 institucionales `8003` y `8004` están documentados en

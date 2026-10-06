@@ -17,9 +17,9 @@ class WeatherForecastTest extends TestCase
         $this->get('/pronostico-meteorologico')->assertRedirect('/login');
     }
 
-    public function test_every_active_role_can_view_the_windy_forecast(): void
+    public function test_internal_active_roles_can_view_the_windy_forecast(): void
     {
-        foreach (UserRole::cases() as $role) {
+        foreach ([UserRole::Admin, UserRole::Supervisor, UserRole::Operator, UserRole::Viewer] as $role) {
             $user = User::factory()->create(['role' => $role]);
 
             $this->actingAs($user)
@@ -29,5 +29,14 @@ class WeatherForecastTest extends TestCase
                     ->component('WeatherForecast')
                     ->where('embedUrl', fn (string $url) => str_starts_with($url, 'https://embed.windy.com/')));
         }
+    }
+
+    public function test_guest_cannot_view_the_windy_forecast(): void
+    {
+        $guest = User::factory()->create(['role' => UserRole::Guest]);
+
+        $this->actingAs($guest)
+            ->get('/pronostico-meteorologico')
+            ->assertForbidden();
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Commune;
 use App\Models\Contingency;
 use App\Models\Feeder;
 use App\Models\User;
+use App\Services\Reports\ContingencyMapSnapshotRenderer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -106,6 +107,58 @@ class ContingencyReportTest extends TestCase
         }
     }
 
+    public function test_group_filters_apply_consistently_to_page_and_csv(): void
+    {
+        $user = $this->reportUser();
+        [$commune, $feeder] = $this->createLocation();
+        $this->createContingency($commune, $feeder, 'CONT-CRITICAL', 'reported', 'critical', 25, 2, 0);
+        $this->createContingency($commune, $feeder, 'CONT-ELECTRO', 'reported', 'high', 15, 0, 3);
+        $this->createContingency($commune, $feeder, 'CONT-GENERAL', 'reported', 'medium', 8, 0, 0);
+
+        $query = '?range=all&critical_customers=with&electrodependents=without';
+        $this->actingAs($user)
+            ->get('/informes'.$query)
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filters.critical_customers', 'with')
+                ->where('filters.electrodependents', 'without')
+                ->where('summary.total', 1)
+                ->where('summary.critical', 2)
+                ->where('summary.electrodependent', 0)
+                ->where('results.data.0.code', 'CONT-CRITICAL'));
+
+        $response = $this->actingAs($user)->get('/informes/contingencias.csv'.$query);
+        ob_start();
+        $response->sendContent();
+        $content = (string) ob_get_clean();
+
+        $this->assertStringContainsString('CONT-CRITICAL', $content);
+        $this->assertStringNotContainsString('CONT-ELECTRO', $content);
+        $this->assertStringNotContainsString('CONT-GENERAL', $content);
+    }
+
+    public function test_map_snapshot_renders_only_the_selected_synthetic_contingencies(): void
+    {
+        [$commune, $feeder] = $this->createLocation();
+        $contingency = $this->createContingency(
+            $commune,
+            $feeder,
+            'CONT-MAP-PDF',
+            'reported',
+            'critical',
+            25,
+        );
+
+        $uri = app(ContingencyMapSnapshotRenderer::class)->render(collect([$contingency]));
+        $this->assertStringStartsWith('data:image/svg+xml;base64,', $uri);
+
+        $svg = base64_decode(substr($uri, strlen('data:image/svg+xml;base64,')), true);
+        $this->assertIsString($svg);
+        $this->assertStringContainsString('<svg', $svg);
+        $this->assertStringContainsString('CONT-MAP-PDF', $svg);
+        $this->assertStringContainsString('Mapa esquemático', $svg);
+    }
+
     public function test_report_rejects_invalid_filters(): void
     {
         $user = $this->reportUser();
@@ -117,6 +170,10 @@ class ContingencyReportTest extends TestCase
         $this->actingAs($user)
             ->get('/informes/contingencias.pdf?report_type=raw')
             ->assertSessionHasErrors('report_type');
+
+        $this->actingAs($user)
+            ->get('/informes?critical_customers=maybe&electrodependents=all')
+            ->assertSessionHasErrors(['critical_customers', 'electrodependents']);
     }
 
     private function reportUser(): User
@@ -146,8 +203,16 @@ class ContingencyReportTest extends TestCase
         return [$commune, $feeder];
     }
 
-    private function createContingency(Commune $commune, Feeder $feeder, string $code, string $status, string $priority, int $affected): Contingency
-    {
+    private function createContingency(
+        Commune $commune,
+        Feeder $feeder,
+        string $code,
+        string $status,
+        string $priority,
+        int $affected,
+        int $critical = 2,
+        int $electrodependent = 1,
+    ): Contingency {
         return Contingency::query()->create([
             'code' => $code,
             'osf_code' => str_replace('CONT', 'OSF', $code),
@@ -162,8 +227,8 @@ class ContingencyReportTest extends TestCase
             'latitude' => -36.1400000,
             'longitude' => -71.8200000,
             'affected_total' => $affected,
-            'critical_affected' => 2,
-            'electrodependent_affected' => 1,
+            'critical_affected' => $critical,
+            'electrodependent_affected' => $electrodependent,
         ]);
     }
 }

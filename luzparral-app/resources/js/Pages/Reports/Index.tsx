@@ -14,6 +14,8 @@ type Filters = {
     feeder: number | null;
     priority: string | null;
     status: string | null;
+    critical_customers: string | null;
+    electrodependents: string | null;
     search: string;
 };
 
@@ -22,6 +24,8 @@ type FilterForm = PeriodFilterValue & {
     feeder: string;
     priority: string;
     status: string;
+    critical_customers: string;
+    electrodependents: string;
     search: string;
 };
 
@@ -114,20 +118,20 @@ const reportTypeOptions: Array<{
         value: 'executive',
         title: 'Resumen ejecutivo',
         description: 'Para revisar el comportamiento general y apoyar decisiones sin recorrer cada expediente.',
-        contents: 'Indicadores, gráficos, evolución temporal y comunas más afectadas.',
+        contents: 'Indicadores, mapa, gráficos, evolución temporal y comunas más afectadas.',
         recommended: true,
     },
     {
         value: 'development',
         title: 'Desarrollo de contingencias',
         description: 'Para consultar la evolución y trazabilidad de las contingencias incluidas por los filtros.',
-        contents: 'Fichas operacionales, causas, impacto, duración y cambios de estado.',
+        contents: 'Mapa, fichas operacionales, causas, impacto, duración y cambios de estado.',
     },
     {
         value: 'complete',
         title: 'Informe integral',
         description: 'Para auditoría, respaldo académico o revisión exhaustiva de la selección.',
-        contents: 'Resumen ejecutivo, gráficos y desarrollo completo de cada contingencia.',
+        contents: 'Resumen ejecutivo, mapa, gráficos y desarrollo completo de cada contingencia.',
     },
 ];
 
@@ -175,6 +179,8 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
         feeder: filters.feeder?.toString() ?? '',
         priority: filters.priority ?? '',
         status: filters.status ?? '',
+        critical_customers: filters.critical_customers ?? '',
+        electrodependents: filters.electrodependents ?? '',
         search: filters.search,
     });
 
@@ -197,6 +203,8 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
         if (filters.feeder) params.set('feeder', filters.feeder.toString());
         if (filters.priority) params.set('priority', filters.priority);
         if (filters.status) params.set('status', filters.status);
+        if (filters.critical_customers) params.set('critical_customers', filters.critical_customers);
+        if (filters.electrodependents) params.set('electrodependents', filters.electrodependents);
         if (filters.search) params.set('search', filters.search);
         return params.toString();
     }, [filters]);
@@ -230,12 +238,14 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
             feeder: form.feeder || undefined,
             priority: form.priority || undefined,
             status: form.status || undefined,
+            critical_customers: form.critical_customers || undefined,
+            electrodependents: form.electrodependents || undefined,
             search: form.search.trim() || undefined,
         }, { preserveState: true, preserveScroll: true, replace: true });
     };
 
     const reset = () => {
-        setForm({ ...defaultCustomPeriod(referenceDate), commune: '', feeder: '', priority: '', status: '', search: '' });
+        setForm({ ...defaultCustomPeriod(referenceDate), commune: '', feeder: '', priority: '', status: '', critical_customers: '', electrodependents: '', search: '' });
         router.get(route('reports.index'), {}, { replace: true });
     };
 
@@ -261,7 +271,7 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
             <div className="space-y-6 p-4 sm:p-6 lg:p-8">
                 <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                     <form onSubmit={submit} className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+                        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                             <PeriodFields
                                 value={form}
                                 onChange={setForm}
@@ -303,6 +313,24 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
                                 <select value={form.priority} onChange={(event) => setForm((current) => ({ ...current, priority: event.target.value }))} className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="">Todas</option>
                                     {Object.entries(priorityLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                                </select>
+                            </label>
+
+                            <label className="text-sm font-medium text-slate-700">
+                                Clientes críticos
+                                <select value={form.critical_customers} onChange={(event) => setForm((current) => ({ ...current, critical_customers: event.target.value }))} className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Todos</option>
+                                    <option value="with">Con clientes críticos</option>
+                                    <option value="without">Sin clientes críticos</option>
+                                </select>
+                            </label>
+
+                            <label className="text-sm font-medium text-slate-700">
+                                Electrodependientes
+                                <select value={form.electrodependents} onChange={(event) => setForm((current) => ({ ...current, electrodependents: event.target.value }))} className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Todos</option>
+                                    <option value="with">Con electrodependientes</option>
+                                    <option value="without">Sin electrodependientes</option>
                                 </select>
                             </label>
 

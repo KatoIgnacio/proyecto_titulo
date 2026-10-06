@@ -21,6 +21,8 @@ class User extends Authenticatable
         'password',
         'role',
         'active',
+        'expires_at',
+        'created_by',
     ];
 
     /** @var list<string> */
@@ -35,6 +37,7 @@ class User extends Authenticatable
         return [
             'active' => 'boolean',
             'email_verified_at' => 'datetime',
+            'expires_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
         ];
@@ -42,7 +45,8 @@ class User extends Authenticatable
 
     public function isActive(): bool
     {
-        return $this->active;
+        return $this->active
+            && ($this->expires_at === null || $this->expires_at->isFuture());
     }
 
     public function hasRole(UserRole ...$roles): bool

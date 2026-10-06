@@ -23,6 +23,27 @@ promoción a producción y la evaluación empírica permanecen pendientes.
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
 
+## Evidencia local del Segmento 25
+
+El 6 de octubre de 2026 se completó la implementación y verificación local de
+tres extensiones para la presentación académica. Administración puede crear y
+desactivar cuentas temporales con rol Visita; la credencial se muestra una sola
+vez, vence automáticamente y respeta el límite global de diez cuentas activas.
+La visita dispone de panel, búsqueda, detalle e informes en modo de consulta,
+pero el backend le impide acceder al mapa, al pronóstico, a importaciones, a
+identificadores sensibles y a operaciones de modificación.
+
+Los informes incorporan filtros independientes para contingencias con o sin
+clientes críticos y electrodependientes. Los tres tipos de PDF incluyen un mapa
+esquemático construido localmente con coordenadas sintéticas, sin solicitar
+teselas externas. Un informe integral de cinco páginas fue renderizado e
+inspeccionado sin cortes, superposiciones ni datos personales.
+
+La validación local aprobó 155 pruebas con 1.840 aserciones, la construcción de
+producción de Vite y Pint. Esta evidencia todavía no corresponde a staging:
+Parra continúa usando `luzparral-app:ef209b7d3d9e` hasta construir, transferir,
+migrar y aceptar una nueva imagen del Segmento 25.
+
 ## Evidencia técnica del Segmento 24
 
 El 5 de octubre de 2026 se completó la aceptación funcional técnica de staging
@@ -103,8 +124,8 @@ futuro la generación asíncrona si crece la demanda.
   Administración puede corregirlos o eliminarlos con confirmación y auditoría.
 - Importación previsualizada, transaccional y auditable, con resultados
   parciales y causas de rechazo explicadas en la interfaz.
-- Informes completo, resumen gráfico y evolución, con exportación filtrada.
-- Roles en backend, cuentas activas, archivos privados y diagnóstico de salud.
+- Informes completo, resumen gráfico y evolución, con filtros por clientes críticos y electrodependientes, mapa esquemático y exportación filtrada.
+- Roles en backend, cuentas activas, visitas temporales con vencimiento, archivos privados y diagnóstico de salud.
 - Contenedorización reproducible y proceso de promoción 8004 a 8003 con
   comprobación de integridad y reversión.
 

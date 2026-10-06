@@ -37,8 +37,12 @@
         .insights td { background: #fff; border: 1px solid #dbe3ee; border-radius: 4px; padding: 7px 8px; vertical-align: top; width: 25%; }
         .insight-label { color: #64748b; font-size: 6.2px; font-weight: bold; text-transform: uppercase; }
         .insight-value { color: #102a56; font-size: 11px; font-weight: bold; margin: 2px 0; }
-        .chart-card { border: 1px solid #dbe3ee; border-radius: 5px; padding: 8px 10px; }
+        .chart-card, .map-card { border: 1px solid #dbe3ee; border-radius: 5px; padding: 8px 10px; }
         .chart-card img { display: block; height: 205px; width: 100%; }
+        .map-card img { display: block; height: 205px; width: 100%; }
+        .visual-grid { border-collapse: separate; border-spacing: 8px 0; margin: 0 -8px; width: 101.6%; }
+        .visual-grid td { vertical-align: top; width: 50%; }
+        .visual-grid .chart-card img, .visual-grid .map-card img { height: 172px; }
         .section-head { border-bottom: 2px solid #1646a3; margin-bottom: 11px; padding-bottom: 7px; }
         .section-kicker { color: #1646a3; font-size: 7px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
         .two-column { border-spacing: 10px 0; margin: 0 -10px; width: 102.2%; }
@@ -171,12 +175,30 @@
         </table>
 
         @if ($includesAnalytics)
-            <div class="chart-card avoid-break">
-                <h3 style="margin-bottom: 1px">Evolución de clientes afectados y repuestos</h3>
-                <p class="muted small" style="margin-bottom: 3px">Comparación temporal de nuevas afectaciones y reposiciones registradas.</p>
-                <img src="{{ $analytics['trendChart'] }}" alt="Evolución temporal">
-            </div>
+            <table class="visual-grid avoid-break">
+                <tr>
+                    <td>
+                        <div class="chart-card">
+                            <h3 style="margin-bottom: 1px">Evolución de clientes afectados y repuestos</h3>
+                            <p class="muted small" style="margin-bottom: 3px">Nuevas afectaciones y reposiciones registradas.</p>
+                            <img src="{{ $analytics['trendChart'] }}" alt="Evolución temporal">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="map-card">
+                            <h3 style="margin-bottom: 1px">Mapa de contingencias seleccionadas</h3>
+                            <p class="muted small" style="margin-bottom: 3px">Distribución esquemática según coordenadas sintéticas.</p>
+                            <img src="{{ $mapSnapshot }}" alt="Mapa de contingencias">
+                        </div>
+                    </td>
+                </tr>
+            </table>
         @else
+            <div class="map-card avoid-break">
+                <h3 style="margin-bottom: 1px">Mapa de contingencias seleccionadas</h3>
+                <p class="muted small" style="margin-bottom: 3px">Distribución esquemática asociada a las fichas incluidas.</p>
+                <img src="{{ $mapSnapshot }}" alt="Mapa de contingencias">
+            </div>
             <div class="analysis-note">
                 <strong>Criterio de lectura:</strong> las fichas se presentan desde la contingencia más reciente a la más antigua. Dentro de cada ficha, los hitos se ordenan cronológicamente.
             </div>

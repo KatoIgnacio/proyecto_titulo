@@ -23,6 +23,8 @@ class ContingencyReportRequest extends FormRequest
             'feeder' => ['nullable', 'integer', 'exists:feeders,id'],
             'priority' => ['nullable', Rule::in(['critical', 'high', 'medium', 'low'])],
             'status' => ['nullable', Rule::in(['reported', 'assigned', 'in_progress', 'restored', 'closed'])],
+            'critical_customers' => ['nullable', Rule::in(['with', 'without'])],
+            'electrodependents' => ['nullable', Rule::in(['with', 'without'])],
             'search' => ['nullable', 'string', 'max:80'],
             'report_type' => ['nullable', Rule::in(['executive', 'development', 'complete'])],
             'page' => ['nullable', 'integer', 'min:1'],
@@ -30,7 +32,7 @@ class ContingencyReportRequest extends FormRequest
     }
 
     /**
-     * @return array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, search: string}
+     * @return array{range: string, date_day: ?string, date_month: ?string, date_year: ?string, date_from: ?string, date_to: ?string, commune: ?int, feeder: ?int, priority: ?string, status: ?string, critical_customers: ?string, electrodependents: ?string, search: string}
      */
     public function reportFilters(?CarbonImmutable $referenceDate = null): array
     {
@@ -43,6 +45,8 @@ class ContingencyReportRequest extends FormRequest
             'feeder' => isset($validated['feeder']) ? (int) $validated['feeder'] : null,
             'priority' => $validated['priority'] ?? null,
             'status' => $validated['status'] ?? null,
+            'critical_customers' => $validated['critical_customers'] ?? null,
+            'electrodependents' => $validated['electrodependents'] ?? null,
             'search' => trim($validated['search'] ?? ''),
         ];
     }

@@ -147,6 +147,7 @@ class ContingencyReportController extends Controller
             'reportTitle' => $definition['title'],
             'includesAnalytics' => $includesAnalytics,
             'includesDetail' => $includesDetail,
+            'mapSnapshot' => $this->reports->mapSnapshot($contingencies),
             'companyLogo' => $this->reports->imageDataUri('images/logo-luzparral.png'),
             'systemLogo' => $this->reports->imageDataUri('images/logo-sigcel-transparente.png'),
         ])->render(), 'UTF-8');

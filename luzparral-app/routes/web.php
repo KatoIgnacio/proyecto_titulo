@@ -8,6 +8,7 @@ use App\Http\Controllers\ContingencyStatusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FieldReportAttachmentController;
 use App\Http\Controllers\FieldReportController;
+use App\Http\Controllers\GuestAccountController;
 use App\Http\Controllers\OperationalSearchController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WeatherForecastController;
@@ -17,9 +18,13 @@ Route::redirect('/', '/login');
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
-    Route::get('/contingencias/mapa', ContingencyMapController::class)->name('contingencies.map');
-    Route::get('/contingencias/mapa/datos', [ContingencyMapController::class, 'data'])->name('contingencies.map.data');
-    Route::get('/pronostico-meteorologico', WeatherForecastController::class)->name('weather.forecast');
+
+    Route::middleware('role:admin,supervisor,operator,viewer')->group(function () {
+        Route::get('/contingencias/mapa', ContingencyMapController::class)->name('contingencies.map');
+        Route::get('/contingencias/mapa/datos', [ContingencyMapController::class, 'data'])->name('contingencies.map.data');
+        Route::get('/pronostico-meteorologico', WeatherForecastController::class)->name('weather.forecast');
+    });
+
     Route::get('/buscador-operacional', OperationalSearchController::class)->name('contingencies.search');
     Route::get('/contingencias/{contingency}', ContingencyDetailController::class)->name('contingencies.show');
     Route::patch('/contingencias/{contingency}/estado', [ContingencyStatusController::class, 'update'])
@@ -46,13 +51,19 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         Route::get('/importaciones/plantilla', [ContingencyImportController::class, 'template'])->name('imports.template');
     });
 
-    Route::middleware('role:admin,supervisor')->group(function () {
+    Route::middleware('role:admin,supervisor,guest')->group(function () {
         Route::get('/informes', [ContingencyReportController::class, 'index'])
             ->name('reports.index');
         Route::get('/informes/contingencias.csv', [ContingencyReportController::class, 'exportCsv'])
             ->name('reports.csv');
         Route::get('/informes/contingencias.pdf', [ContingencyReportController::class, 'exportPdf'])
             ->name('reports.pdf');
+    });
+
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/cuentas-visita', [GuestAccountController::class, 'index'])->name('guest-accounts.index');
+        Route::post('/cuentas-visita', [GuestAccountController::class, 'store'])->name('guest-accounts.store');
+        Route::delete('/cuentas-visita/{guest}', [GuestAccountController::class, 'destroy'])->name('guest-accounts.destroy');
     });
 });
 

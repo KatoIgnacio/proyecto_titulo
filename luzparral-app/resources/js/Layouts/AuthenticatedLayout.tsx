@@ -8,6 +8,7 @@ const roleLabels: Record<UserRole, string> = {
     supervisor: 'Supervisión',
     operator: 'Operación',
     viewer: 'Consulta',
+    guest: 'Visita',
 };
 
 type IconName =
@@ -18,6 +19,7 @@ type IconName =
     | 'search'
     | 'report'
     | 'import'
+    | 'users'
     | 'menu'
     | 'close';
 
@@ -29,6 +31,7 @@ const iconPaths: Record<IconName, ReactNode> = {
     search: <path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />,
     report: <path d="M6 2h9l4 4v16H6V2Zm9 0v5h5M9 12h7m-7 4h7" />,
     import: <path d="M12 3v12m0-12 4 4m-4-4L8 7M4 14v6h16v-6" />,
+    users: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m7-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
     menu: <path d="M4 6h16M4 12h16M4 18h16" />,
     close: <path d="m6 6 12 12M18 6 6 18" />,
 };
@@ -63,6 +66,7 @@ export default function Authenticated({
     const searchActive = route().current('contingencies.search');
     const reportsActive = route().current('reports.*');
     const importsActive = route().current('imports.*');
+    const guestAccountsActive = route().current('guest-accounts.*');
 
     const activeClass = 'bg-blue-600 text-white shadow-sm';
     const inactiveClass = 'text-slate-300 transition hover:bg-slate-900 hover:text-white';
@@ -77,6 +81,7 @@ export default function Authenticated({
                 Panel general
             </Link>
 
+            {permissions.viewMap && (
             <Link
                 href={route('contingencies.map')}
                 className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ${mapActive ? activeClass : inactiveClass}`}
@@ -84,7 +89,9 @@ export default function Authenticated({
                 <Icon name="map" />
                 Mapa de contingencias
             </Link>
+            )}
 
+            {permissions.viewWeather && (
             <Link
                 href={route('weather.forecast')}
                 className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ${weatherActive ? activeClass : inactiveClass}`}
@@ -92,6 +99,7 @@ export default function Authenticated({
                 <Icon name="weather" />
                 Pronóstico meteorológico
             </Link>
+            )}
 
             <div
                 className={`flex items-center justify-between rounded-lg px-3 py-3 text-sm font-semibold ${detailActive ? activeClass : 'text-slate-400'}`}
@@ -133,6 +141,15 @@ export default function Authenticated({
                 >
                     <Icon name="import" />
                     Importaciones
+                </Link>
+            )}
+            {permissions.manageGuestAccounts && (
+                <Link
+                    href={route('guest-accounts.index')}
+                    className={'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ' + (guestAccountsActive ? activeClass : inactiveClass)}
+                >
+                    <Icon name="users" />
+                    Cuentas de visita
                 </Link>
             )}
         </nav>

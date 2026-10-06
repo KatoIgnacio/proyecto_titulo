@@ -15,7 +15,10 @@ class ContingencyReportData
 {
     private const ACTIVE_STATUSES = ['reported', 'assigned', 'in_progress'];
 
-    public function __construct(private readonly TrendChartRenderer $chartRenderer) {}
+    public function __construct(
+        private readonly TrendChartRenderer $chartRenderer,
+        private readonly ContingencyMapSnapshotRenderer $mapRenderer,
+    ) {}
 
     public function referenceDate(): CarbonImmutable
     {
@@ -39,6 +42,16 @@ class ContingencyReportData
             ->when($filters['feeder'], fn (Builder $builder, int $feeder) => $builder->where('contingencies.feeder_id', $feeder))
             ->when($filters['priority'], fn (Builder $builder, string $priority) => $builder->where('contingencies.priority', $priority))
             ->when($filters['status'], fn (Builder $builder, string $status) => $builder->where('contingencies.status', $status))
+            ->when($filters['critical_customers'], fn (Builder $builder, string $mode) => $builder->where(
+                'contingencies.critical_affected',
+                $mode === 'with' ? '>' : '=',
+                0,
+            ))
+            ->when($filters['electrodependents'], fn (Builder $builder, string $mode) => $builder->where(
+                'contingencies.electrodependent_affected',
+                $mode === 'with' ? '>' : '=',
+                0,
+            ))
             ->when($filters['search'], function (Builder $builder, string $search): void {
                 $term = '%'.$search.'%';
 
@@ -252,11 +265,28 @@ class ContingencyReportData
         if ($filters['status']) {
             $items[] = ['label' => 'Estado', 'value' => $this->statusLabel($filters['status'])];
         }
+        if ($filters['critical_customers']) {
+            $items[] = [
+                'label' => 'Clientes críticos',
+                'value' => $filters['critical_customers'] === 'with' ? 'Con clientes críticos' : 'Sin clientes críticos',
+            ];
+        }
+        if ($filters['electrodependents']) {
+            $items[] = [
+                'label' => 'Electrodependientes',
+                'value' => $filters['electrodependents'] === 'with' ? 'Con electrodependientes' : 'Sin electrodependientes',
+            ];
+        }
         if ($filters['search'] !== '') {
             $items[] = ['label' => 'Búsqueda', 'value' => $filters['search']];
         }
 
         return $items;
+    }
+
+    public function mapSnapshot(Collection $contingencies): string
+    {
+        return $this->mapRenderer->render($contingencies);
     }
 
     public function imageDataUri(string $relativePath): string
