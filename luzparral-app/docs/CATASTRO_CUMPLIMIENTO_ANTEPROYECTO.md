@@ -18,18 +18,33 @@ promoción a producción y la evaluación empírica permanecen pendientes.
 | RNF06-RNF07 | Trazabilidad, consistencia e importación atómica verificadas |
 | OE1-OE3 | Materializados en levantamiento, modelo, requisitos e implementación |
 | OE4 | Preparado; exige sesiones reales autorizadas con usuarios |
-| Despliegue Parra | `ef209b7d3d9e` operativo en `8004`; acceso externo, reinicio del servidor y producción `8003` pendientes |
+| Despliegue Parra | `3ebc513c86fb` operativo en `8004`; consolidación de Consulta pendiente de nueva imagen, reinicio del servidor y producción `8003` pendientes |
 
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
 
-## Evidencia local del Segmento 25
+## Evidencia local del Segmento 26
+
+El 8 de octubre de 2026 se eliminó la diferencia funcional entre Consulta y
+Visita. Existe un único rol Consulta: una cuenta puede ser permanente o tener
+vencimiento automático, pero conserva exactamente los mismos permisos. Consulta
+puede revisar panel, búsqueda, detalle e informes; el backend bloquea mapa,
+pronóstico, importaciones, identificadores sensibles y cualquier modificación.
+
+Una migración convierte las cuentas históricas con rol `guest` a `viewer`.
+Administración solo puede desactivar desde la pantalla temporal las cuentas de
+Consulta que tengan vencimiento, por lo que la cuenta permanente queda
+protegida. La validación local aprobó 157 pruebas con 1.823 aserciones, Pint y
+la construcción de producción de Vite. Este cambio requiere construir y
+desplegar una imagen posterior a `3ebc513c86fb`.
+
+## Evidencia técnica del Segmento 25
 
 El 6 de octubre de 2026 se completó la implementación y verificación local de
 tres extensiones para la presentación académica. Administración puede crear y
-desactivar cuentas temporales con rol Visita; la credencial se muestra una sola
+desactivar cuentas temporales con el mismo rol Consulta; la credencial se muestra una sola
 vez, vence automáticamente y respeta el límite global de diez cuentas activas.
-La visita dispone de panel, búsqueda, detalle e informes en modo de consulta,
+La cuenta temporal dispone de panel, búsqueda, detalle e informes en modo de consulta,
 pero el backend le impide acceder al mapa, al pronóstico, a importaciones, a
 identificadores sensibles y a operaciones de modificación.
 
@@ -40,9 +55,10 @@ teselas externas. Un informe integral de cinco páginas fue renderizado e
 inspeccionado sin cortes, superposiciones ni datos personales.
 
 La validación local aprobó 155 pruebas con 1.840 aserciones, la construcción de
-producción de Vite y Pint. Esta evidencia todavía no corresponde a staging:
-Parra continúa usando `luzparral-app:ef209b7d3d9e` hasta construir, transferir,
-migrar y aceptar una nueva imagen del Segmento 25.
+producción de Vite y Pint. El 6 de octubre de 2026 se desplegó en staging la
+imagen `luzparral-app:3ebc513c86fb`; la migración de ciclo de vida de cuentas
+terminó correctamente y `verify.sh staging --database` confirmó aplicación,
+contenedor, MySQL y esquema saludables en el puerto `8004`.
 
 ## Evidencia técnica del Segmento 24
 
@@ -125,7 +141,7 @@ futuro la generación asíncrona si crece la demanda.
 - Importación previsualizada, transaccional y auditable, con resultados
   parciales y causas de rechazo explicadas en la interfaz.
 - Informes completo, resumen gráfico y evolución, con filtros por clientes críticos y electrodependientes, mapa esquemático y exportación filtrada.
-- Roles en backend, cuentas activas, visitas temporales con vencimiento, archivos privados y diagnóstico de salud.
+- Roles en backend, cuentas activas, consultas temporales con vencimiento, archivos privados y diagnóstico de salud.
 - Contenedorización reproducible y proceso de promoción 8004 a 8003 con
   comprobación de integridad y reversión.
 

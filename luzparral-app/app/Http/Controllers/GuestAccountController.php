@@ -17,22 +17,23 @@ class GuestAccountController extends Controller
 {
     public function index(): Response
     {
-        $guests = User::query()
-            ->where('role', UserRole::Guest)
+        $accounts = User::query()
+            ->where('role', UserRole::Viewer)
+            ->whereNotNull('expires_at')
             ->orderByDesc('created_at')
             ->get()
-            ->map(fn (User $guest): array => [
-                'id' => $guest->id,
-                'name' => $guest->name,
-                'email' => $guest->email,
-                'active' => $guest->isActive(),
-                'expires_at' => $guest->expires_at?->toIso8601String(),
-                'created_at' => $guest->created_at?->toIso8601String(),
+            ->map(fn (User $account): array => [
+                'id' => $account->id,
+                'name' => $account->name,
+                'email' => $account->email,
+                'active' => $account->isActive(),
+                'expires_at' => $account->expires_at?->toIso8601String(),
+                'created_at' => $account->created_at?->toIso8601String(),
             ]);
 
         return Inertia::render('GuestAccounts/Index', [
-            'guests' => $guests,
-            'credentials' => session('guest_credentials'),
+            'accounts' => $accounts,
+            'credentials' => session('temporary_viewer_credentials'),
             'maxActiveUsers' => $this->maxActiveUsers(),
             'activeUsers' => $this->activeUserCount(),
         ]);
@@ -57,7 +58,7 @@ class GuestAccountController extends Controller
             'email' => $email,
             'email_verified_at' => now(),
             'password' => $password,
-            'role' => UserRole::Guest,
+            'role' => UserRole::Viewer,
             'active' => true,
             'expires_at' => $expiresAt,
             'created_by' => $request->user()?->id,
@@ -65,33 +66,36 @@ class GuestAccountController extends Controller
         ]);
 
         return redirect()
-            ->route('guest-accounts.index')
-            ->with('success', 'Cuenta de visita creada. Copie la clave ahora; no volverá a mostrarse.')
-            ->with('guest_credentials', [
+            ->route('temporary-viewer-accounts.index')
+            ->with('success', 'Cuenta temporal de consulta creada. Copie la clave ahora; no volverá a mostrarse.')
+            ->with('temporary_viewer_credentials', [
                 'email' => $email,
                 'password' => $password,
                 'expires_at' => $expiresAt->toIso8601String(),
             ]);
     }
 
-    public function destroy(User $guest): RedirectResponse
+    public function destroy(User $account): RedirectResponse
     {
-        abort_unless($guest->role === UserRole::Guest, HttpResponse::HTTP_NOT_FOUND);
+        abort_unless(
+            $account->role === UserRole::Viewer && $account->expires_at !== null,
+            HttpResponse::HTTP_NOT_FOUND,
+        );
 
-        DB::transaction(function () use ($guest): void {
-            $guest->forceFill([
+        DB::transaction(function () use ($account): void {
+            $account->forceFill([
                 'active' => false,
                 'remember_token' => null,
             ])->save();
 
             if (DB::getSchemaBuilder()->hasTable('sessions')) {
-                DB::table('sessions')->where('user_id', $guest->id)->delete();
+                DB::table('sessions')->where('user_id', $account->id)->delete();
             }
         });
 
         return redirect()
-            ->route('guest-accounts.index')
-            ->with('success', 'Cuenta de visita desactivada y sesiones revocadas.');
+            ->route('temporary-viewer-accounts.index')
+            ->with('success', 'Cuenta temporal de consulta desactivada y sesiones revocadas.');
     }
 
     private function activeUserCount(): int
@@ -114,7 +118,7 @@ class GuestAccountController extends Controller
     private function uniqueSyntheticEmail(): string
     {
         do {
-            $email = 'visita-'.Str::lower(Str::random(12)).'@luzparral.example.invalid';
+            $email = 'consulta-temporal-'.Str::lower(Str::random(12)).'@luzparral.example.invalid';
         } while (User::query()->where('email', $email)->exists());
 
         return $email;

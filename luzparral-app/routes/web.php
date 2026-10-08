@@ -19,7 +19,7 @@ Route::redirect('/', '/login');
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
-    Route::middleware('role:admin,supervisor,operator,viewer')->group(function () {
+    Route::middleware('role:admin,supervisor,operator')->group(function () {
         Route::get('/contingencias/mapa', ContingencyMapController::class)->name('contingencies.map');
         Route::get('/contingencias/mapa/datos', [ContingencyMapController::class, 'data'])->name('contingencies.map.data');
         Route::get('/pronostico-meteorologico', WeatherForecastController::class)->name('weather.forecast');
@@ -51,7 +51,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
         Route::get('/importaciones/plantilla', [ContingencyImportController::class, 'template'])->name('imports.template');
     });
 
-    Route::middleware('role:admin,supervisor,guest')->group(function () {
+    Route::middleware('role:admin,supervisor,viewer')->group(function () {
         Route::get('/informes', [ContingencyReportController::class, 'index'])
             ->name('reports.index');
         Route::get('/informes/contingencias.csv', [ContingencyReportController::class, 'exportCsv'])
@@ -61,9 +61,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     });
 
     Route::middleware('role:admin')->group(function () {
-        Route::get('/cuentas-visita', [GuestAccountController::class, 'index'])->name('guest-accounts.index');
-        Route::post('/cuentas-visita', [GuestAccountController::class, 'store'])->name('guest-accounts.store');
-        Route::delete('/cuentas-visita/{guest}', [GuestAccountController::class, 'destroy'])->name('guest-accounts.destroy');
+        Route::get('/cuentas-consulta', [GuestAccountController::class, 'index'])->name('temporary-viewer-accounts.index');
+        Route::post('/cuentas-consulta', [GuestAccountController::class, 'store'])->name('temporary-viewer-accounts.store');
+        Route::delete('/cuentas-consulta/{account}', [GuestAccountController::class, 'destroy'])->name('temporary-viewer-accounts.destroy');
     });
 });
 

@@ -65,7 +65,7 @@ validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DAT
 El aprovisionamiento de las cinco cuentas, la recuperación sin SMTP y las
 protecciones de sesión están documentados en
 [`docs/SEGURIDAD_OPERATIVA.md`](docs/SEGURIDAD_OPERATIVA.md). Esa guía también
-describe la creación administrativa de cuentas temporales de visita, su
+describe la creación administrativa de cuentas temporales de consulta, su
 vencimiento automático, la revocación de sesiones y sus permisos de solo
 lectura.
 

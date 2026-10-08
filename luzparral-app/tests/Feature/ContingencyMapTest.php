@@ -24,7 +24,7 @@ class ContingencyMapTest extends TestCase
 
     public function test_map_displays_active_synthetic_contingencies_by_default(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Operator]);
         [$commune, $feeder] = $this->createLocation();
 
         $this->createContingency($commune->id, $feeder->id, [
@@ -60,7 +60,7 @@ class ContingencyMapTest extends TestCase
 
     public function test_map_can_filter_closed_contingencies(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Operator]);
         [$commune, $feeder] = $this->createLocation();
 
         $this->createContingency($commune->id, $feeder->id, [
@@ -81,7 +81,7 @@ class ContingencyMapTest extends TestCase
 
     public function test_visible_area_endpoint_excludes_outside_events_and_groups_nearby_markers(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Operator]);
         [$commune, $feeder] = $this->createLocation();
 
         $this->createContingency($commune->id, $feeder->id, [
@@ -113,7 +113,7 @@ class ContingencyMapTest extends TestCase
             ->assertJsonPath('meta.bounds_applied', true);
     }
 
-    public function test_sensitive_layers_are_aggregated_and_hidden_from_viewer(): void
+    public function test_sensitive_layers_are_aggregated_for_operator_and_map_is_forbidden_to_viewer(): void
     {
         [$commune, $feeder] = $this->createLocation();
         $contingency = $this->createContingency($commune->id, $feeder->id);
@@ -152,15 +152,12 @@ class ContingencyMapTest extends TestCase
         $viewer = User::factory()->create(['role' => UserRole::Viewer]);
         $this->actingAs($viewer)
             ->getJson($viewport)
-            ->assertOk()
-            ->assertJsonPath('meta.can_view_sensitive_layers', false)
-            ->assertJsonCount(0, 'layers.critical_zones')
-            ->assertJsonCount(0, 'layers.electrodependent_zones');
+            ->assertForbidden();
     }
 
     public function test_map_response_remains_bounded_with_a_large_visible_dataset(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Operator]);
         [$commune, $feeder] = $this->createLocation();
         $rows = [];
 
@@ -199,7 +196,7 @@ class ContingencyMapTest extends TestCase
 
     public function test_map_rejects_invalid_or_oversized_visible_areas(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => UserRole::Operator]);
 
         $this->actingAs($user)
             ->getJson('/contingencias/mapa/datos?north=-36.5&south=-36&east=-71.6&west=-72&zoom=10')

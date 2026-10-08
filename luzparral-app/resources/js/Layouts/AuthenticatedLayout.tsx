@@ -8,7 +8,6 @@ const roleLabels: Record<UserRole, string> = {
     supervisor: 'Supervisión',
     operator: 'Operación',
     viewer: 'Consulta',
-    guest: 'Visita',
 };
 
 type IconName =
@@ -66,7 +65,7 @@ export default function Authenticated({
     const searchActive = route().current('contingencies.search');
     const reportsActive = route().current('reports.*');
     const importsActive = route().current('imports.*');
-    const guestAccountsActive = route().current('guest-accounts.*');
+    const temporaryViewerAccountsActive = route().current('temporary-viewer-accounts.*');
 
     const activeClass = 'bg-blue-600 text-white shadow-sm';
     const inactiveClass = 'text-slate-300 transition hover:bg-slate-900 hover:text-white';
@@ -143,13 +142,13 @@ export default function Authenticated({
                     Importaciones
                 </Link>
             )}
-            {permissions.manageGuestAccounts && (
+            {permissions.manageTemporaryViewerAccounts && (
                 <Link
-                    href={route('guest-accounts.index')}
-                    className={'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ' + (guestAccountsActive ? activeClass : inactiveClass)}
+                    href={route('temporary-viewer-accounts.index')}
+                    className={'flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold ' + (temporaryViewerAccountsActive ? activeClass : inactiveClass)}
                 >
                     <Icon name="users" />
-                    Cuentas de visita
+                    Cuentas temporales
                 </Link>
             )}
         </nav>

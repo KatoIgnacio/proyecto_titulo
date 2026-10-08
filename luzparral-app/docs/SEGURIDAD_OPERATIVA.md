@@ -72,10 +72,10 @@ unset LUZPARRAL_USER_OPERATOR1_PASSWORD LUZPARRAL_USER_OPERATOR2_PASSWORD
 unset LUZPARRAL_USER_VIEWER_PASSWORD
 ```
 
-## Cuentas temporales de visita
+## Cuentas temporales de consulta
 
-Solo Administración puede abrir `/cuentas-visita`, crear una visita o
-desactivarla. El sistema genera un correo reservado bajo
+Solo Administración puede abrir `/cuentas-consulta`, crear una cuenta temporal
+de consulta o desactivarla. El sistema genera un correo reservado bajo
 `@luzparral.example.invalid` y una contraseña aleatoria fuerte de 18
 caracteres. La contraseña se muestra una sola vez y debe entregarse por un canal
 privado. Solo transita por el mensaje temporal de la sesión cifrada; no se
@@ -84,10 +84,12 @@ registra en logs ni se conserva como texto claro.
 Cada cuenta debe usar una duración aprobada de 4, 8, 24, 72 o 168 horas. El
 estado efectivo exige simultáneamente `active=true` y un `expires_at`
 futuro. Al vencer, el middleware cierra el acceso; al desactivarla manualmente
-se elimina además cualquier sesión asociada. Las visitas forman parte del
+se elimina además cualquier sesión asociada. Las cuentas temporales forman parte del
 máximo institucional de diez cuentas activas.
 
-El rol Visita puede consultar el panel general, el buscador, el detalle de
+Existe un único rol Consulta. Una cuenta de Consulta puede ser permanente o
+temporal; la diferencia es exclusivamente su fecha de vencimiento, no sus
+permisos. Puede consultar el panel general, el buscador, el detalle de
 contingencias y los informes. No puede acceder al mapa, al pronóstico
 meteorológico, a importaciones, a identificadores de cliente o suministro ni a
 rutas que modifiquen información. Estas restricciones se aplican en backend y

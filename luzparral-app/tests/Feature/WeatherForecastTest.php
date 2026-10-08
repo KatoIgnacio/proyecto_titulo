@@ -19,7 +19,7 @@ class WeatherForecastTest extends TestCase
 
     public function test_internal_active_roles_can_view_the_windy_forecast(): void
     {
-        foreach ([UserRole::Admin, UserRole::Supervisor, UserRole::Operator, UserRole::Viewer] as $role) {
+        foreach ([UserRole::Admin, UserRole::Supervisor, UserRole::Operator] as $role) {
             $user = User::factory()->create(['role' => $role]);
 
             $this->actingAs($user)
@@ -31,11 +31,11 @@ class WeatherForecastTest extends TestCase
         }
     }
 
-    public function test_guest_cannot_view_the_windy_forecast(): void
+    public function test_viewer_cannot_view_the_windy_forecast(): void
     {
-        $guest = User::factory()->create(['role' => UserRole::Guest]);
+        $viewer = User::factory()->create(['role' => UserRole::Viewer]);
 
-        $this->actingAs($guest)
+        $this->actingAs($viewer)
             ->get('/pronostico-meteorologico')
             ->assertForbidden();
     }

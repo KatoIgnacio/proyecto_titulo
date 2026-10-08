@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'supervisor' | 'operator' | 'viewer' | 'guest';
+export type UserRole = 'admin' | 'supervisor' | 'operator' | 'viewer';
 
 export interface User {
     id: number;
@@ -18,7 +18,7 @@ export type PageProps<
             viewReports: boolean;
             viewMap: boolean;
             viewWeather: boolean;
-            manageGuestAccounts: boolean;
+            manageTemporaryViewerAccounts: boolean;
             updateContingencies: boolean;
             registerFieldReports: boolean;
             manageFieldReports: boolean;

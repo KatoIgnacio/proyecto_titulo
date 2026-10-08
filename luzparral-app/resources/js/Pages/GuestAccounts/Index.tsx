@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 
-type Guest = {
+type TemporaryViewerAccount = {
     id: number;
     name: string;
     email: string;
@@ -18,7 +18,7 @@ type Credentials = {
 } | null;
 
 type Props = {
-    guests: Guest[];
+    accounts: TemporaryViewerAccount[];
     credentials: Credentials;
     maxActiveUsers: number;
     activeUsers: number;
@@ -33,7 +33,7 @@ function formatDate(value: string | null): string {
     }).format(new Date(value));
 }
 
-export default function Index({ guests, credentials, maxActiveUsers, activeUsers }: Props) {
+export default function Index({ accounts, credentials, maxActiveUsers, activeUsers }: Props) {
     const [copied, setCopied] = useState(false);
     const form = useForm({
         name: '',
@@ -42,16 +42,16 @@ export default function Index({ guests, credentials, maxActiveUsers, activeUsers
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
-        form.post(route('guest-accounts.store'), {
+        form.post(route('temporary-viewer-accounts.store'), {
             preserveScroll: true,
             onSuccess: () => form.reset('name'),
         });
     };
 
-    const deactivate = (guest: Guest) => {
-        if (!window.confirm('¿Desactivar esta cuenta de visita y cerrar sus sesiones?')) return;
+    const deactivate = (account: TemporaryViewerAccount) => {
+        if (!window.confirm('¿Desactivar esta cuenta temporal de consulta y cerrar sus sesiones?')) return;
 
-        form.delete(route('guest-accounts.destroy', guest.id), { preserveScroll: true });
+        form.delete(route('temporary-viewer-accounts.destroy', account.id), { preserveScroll: true });
     };
 
     const copyCredentials = async () => {
@@ -65,12 +65,12 @@ export default function Index({ guests, credentials, maxActiveUsers, activeUsers
         <AuthenticatedLayout
             header={(
                 <div>
-                    <h1 className="text-2xl font-black tracking-tight text-slate-950">CUENTAS DE VISITA</h1>
-                    <p className="mt-1 text-sm text-slate-500">Acceso temporal y de solo lectura para revisar contingencias e informes.</p>
+                    <h1 className="text-2xl font-black tracking-tight text-slate-950">CUENTAS TEMPORALES DE CONSULTA</h1>
+                    <p className="mt-1 text-sm text-slate-500">El mismo perfil de consulta, con vencimiento automático para evaluaciones y visitas.</p>
                 </div>
             )}
         >
-            <Head title="Cuentas de visita" />
+            <Head title="Cuentas temporales de consulta" />
 
             <div className="space-y-6 p-4 sm:p-6 lg:p-8">
                 {credentials && (
@@ -90,7 +90,7 @@ export default function Index({ guests, credentials, maxActiveUsers, activeUsers
 
                 <section className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">
                     <form onSubmit={submit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <h2 className="text-lg font-black text-slate-900">Crear visita temporal</h2>
+                        <h2 className="text-lg font-black text-slate-900">Crear cuenta temporal</h2>
                         <p className="mt-1 text-sm text-slate-500">El correo y la contraseña se generan automáticamente.</p>
 
                         <label className="mt-5 block text-sm font-semibold text-slate-700">
@@ -99,7 +99,7 @@ export default function Index({ guests, credentials, maxActiveUsers, activeUsers
                                 value={form.data.name}
                                 onChange={(event) => form.setData('name', event.target.value)}
                                 maxLength={80}
-                                placeholder="Ej.: Visita comité 1"
+                                placeholder="Ej.: Evaluación comité 1"
                                 className="mt-1.5 block w-full rounded-lg border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
                             {form.errors.name && <span className="mt-1 block text-sm text-rose-600">{form.errors.name}</span>}
@@ -125,14 +125,14 @@ export default function Index({ guests, credentials, maxActiveUsers, activeUsers
                             disabled={form.processing || activeUsers >= maxActiveUsers}
                             className="mt-5 w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                         >
-                            Crear cuenta de visita
+                            Crear cuenta temporal
                         </button>
                         <p className="mt-3 text-xs text-slate-500">Cuentas activas: {activeUsers} de {maxActiveUsers} permitidas.</p>
                     </form>
 
                     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                         <div className="border-b border-slate-200 px-5 py-4">
-                            <h2 className="font-black text-slate-900">Visitas creadas</h2>
+                            <h2 className="font-black text-slate-900">Cuentas temporales creadas</h2>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-slate-200 text-sm">
@@ -140,18 +140,18 @@ export default function Index({ guests, credentials, maxActiveUsers, activeUsers
                                     <tr><th className="px-5 py-3">Nombre</th><th className="px-5 py-3">Usuario</th><th className="px-5 py-3">Vencimiento</th><th className="px-5 py-3">Estado</th><th className="px-5 py-3 text-right">Acción</th></tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {guests.map((guest) => (
-                                        <tr key={guest.id}>
-                                            <td className="px-5 py-4 font-semibold">{guest.name}</td>
-                                            <td className="px-5 py-4 font-mono text-xs">{guest.email}</td>
-                                            <td className="px-5 py-4">{formatDate(guest.expires_at)}</td>
-                                            <td className="px-5 py-4"><span className={'rounded-full px-2.5 py-1 text-xs font-bold ' + (guest.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600')}>{guest.active ? 'Activa' : 'Inactiva o vencida'}</span></td>
+                                    {accounts.map((account) => (
+                                        <tr key={account.id}>
+                                            <td className="px-5 py-4 font-semibold">{account.name}</td>
+                                            <td className="px-5 py-4 font-mono text-xs">{account.email}</td>
+                                            <td className="px-5 py-4">{formatDate(account.expires_at)}</td>
+                                            <td className="px-5 py-4"><span className={'rounded-full px-2.5 py-1 text-xs font-bold ' + (account.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600')}>{account.active ? 'Activa' : 'Inactiva o vencida'}</span></td>
                                             <td className="px-5 py-4 text-right">
-                                                {guest.active && <button type="button" onClick={() => deactivate(guest)} className="font-bold text-rose-700 hover:text-rose-900">Desactivar</button>}
+                                                {account.active && <button type="button" onClick={() => deactivate(account)} className="font-bold text-rose-700 hover:text-rose-900">Desactivar</button>}
                                             </td>
                                         </tr>
                                     ))}
-                                    {guests.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-slate-500">No se han creado cuentas de visita.</td></tr>}
+                                    {accounts.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-slate-500">No se han creado cuentas temporales.</td></tr>}
                                 </tbody>
                             </table>
                         </div>
@@ -159,7 +159,7 @@ export default function Index({ guests, credentials, maxActiveUsers, activeUsers
                 </section>
 
                 <section className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-                    <strong>Permisos:</strong> las visitas pueden consultar el panel general, buscador, detalle e informes. No pueden abrir mapa, pronóstico, importaciones, identificadores de clientes o suministro, ni realizar cambios.
+                    <strong>Permisos:</strong> Consulta puede revisar panel general, buscador, detalle e informes. No puede abrir mapa, pronóstico, importaciones, identificadores de clientes o suministro, ni realizar cambios. Las cuentas permanentes y temporales comparten exactamente estos permisos.
                 </section>
             </div>
         </AuthenticatedLayout>

@@ -26,7 +26,7 @@ class StoreGuestAccountRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Ingrese un nombre identificador para la visita.',
+            'name.required' => 'Ingrese un nombre identificador para la cuenta temporal.',
             'duration_hours.in' => 'Seleccione una duración temporal válida.',
         ];
     }

@@ -13,66 +13,88 @@ class GuestAccountManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_only_admin_can_open_and_modify_guest_accounts(): void
+    public function test_only_admin_can_open_and_modify_temporary_viewer_accounts(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
         $supervisor = User::factory()->create(['role' => UserRole::Supervisor]);
-        $guest = User::factory()->create(['role' => UserRole::Guest]);
+        $temporaryViewer = User::factory()->create([
+            'role' => UserRole::Viewer,
+            'expires_at' => now()->addDay(),
+        ]);
 
         $this->actingAs($admin)
-            ->get('/cuentas-visita')
+            ->get('/cuentas-consulta')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('GuestAccounts/Index')
                 ->where('maxActiveUsers', 10));
 
-        $this->actingAs($supervisor)->get('/cuentas-visita')->assertForbidden();
-        $this->actingAs($supervisor)->post('/cuentas-visita', [
-            'name' => 'Visita no autorizada',
+        $this->actingAs($supervisor)->get('/cuentas-consulta')->assertForbidden();
+        $this->actingAs($supervisor)->post('/cuentas-consulta', [
+            'name' => 'Consulta temporal no autorizada',
             'duration_hours' => 24,
         ])->assertForbidden();
-        $this->actingAs($supervisor)->delete('/cuentas-visita/'.$guest->id)->assertForbidden();
+        $this->actingAs($supervisor)->delete('/cuentas-consulta/'.$temporaryViewer->id)->assertForbidden();
     }
 
-    public function test_admin_creates_a_temporary_guest_with_one_time_credentials(): void
+    public function test_admin_creates_a_temporary_viewer_with_one_time_credentials(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
-        $response = $this->actingAs($admin)->post('/cuentas-visita', [
-            'name' => 'Visita comité sintética',
+        $response = $this->actingAs($admin)->post('/cuentas-consulta', [
+            'name' => 'Consulta comité sintética',
             'duration_hours' => 24,
         ]);
 
         $response
-            ->assertRedirect('/cuentas-visita')
-            ->assertSessionHas('guest_credentials');
+            ->assertRedirect('/cuentas-consulta')
+            ->assertSessionHas('temporary_viewer_credentials');
 
-        $guest = User::query()->where('role', UserRole::Guest)->sole();
-        $credentials = session('guest_credentials');
+        $temporaryViewer = User::query()
+            ->where('role', UserRole::Viewer)
+            ->whereNotNull('expires_at')
+            ->sole();
+        $credentials = session('temporary_viewer_credentials');
 
         $this->assertIsArray($credentials);
-        $this->assertSame('Visita comité sintética', $guest->name);
-        $this->assertStringEndsWith('@luzparral.example.invalid', $guest->email);
-        $this->assertSame($admin->id, $guest->created_by);
-        $this->assertTrue($guest->isActive());
-        $this->assertTrue(Hash::check($credentials['password'], $guest->password));
-        $this->assertTrue($guest->expires_at->between(now()->addHours(23), now()->addHours(25)));
+        $this->assertSame('Consulta comité sintética', $temporaryViewer->name);
+        $this->assertStringStartsWith('consulta-temporal-', $temporaryViewer->email);
+        $this->assertStringEndsWith('@luzparral.example.invalid', $temporaryViewer->email);
+        $this->assertSame($admin->id, $temporaryViewer->created_by);
+        $this->assertTrue($temporaryViewer->isActive());
+        $this->assertTrue(Hash::check($credentials['password'], $temporaryViewer->password));
+        $this->assertTrue($temporaryViewer->expires_at->between(now()->addHours(23), now()->addHours(25)));
     }
 
-    public function test_admin_can_deactivate_a_guest_and_revoke_access(): void
+    public function test_admin_can_deactivate_a_temporary_viewer_and_revoke_access(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
-        $guest = User::factory()->create([
-            'role' => UserRole::Guest,
+        $temporaryViewer = User::factory()->create([
+            'role' => UserRole::Viewer,
             'expires_at' => now()->addDay(),
         ]);
 
         $this->actingAs($admin)
-            ->delete('/cuentas-visita/'.$guest->id)
-            ->assertRedirect('/cuentas-visita');
+            ->delete('/cuentas-consulta/'.$temporaryViewer->id)
+            ->assertRedirect('/cuentas-consulta');
 
-        $this->assertFalse($guest->fresh()->active);
-        $this->actingAs($guest->fresh())->get('/dashboard')->assertRedirect('/login');
+        $this->assertFalse($temporaryViewer->fresh()->active);
+        $this->actingAs($temporaryViewer->fresh())->get('/dashboard')->assertRedirect('/login');
+    }
+
+    public function test_admin_cannot_deactivate_the_permanent_viewer_account_from_temporary_accounts(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $permanentViewer = User::factory()->create([
+            'role' => UserRole::Viewer,
+            'expires_at' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->delete('/cuentas-consulta/'.$permanentViewer->id)
+            ->assertNotFound();
+
+        $this->assertTrue($permanentViewer->fresh()->active);
     }
 
     public function test_creation_respects_the_institutional_active_account_limit(): void
@@ -81,22 +103,22 @@ class GuestAccountManagementTest extends TestCase
         User::factory()->count(9)->create();
 
         $this->actingAs($admin)
-            ->post('/cuentas-visita', [
-                'name' => 'Visita excedente',
+            ->post('/cuentas-consulta', [
+                'name' => 'Consulta temporal excedente',
                 'duration_hours' => 24,
             ])
             ->assertSessionHasErrors('name');
 
-        $this->assertDatabaseMissing('users', ['name' => 'Visita excedente']);
+        $this->assertDatabaseMissing('users', ['name' => 'Consulta temporal excedente']);
     }
 
-    public function test_guest_duration_must_use_an_approved_window(): void
+    public function test_temporary_viewer_duration_must_use_an_approved_window(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
 
         $this->actingAs($admin)
-            ->post('/cuentas-visita', [
-                'name' => 'Visita inválida',
+            ->post('/cuentas-consulta', [
+                'name' => 'Consulta temporal inválida',
                 'duration_hours' => 999,
             ])
             ->assertSessionHasErrors('duration_hours');
