@@ -18,10 +18,23 @@ promoción a producción y la evaluación empírica permanecen pendientes.
 | RNF06-RNF07 | Trazabilidad, consistencia e importación atómica verificadas |
 | OE1-OE3 | Materializados en levantamiento, modelo, requisitos e implementación |
 | OE4 | Preparado; exige sesiones reales autorizadas con usuarios |
-| Despliegue Parra | `3ebc513c86fb` operativo en `8004`; consolidación de Consulta pendiente de nueva imagen, reinicio del servidor y producción `8003` pendientes |
+| Despliegue Parra | `83690e39367d` operativo y saludable en `8004`; reinicio completo del servidor y producción `8003` pendientes |
 
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
+
+## Evidencia local del Segmento 27
+
+El 9 de octubre de 2026 se incorporó el autorregistro desde la pantalla inicial.
+El formulario público solo puede crear cuentas temporales con el rol Consulta,
+vigencia de siete días y contraseña robusta; ignora cualquier intento de
+solicitar un rol superior, aplica limitación de frecuencia y respeta el máximo
+institucional de diez cuentas activas. Administración conserva la creación y
+desactivación controlada de cuentas temporales desde `/cuentas-consulta`.
+
+La validación local aprobó 160 pruebas con 1.848 aserciones, Pint y la
+construcción de producción de Vite. El cambio se encuentra pendiente de crear
+una imagen y desplegarla después de `83690e39367d`.
 
 ## Evidencia local del Segmento 26
 
@@ -35,8 +48,10 @@ Una migración convierte las cuentas históricas con rol `guest` a `viewer`.
 Administración solo puede desactivar desde la pantalla temporal las cuentas de
 Consulta que tengan vencimiento, por lo que la cuenta permanente queda
 protegida. La validación local aprobó 157 pruebas con 1.823 aserciones, Pint y
-la construcción de producción de Vite. Este cambio requiere construir y
-desplegar una imagen posterior a `3ebc513c86fb`.
+la construcción de producción de Vite. El cambio fue desplegado el 8 de octubre
+de 2026 mediante `luzparral-app:83690e39367d`; la migración se ejecutó y las
+verificaciones de aplicación, contenedor, base, esquema, roles y auditoría
+operativa finalizaron correctamente.
 
 ## Evidencia técnica del Segmento 25
 

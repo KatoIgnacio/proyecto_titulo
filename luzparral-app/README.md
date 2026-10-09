@@ -38,7 +38,9 @@ la línea base. El segundo crea solamente las tablas internas faltantes de Larav
 
 El seeder crea cinco usuarios para desarrollo solamente cuando se proporciona
 `LUZPARRAL_DEMO_PASSWORD`; no contiene ni imprime una contraseña conocida y se
-niega a ejecutarse en producción. El registro público está deshabilitado.
+niega a ejecutarse en producción. El acceso público permite crear únicamente
+cuentas temporales de Consulta, con vigencia de siete días, contraseña robusta
+y sujeción al límite institucional de usuarios activos.
 
 ## Datos sintéticos completos
 
@@ -65,9 +67,9 @@ validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DAT
 El aprovisionamiento de las cinco cuentas, la recuperación sin SMTP y las
 protecciones de sesión están documentados en
 [`docs/SEGURIDAD_OPERATIVA.md`](docs/SEGURIDAD_OPERATIVA.md). Esa guía también
-describe la creación administrativa de cuentas temporales de consulta, su
-vencimiento automático, la revocación de sesiones y sus permisos de solo
-lectura.
+describe el autorregistro y la creación administrativa de cuentas temporales
+de consulta, su vencimiento automático, la revocación de sesiones y sus
+permisos de solo lectura.
 
 Los informes permiten filtrar contingencias con o sin clientes críticos y
 electrodependientes. Los PDF ejecutivo, de desarrollo e integral incorporan un

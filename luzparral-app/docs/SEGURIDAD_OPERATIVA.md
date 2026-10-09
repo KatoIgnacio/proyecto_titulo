@@ -74,8 +74,15 @@ unset LUZPARRAL_USER_VIEWER_PASSWORD
 
 ## Cuentas temporales de consulta
 
-Solo Administración puede abrir `/cuentas-consulta`, crear una cuenta temporal
-de consulta o desactivarla. El sistema genera un correo reservado bajo
+Una persona evaluadora puede abrir `/register` desde la pantalla de acceso y
+crear su propia cuenta temporal de Consulta. El formulario exige nombre,
+correo único y una contraseña de al menos 12 caracteres con mayúsculas,
+minúsculas, números y símbolos. La cuenta vence automáticamente después de
+siete días, se somete a limitación de frecuencia y siempre recibe el rol
+Consulta; el cliente no puede solicitar ni alterar privilegios superiores.
+
+Administración puede abrir `/cuentas-consulta`, crear además una cuenta temporal
+o desactivarla. En la creación administrativa, el sistema genera un correo reservado bajo
 `@luzparral.example.invalid` y una contraseña aleatoria fuerte de 18
 caracteres. La contraseña se muestra una sola vez y debe entregarse por un canal
 privado. Solo transita por el mensaje temporal de la sesión cifrada; no se
@@ -115,7 +122,8 @@ cambiar `MAIL_MAILER=smtp` y establecer `PASSWORD_RESET_ENABLED=true`.
 
 ## Sesiones y cuentas
 
-- No existe registro público ni eliminación de la propia cuenta.
+- El registro público crea exclusivamente cuentas temporales de Consulta y no
+  permite elegir roles. No existe eliminación de la propia cuenta.
 - La sesión de producción dura 60 minutos y expira al cerrar el navegador.
 - La opción de recordar la sesión está deshabilitada.
 - Las sesiones se almacenan cifradas en MySQL; las cookies son HTTP-only y

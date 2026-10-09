@@ -88,6 +88,18 @@ export default function Login({
                     </PrimaryButton>
                 </div>
             </form>
+
+            <div className="mt-6 border-t border-gray-200 pt-5 text-center">
+                <p className="text-sm text-gray-600">
+                    ¿Participas en las pruebas de SIGCEL?
+                </p>
+                <Link
+                    href={route('register')}
+                    className="mt-3 inline-flex w-full items-center justify-center rounded-md border border-blue-700 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-blue-700 transition hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    Crear cuenta de consulta
+                </Link>
+            </div>
         </GuestLayout>
     );
 }
