@@ -53,7 +53,7 @@ class PasswordUpdateTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)
+        $response = $this->actingAs($user)
             ->from('/profile')
             ->put('/password', [
                 'current_password' => 'password',
@@ -63,6 +63,9 @@ class PasswordUpdateTest extends TestCase
             ->assertSessionHasErrors('password')
             ->assertRedirect('/profile');
 
+        $message = $response->getSession()->get('errors')->first('password');
+        $this->assertStringContainsString('contraseña', mb_strtolower($message));
+        $this->assertStringNotContainsString('validation.', $message);
         $this->assertTrue(Hash::check('password', $user->fresh()->password));
     }
 }

@@ -63,4 +63,43 @@ class OperationalInterfaceContentTest extends TestCase
         $this->assertStringContainsString('los rechazos son casos de prueba deliberados', $imports);
         $this->assertStringContainsString('no provienen de registros reales', $imports);
     }
+
+    public function test_qa_access_and_download_safeguards_are_present(): void
+    {
+        $login = (string) file_get_contents(base_path('resources/js/Pages/Auth/Login.tsx'));
+        $temporaryAccounts = (string) file_get_contents(base_path('resources/js/Pages/GuestAccounts/Index.tsx'));
+        $reports = (string) file_get_contents(base_path('resources/js/Pages/Reports/Index.tsx'));
+
+        $this->assertStringContainsString('new FormData(event.currentTarget)', $login);
+        $this->assertStringContainsString('type="submit"', $login);
+        $this->assertStringContainsString('Ingresando…', $login);
+
+        $this->assertStringContainsString("document.execCommand('copy')", $temporaryAccounts);
+        $this->assertStringContainsString('Nombre visible', $temporaryAccounts);
+        $this->assertStringContainsString('no se utiliza para iniciar sesión', $temporaryAccounts);
+
+        $this->assertStringContainsString("fetch(exportUrl('reports.csv')", $reports);
+        $this->assertStringContainsString('URL.createObjectURL', $reports);
+        $this->assertStringNotContainsString("<a href={exportUrl('reports.csv')}", $reports);
+    }
+
+    public function test_profile_interface_is_presented_in_spanish(): void
+    {
+        $files = [
+            'resources/js/Pages/Profile/Edit.tsx',
+            'resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.tsx',
+            'resources/js/Pages/Profile/Partials/UpdatePasswordForm.tsx',
+        ];
+        $content = implode("\n", array_map(
+            fn (string $file): string => (string) file_get_contents(base_path($file)),
+            $files,
+        ));
+
+        $this->assertStringContainsString('Información del perfil', $content);
+        $this->assertStringContainsString('Actualizar contraseña', $content);
+        $this->assertStringContainsString('Contraseña actual', $content);
+        $this->assertStringNotContainsString('Profile Information', $content);
+        $this->assertStringNotContainsString('Update Password', $content);
+        $this->assertStringNotContainsString('Current Password', $content);
+    }
 }

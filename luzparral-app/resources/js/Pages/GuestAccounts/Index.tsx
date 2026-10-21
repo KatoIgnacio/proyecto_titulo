@@ -34,7 +34,7 @@ function formatDate(value: string | null): string {
 }
 
 export default function Index({ accounts, credentials, maxActiveUsers, activeUsers }: Props) {
-    const [copied, setCopied] = useState(false);
+    const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'error'>('idle');
     const form = useForm({
         name: '',
         duration_hours: '24',
@@ -57,8 +57,42 @@ export default function Index({ accounts, credentials, maxActiveUsers, activeUse
     const copyCredentials = async () => {
         if (!credentials) return;
 
-        await navigator.clipboard.writeText('Usuario: ' + credentials.email + '\nContraseña: ' + credentials.password);
-        setCopied(true);
+        const text = 'Usuario: ' + credentials.email + '\nContraseña: ' + credentials.password;
+
+        try {
+            let copied = false;
+
+            if (window.isSecureContext && navigator.clipboard?.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    copied = true;
+                } catch {
+                    copied = false;
+                }
+            }
+
+            if (!copied) {
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.setAttribute('readonly', '');
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+
+                try {
+                    copied = document.execCommand('copy');
+                } finally {
+                    textArea.remove();
+                }
+            }
+
+            if (!copied) throw new Error('copy-command-failed');
+
+            setCopyStatus('copied');
+        } catch {
+            setCopyStatus('error');
+        }
     };
 
     return (
@@ -76,15 +110,19 @@ export default function Index({ accounts, credentials, maxActiveUsers, activeUse
                 {credentials && (
                     <section className="rounded-xl border-2 border-amber-300 bg-amber-50 p-5 shadow-sm">
                         <h2 className="font-black text-amber-950">Credenciales visibles una sola vez</h2>
-                        <p className="mt-1 text-sm text-amber-800">Cópielas y entréguelas por un canal privado. La contraseña no se volverá a mostrar.</p>
+                        <p className="mt-1 text-sm text-amber-800">Para ingresar, use el correo mostrado como Usuario. Cópielas y entréguelas por un canal privado; la contraseña no se volverá a mostrar.</p>
                         <dl className="mt-4 grid gap-3 sm:grid-cols-3">
                             <div><dt className="text-xs font-bold uppercase text-amber-700">Usuario</dt><dd className="mt-1 break-all font-mono text-sm">{credentials.email}</dd></div>
                             <div><dt className="text-xs font-bold uppercase text-amber-700">Contraseña temporal</dt><dd className="mt-1 break-all font-mono text-sm">{credentials.password}</dd></div>
                             <div><dt className="text-xs font-bold uppercase text-amber-700">Vence</dt><dd className="mt-1 text-sm">{formatDate(credentials.expires_at)}</dd></div>
                         </dl>
                         <button type="button" onClick={copyCredentials} className="mt-4 rounded-lg bg-amber-900 px-4 py-2 text-sm font-bold text-white hover:bg-amber-800">
-                            {copied ? 'Credenciales copiadas' : 'Copiar credenciales'}
+                            {copyStatus === 'copied' ? 'Credenciales copiadas' : 'Copiar credenciales'}
                         </button>
+                        <p className="mt-2 text-sm text-amber-900" role="status" aria-live="polite">
+                            {copyStatus === 'copied' && 'Credenciales copiadas al portapapeles.'}
+                            {copyStatus === 'error' && 'No fue posible copiar automáticamente. Seleccione el usuario y la contraseña de forma manual.'}
+                        </p>
                     </section>
                 )}
 
@@ -94,7 +132,7 @@ export default function Index({ accounts, credentials, maxActiveUsers, activeUse
                         <p className="mt-1 text-sm text-slate-500">El correo y la contraseña se generan automáticamente.</p>
 
                         <label className="mt-5 block text-sm font-semibold text-slate-700">
-                            Identificador visible
+                            Nombre visible
                             <input
                                 value={form.data.name}
                                 onChange={(event) => form.setData('name', event.target.value)}
@@ -102,6 +140,7 @@ export default function Index({ accounts, credentials, maxActiveUsers, activeUse
                                 placeholder="Ej.: Evaluación comité 1"
                                 className="mt-1.5 block w-full rounded-lg border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             />
+                            <span className="mt-1 block text-xs font-normal text-slate-500">Sirve para reconocer la cuenta; no se utiliza para iniciar sesión.</span>
                             {form.errors.name && <span className="mt-1 block text-sm text-rose-600">{form.errors.name}</span>}
                         </label>
 
@@ -132,7 +171,7 @@ export default function Index({ accounts, credentials, maxActiveUsers, activeUse
 
                     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                         <div className="border-b border-slate-200 px-5 py-4">
-                            <h2 className="font-black text-slate-900">Cuentas temporales creadas</h2>
+                            <h2 className="font-black text-slate-900">Cuentas temporales</h2>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="min-w-full divide-y divide-slate-200 text-sm">

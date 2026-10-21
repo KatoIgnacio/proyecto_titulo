@@ -13,14 +13,25 @@ export default function Login({
     status?: string;
     canResetPassword: boolean;
 }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, errors, reset, transform } = useForm({
         email: '',
         password: '',
     });
 
-    const submit: FormEventHandler = (event) => {
+    const submit: FormEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
-        post(route('login'), { onFinish: () => reset('password') });
+
+        const submittedValues = new FormData(event.currentTarget);
+        const email = String(submittedValues.get('email') ?? data.email).trim();
+        const password = String(
+            submittedValues.get('password') ?? data.password,
+        );
+
+        transform(() => ({ email, password }));
+        post(route('login'), {
+            preserveScroll: true,
+            onFinish: () => reset('password'),
+        });
     };
 
     return (
@@ -52,6 +63,7 @@ export default function Login({
                         value={data.email}
                         className="mt-1 block w-full"
                         autoComplete="username"
+                        required
                         isFocused
                         onChange={(event) => setData('email', event.target.value)}
                     />
@@ -67,6 +79,7 @@ export default function Login({
                         value={data.password}
                         className="mt-1 block w-full"
                         autoComplete="current-password"
+                        required
                         onChange={(event) =>
                             setData('password', event.target.value)
                         }
@@ -83,8 +96,12 @@ export default function Login({
                             Recuperar contraseña
                         </Link>
                     )}
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Ingresar
+                    <PrimaryButton
+                        type="submit"
+                        className="ms-4"
+                        disabled={processing}
+                    >
+                        {processing ? 'Ingresando…' : 'Ingresar'}
                     </PrimaryButton>
                 </div>
             </form>

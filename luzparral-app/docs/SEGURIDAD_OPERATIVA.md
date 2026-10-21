@@ -88,6 +88,12 @@ caracteres. La contraseña se muestra una sola vez y debe entregarse por un cana
 privado. Solo transita por el mensaje temporal de la sesión cifrada; no se
 registra en logs ni se conserva como texto claro.
 
+La pantalla distingue el nombre visible del usuario de acceso, que siempre es
+el correo generado. El botón de copia intenta primero la API segura del
+navegador y, si no está disponible o es rechazada, utiliza una copia local
+alternativa. Ninguno de los dos mecanismos envía las credenciales a servicios
+externos ni las almacena después de abandonar la pantalla.
+
 Cada cuenta debe usar una duración aprobada de 4, 8, 24, 72 o 168 horas. El
 estado efectivo exige simultáneamente `active=true` y un `expires_at`
 futuro. Al vencer, el middleware cierra el acceso; al desactivarla manualmente

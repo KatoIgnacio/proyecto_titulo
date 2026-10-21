@@ -18,10 +18,28 @@ promoción a producción y la evaluación empírica permanecen pendientes.
 | RNF06-RNF07 | Trazabilidad, consistencia e importación atómica verificadas |
 | OE1-OE3 | Materializados en levantamiento, modelo, requisitos e implementación |
 | OE4 | Preparado; exige sesiones reales autorizadas con usuarios |
-| Despliegue Parra | `83690e39367d` operativo y saludable en `8004`; reinicio completo del servidor y producción `8003` pendientes |
+| Despliegue Parra | `c439b2f7f840` operativo y saludable en `8004`; reinicio completo del servidor y producción `8003` pendientes |
 
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
+
+## Evidencia local del Segmento 28
+
+El 21 de octubre de 2026 se atendieron los hallazgos del QA técnico informal
+del staging. El acceso ahora considera los valores efectivos completados por el
+navegador y comunica el envío; los mensajes de autenticación y validación están
+en español; la gestión temporal diferencia el nombre visible del correo usado
+para ingresar y dispone de copia alternativa; el CSV se descarga sin abandonar
+Informes; y Perfil quedó completamente en español. Una prueba de regresión
+confirma además que Administración lista las cuentas temporales creadas por
+autorregistro.
+
+La validación local aprobó 163 pruebas con 1.883 aserciones, sin fallos ni
+errores, además de Pint y la construcción de producción de Vite. El detalle y
+los criterios para repetir la comprobación se encuentran en
+`RESULTADO_QA_TECNICO_20261020.md`. Estas correcciones permanecen pendientes de
+despliegue y repetición manual en staging; por ello no constituyen todavía
+aceptación con usuarios ni cumplimiento de RNF05.
 
 ## Evidencia local del Segmento 27
 
@@ -33,8 +51,10 @@ institucional de diez cuentas activas. Administración conserva la creación y
 desactivación controlada de cuentas temporales desde `/cuentas-consulta`.
 
 La validación local aprobó 160 pruebas con 1.848 aserciones, Pint y la
-construcción de producción de Vite. El cambio se encuentra pendiente de crear
-una imagen y desplegarla después de `83690e39367d`.
+construcción de producción de Vite. El cambio fue desplegado mediante
+`luzparral-app:c439b2f7f840`; las verificaciones de aplicación, contenedor,
+base, esquema y auditoría operativa terminaron correctamente en staging
+`8004`.
 
 ## Evidencia local del Segmento 26
 

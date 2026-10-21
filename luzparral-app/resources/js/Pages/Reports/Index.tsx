@@ -168,6 +168,8 @@ function Metric({ label, value, accent }: { label: string; value: string; accent
 
 export default function Index({ filters, referenceDate, filterOptions, summary, results }: ReportProps) {
     const [reportType, setReportType] = useState<ReportType>('executive');
+    const [csvDownloading, setCsvDownloading] = useState(false);
+    const [csvError, setCsvError] = useState('');
     const [form, setForm] = useState<FilterForm>({
         range: filters.range,
         date_day: filters.date_day ?? '',
@@ -217,6 +219,40 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
         return query ? `${route(routeName)}?${query}` : route(routeName);
     };
 
+    const downloadCsv = async () => {
+        setCsvDownloading(true);
+        setCsvError('');
+
+        try {
+            const response = await fetch(exportUrl('reports.csv'), {
+                credentials: 'same-origin',
+                headers: { Accept: 'text/csv' },
+            });
+            const contentType = response.headers.get('content-type') ?? '';
+
+            if (!response.ok || !contentType.includes('text/csv')) {
+                throw new Error('csv-download-failed');
+            }
+
+            const disposition = response.headers.get('content-disposition') ?? '';
+            const filenameMatch = disposition.match(/filename="?([^";]+)"?/i);
+            const filename = filenameMatch?.[1] ?? 'informe-contingencias.csv';
+            const objectUrl = URL.createObjectURL(await response.blob());
+            const downloadLink = document.createElement('a');
+
+            downloadLink.href = objectUrl;
+            downloadLink.download = filename;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            downloadLink.remove();
+            window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+        } catch {
+            setCsvError('No fue posible descargar el CSV. Intente nuevamente.');
+        } finally {
+            setCsvDownloading(false);
+        }
+    };
+
     const detailPages = Math.max(1, Math.ceil(results.total / 4));
     const estimatedPages = reportType === 'executive'
         ? 3
@@ -257,11 +293,12 @@ export default function Index({ filters, referenceDate, filterOptions, summary, 
                         <h1 className="text-2xl font-black tracking-tight text-slate-950">INFORMES OPERACIONALES</h1>
                         <p className="mt-1 text-sm text-slate-500">Análisis integral, evolución temporal y trazabilidad de las contingencias seleccionadas.</p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                        <a href={exportUrl('reports.csv')} className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100">
+                    <div className="flex flex-col items-end gap-2">
+                        <button type="button" onClick={downloadCsv} disabled={csvDownloading} className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-wait disabled:opacity-60">
                             <Icon path={<path d="M4 4h16v16H4V4Zm4 4h8M8 12h8m-8 4h5" />} />
-                            Exportar datos CSV
-                        </a>
+                            {csvDownloading ? 'Descargando…' : 'Exportar datos CSV'}
+                        </button>
+                        {csvError && <p className="text-sm font-medium text-rose-700" role="alert">{csvError}</p>}
                     </div>
                 </div>
             )}

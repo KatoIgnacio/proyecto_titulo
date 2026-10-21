@@ -66,6 +66,25 @@ class GuestAccountManagementTest extends TestCase
         $this->assertTrue($temporaryViewer->expires_at->between(now()->addHours(23), now()->addHours(25)));
     }
 
+    public function test_admin_list_includes_self_registered_temporary_viewers(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::Admin]);
+        $selfRegisteredViewer = User::factory()->create([
+            'role' => UserRole::Viewer,
+            'expires_at' => now()->addDays(7),
+            'created_by' => null,
+        ]);
+
+        $this->actingAs($admin)
+            ->get('/cuentas-consulta')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('GuestAccounts/Index')
+                ->has('accounts', 1)
+                ->where('accounts.0.id', $selfRegisteredViewer->id)
+                ->where('accounts.0.email', $selfRegisteredViewer->email));
+    }
+
     public function test_admin_can_deactivate_a_temporary_viewer_and_revoke_access(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
