@@ -46,11 +46,6 @@ enum UserRole: string
         ], true);
     }
 
-    public function canManageTemporaryViewerAccounts(): bool
-    {
-        return $this === self::Admin;
-    }
-
     public function canUpdateContingencies(): bool
     {
         return in_array($this, [

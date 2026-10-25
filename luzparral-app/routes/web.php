@@ -8,7 +8,6 @@ use App\Http\Controllers\ContingencyStatusController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FieldReportAttachmentController;
 use App\Http\Controllers\FieldReportController;
-use App\Http\Controllers\GuestAccountController;
 use App\Http\Controllers\OperationalSearchController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WeatherForecastController;
@@ -58,12 +57,6 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
             ->name('reports.csv');
         Route::get('/informes/contingencias.pdf', [ContingencyReportController::class, 'exportPdf'])
             ->name('reports.pdf');
-    });
-
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/cuentas-consulta', [GuestAccountController::class, 'index'])->name('temporary-viewer-accounts.index');
-        Route::post('/cuentas-consulta', [GuestAccountController::class, 'store'])->name('temporary-viewer-accounts.store');
-        Route::delete('/cuentas-consulta/{account}', [GuestAccountController::class, 'destroy'])->name('temporary-viewer-accounts.destroy');
     });
 });
 

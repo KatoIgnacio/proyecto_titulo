@@ -39,7 +39,6 @@ class HandleInertiaRequests extends Middleware
                     'viewReports' => $user?->role?->canViewReports() ?? false,
                     'viewMap' => $user?->role?->canViewMap() ?? false,
                     'viewWeather' => $user?->role?->canViewWeather() ?? false,
-                    'manageTemporaryViewerAccounts' => $user?->role?->canManageTemporaryViewerAccounts() ?? false,
                     'updateContingencies' => $user?->role?->canUpdateContingencies() ?? false,
                     'registerFieldReports' => $user?->role?->canRegisterFieldReports() ?? false,
                     'manageFieldReports' => $user?->role?->canManageFieldReports() ?? false,

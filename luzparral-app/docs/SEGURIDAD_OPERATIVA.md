@@ -72,7 +72,7 @@ unset LUZPARRAL_USER_OPERATOR1_PASSWORD LUZPARRAL_USER_OPERATOR2_PASSWORD
 unset LUZPARRAL_USER_VIEWER_PASSWORD
 ```
 
-## Cuentas temporales de consulta
+## Autorregistro de cuentas de Consulta
 
 Una persona evaluadora puede abrir `/register` desde la pantalla de acceso y
 crear su propia cuenta temporal de Consulta. El formulario exige nombre,
@@ -81,24 +81,15 @@ minúsculas, números y símbolos. La cuenta vence automáticamente después de
 siete días, se somete a limitación de frecuencia y siempre recibe el rol
 Consulta; el cliente no puede solicitar ni alterar privilegios superiores.
 
-Administración puede abrir `/cuentas-consulta`, crear además una cuenta temporal
-o desactivarla. En la creación administrativa, el sistema genera un correo reservado bajo
-`@luzparral.example.invalid` y una contraseña aleatoria fuerte de 18
-caracteres. La contraseña se muestra una sola vez y debe entregarse por un canal
-privado. Solo transita por el mensaje temporal de la sesión cifrada; no se
-registra en logs ni se conserva como texto claro.
+No existe un flujo administrativo paralelo para generar credenciales. Cada
+persona evaluadora define su propio correo y contraseña en el formulario
+público; esto evita entregar claves por canales externos y mantiene un único
+punto de entrada verificable.
 
-La pantalla distingue el nombre visible del usuario de acceso, que siempre es
-el correo generado. El botón de copia intenta primero la API segura del
-navegador y, si no está disponible o es rechazada, utiliza una copia local
-alternativa. Ninguno de los dos mecanismos envía las credenciales a servicios
-externos ni las almacena después de abandonar la pantalla.
-
-Cada cuenta debe usar una duración aprobada de 4, 8, 24, 72 o 168 horas. El
-estado efectivo exige simultáneamente `active=true` y un `expires_at`
-futuro. Al vencer, el middleware cierra el acceso; al desactivarla manualmente
-se elimina además cualquier sesión asociada. Las cuentas temporales forman parte del
-máximo institucional de diez cuentas activas.
+El estado efectivo exige simultáneamente `active=true` y un `expires_at`
+futuro. Al cumplirse los siete días, el middleware cierra el acceso. Las
+cuentas de autorregistro forman parte del máximo institucional de diez cuentas
+activas.
 
 Existe un único rol Consulta. Una cuenta de Consulta puede ser permanente o
 temporal; la diferencia es exclusivamente su fecha de vencimiento, no sus
@@ -148,6 +139,35 @@ OpenStreetMap requeridas por el mapa y el marco oficial
 El contenedor asigna `storage` y `bootstrap/cache` a `www-data` con permisos
 para propietario y grupo, sin acceso para otros usuarios. El archivo privado de
 variables de Parra debe conservar modo `600`.
+
+## Versión segura del runtime PHP
+
+La imagen de SIGCEL fija `php:8.3.36-apache-bookworm`. PHP 8.3.35, que aún se
+encuentra en el staging institucional hasta publicar la próxima imagen, está
+afectado por CVE-2026-109618 y CVE-2026-109619. Debido a que SIGCEL utiliza
+Apache con `mod_php`, no se debe promover una imagen construida con una versión
+anterior a PHP 8.3.36.
+
+Como defensa adicional, `deploy/php-production.ini` mantiene
+`session.upload_progress.enabled = 0`. Esta configuración no sustituye la
+actualización del runtime. Antes de transferir una imagen se debe verificar la
+versión que contiene:
+
+```powershell
+docker run --rm --entrypoint php luzparral-app:ETIQUETA `
+    -r "echo PHP_VERSION, PHP_EOL;"
+```
+
+Después del despliegue se repite dentro del contenedor institucional:
+
+```bash
+podman exec luzparral-staging php -r 'echo PHP_VERSION, PHP_EOL;'
+podman exec luzparral-staging php -r \
+    'echo ini_get("session.upload_progress.enabled"), PHP_EOL;'
+```
+
+La salida exigida es PHP `8.3.36` o una revisión 8.3 posterior que incorpore
+las correcciones, y `0` para el progreso de carga de sesión.
 
 ## Protección frente a inyección SQL
 

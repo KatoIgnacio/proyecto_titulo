@@ -238,6 +238,91 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
     );
 }
 
+type PieChartItem = {
+    key: string | number;
+    label: string;
+    value: number;
+    color: string;
+};
+
+function DistributionPieChart({
+    items,
+    ariaLabel,
+    prominent = false,
+}: {
+    items: PieChartItem[];
+    ariaLabel: string;
+    prominent?: boolean;
+}) {
+    const visibleItems = items.filter((item) => item.value > 0);
+    const total = visibleItems.reduce((sum, item) => sum + item.value, 0);
+    const radius = 48;
+    const circumference = 2 * Math.PI * radius;
+    let offset = 0;
+    const segments = visibleItems.map((item) => {
+        const length = total === 0 ? 0 : (item.value / total) * circumference;
+        const segment = {
+            ...item,
+            length,
+            offset,
+        };
+        offset += length;
+
+        return segment;
+    });
+
+    if (total === 0) {
+        return <p className="py-8 text-center text-sm text-slate-500">Sin contingencias para mostrar.</p>;
+    }
+
+    return (
+        <div className={`grid items-center gap-8 ${prominent ? 'md:grid-cols-[220px_minmax(0,1fr)]' : 'md:grid-cols-[150px_minmax(0,1fr)]'}`}>
+            <div className={`mx-auto w-full ${prominent ? 'max-w-[220px]' : 'max-w-[150px]'}`}>
+                <svg
+                    aria-label={ariaLabel}
+                    className="h-auto w-full"
+                    role="img"
+                    viewBox="0 0 140 140"
+                >
+                    <title>{ariaLabel}</title>
+                    <circle cx="70" cy="70" r={radius} fill="none" stroke="#e2e8f0" strokeWidth={prominent ? 22 : 18} />
+                    {segments.map((segment) => (
+                        <circle
+                            key={segment.key}
+                            cx="70"
+                            cy="70"
+                            r={radius}
+                            fill="none"
+                            stroke={segment.color}
+                            strokeDasharray={`${segment.length} ${circumference - segment.length}`}
+                            strokeDashoffset={-segment.offset}
+                            strokeWidth={prominent ? 22 : 18}
+                            transform="rotate(-90 70 70)"
+                        />
+                    ))}
+                    <text x="70" y="66" fill="#0f172a" fontSize="20" fontWeight="800" textAnchor="middle">{formatNumber(total)}</text>
+                    <text x="70" y="82" fill="#64748b" fontSize="8" fontWeight="600" textAnchor="middle">CONTINGENCIAS</text>
+                </svg>
+            </div>
+
+            <div className={`grid gap-x-8 gap-y-3 ${prominent ? 'sm:grid-cols-2' : 'grid-cols-1'}`}>
+                {segments.map((segment) => (
+                    <div key={segment.key} className="flex items-center justify-between gap-4 border-b border-slate-100 pb-3 text-sm">
+                        <span className="flex min-w-0 items-center gap-2.5 font-semibold text-slate-700">
+                            <i className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} />
+                            <span className="truncate">{segment.label}</span>
+                        </span>
+                        <span className="whitespace-nowrap text-right tabular-nums">
+                            <strong className="text-slate-900">{Math.round((segment.value / total) * 100)}%</strong>
+                            <span className="ml-2 text-xs text-slate-500">{segment.value}</span>
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export default function Dashboard({
     filters,
     referenceDate,
@@ -281,7 +366,6 @@ export default function Dashboard({
         router.get(route('dashboard'), {}, { replace: true });
     };
 
-    const maxAffected = Math.max(1, ...communeDistribution.map((commune) => commune.affected));
     const defaultPeriod = defaultCustomPeriod(referenceDate);
     const hasFilters = Boolean(
         form.commune
@@ -293,6 +377,26 @@ export default function Dashboard({
         || form.date_from !== defaultPeriod.date_from
         || form.date_to !== defaultPeriod.date_to,
     );
+    const communeColors = ['#1d4ed8', '#0369a1', '#0f766e', '#64748b', '#ca8a04', '#475569'];
+    const statusColors: Record<string, string> = {
+        reported: '#94a3b8',
+        assigned: '#2563eb',
+        in_progress: '#ca8a04',
+        restored: '#0f766e',
+        closed: '#334155',
+    };
+    const communePieItems: PieChartItem[] = communeDistribution.map((commune, index) => ({
+        key: commune.id,
+        label: commune.name,
+        value: commune.incidents,
+        color: communeColors[index % communeColors.length],
+    }));
+    const statusPieItems: PieChartItem[] = statusDistribution.map((item) => ({
+        key: item.status,
+        label: statusLabels[item.status] ?? item.status,
+        value: item.total,
+        color: statusColors[item.status] ?? '#64748b',
+    }));
 
     return (
         <AuthenticatedLayout
@@ -398,42 +502,13 @@ export default function Dashboard({
                     <MetricCard label="Tiempo promedio" value={metrics.averageMinutes === null ? '—' : `${formatNumber(metrics.averageMinutes)} min`} note="interrupciones con duración registrada" accent="border-b-4 border-b-slate-400" icon={<MiniIcon path={<path d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />} />} />
                 </section>
 
-                <section className="grid gap-6 2xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
+                <section>
                     <article className="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <div className="mb-2">
                             <h2 className="font-bold text-slate-900">Evolución reciente de clientes</h2>
                             <p className="mt-1 text-xs text-slate-500">Últimos 12 días con actividad dentro del filtro aplicado.</p>
                         </div>
                         <div className="overflow-x-auto"><TrendChart points={trend} /></div>
-                    </article>
-
-                    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <h2 className="font-bold text-slate-900">Distribución por comunas</h2>
-                        <p className="mt-1 text-xs text-slate-500">Clientes afectados acumulados en la selección.</p>
-                        <div className="mt-5 space-y-4">
-                            {communeDistribution.length === 0 && <p className="text-sm text-slate-500">Sin datos para mostrar.</p>}
-                            {communeDistribution.map((commune) => (
-                                <div key={commune.id}>
-                                    <div className="mb-1.5 flex items-center justify-between gap-4 text-sm">
-                                        <span className="font-semibold text-slate-700">{commune.name}</span>
-                                        <span className="whitespace-nowrap text-xs text-slate-500">{formatNumber(commune.affected)} clientes · {commune.incidents} eventos</span>
-                                    </div>
-                                    <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                                        <div className="h-full rounded-full bg-blue-600" style={{ width: `${Math.max(2, (commune.affected / maxAffected) * 100)}%` }} />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-6 border-t border-slate-100 pt-4">
-                            <p className="mb-3 text-[11px] font-bold uppercase tracking-wide text-slate-500">Estados del período</p>
-                            <div className="flex flex-wrap gap-2">
-                                {statusDistribution.map((item) => (
-                                    <span key={item.status} className={`rounded-full px-2.5 py-1 text-xs font-semibold ${statusStyles[item.status] ?? 'bg-slate-100 text-slate-600'}`}>
-                                        {statusLabels[item.status] ?? item.status}: {item.total}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
                     </article>
                 </section>
 
@@ -484,6 +559,31 @@ export default function Dashboard({
                             </tbody>
                         </table>
                     </div>
+                </section>
+
+                <section aria-label="Distribuciones complementarias" className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)]">
+                    <article aria-labelledby="commune-distribution-title" className="rounded-xl border border-slate-200 border-t-4 border-t-blue-700 bg-white p-5 shadow-sm sm:p-7">
+                        <div className="mb-6">
+                            <h2 id="commune-distribution-title" className="text-lg font-bold text-slate-950">Contingencias por comuna</h2>
+                            <p className="mt-1 text-xs text-slate-500">Participación territorial dentro de los filtros aplicados.</p>
+                        </div>
+                        <DistributionPieChart
+                            ariaLabel="Distribución de contingencias por comuna"
+                            items={communePieItems}
+                            prominent
+                        />
+                    </article>
+
+                    <article aria-labelledby="status-distribution-title" className="rounded-xl border border-slate-200 bg-slate-50/60 p-5 shadow-sm sm:p-6">
+                        <div className="mb-6">
+                            <h2 id="status-distribution-title" className="font-bold text-slate-900">Contingencias por estado</h2>
+                            <p className="mt-1 text-xs text-slate-500">Situación operativa de los eventos incluidos en los filtros.</p>
+                        </div>
+                        <DistributionPieChart
+                            ariaLabel="Distribución de contingencias por estado"
+                            items={statusPieItems}
+                        />
+                    </article>
                 </section>
 
             </div>

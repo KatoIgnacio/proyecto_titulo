@@ -57,6 +57,9 @@ export default function Register() {
                     />
 
                     <InputError message={errors.name} className="mt-2" />
+                    <p className="mt-2 text-xs text-gray-500">
+                        Use solo letras, espacios, apóstrofes o guiones.
+                    </p>
                 </div>
 
                 <div className="mt-4">

@@ -11,7 +11,7 @@ class ContainerConfigurationTest extends TestCase
         $contents = file_get_contents(base_path('Containerfile'));
 
         $this->assertIsString($contents);
-        $this->assertStringContainsString('FROM php:8.3-apache-bookworm AS runtime', $contents);
+        $this->assertStringContainsString('FROM php:8.3.36-apache-bookworm AS runtime', $contents);
         $this->assertStringContainsString('pdo_mysql', $contents);
         $this->assertStringContainsString('intl', $contents);
         $this->assertStringContainsString('mbstring', $contents);
@@ -39,6 +39,17 @@ class ContainerConfigurationTest extends TestCase
 
         $this->assertIsString($entrypoint);
         $this->assertStringNotContainsString('migrate', $entrypoint);
+    }
+
+    public function test_runtime_uses_the_patched_php_release_and_disables_session_upload_progress(): void
+    {
+        $container = file_get_contents(base_path('Containerfile'));
+        $phpConfiguration = file_get_contents(base_path('deploy/php-production.ini'));
+
+        $this->assertIsString($container);
+        $this->assertIsString($phpConfiguration);
+        $this->assertStringContainsString('FROM php:8.3.36-apache-bookworm AS runtime', $container);
+        $this->assertMatchesRegularExpression('/^session\.upload_progress\.enabled\s*=\s*0$/m', $phpConfiguration);
     }
 
     public function test_runtime_directories_are_not_accessible_to_other_users(): void

@@ -18,10 +18,42 @@ promoción a producción y la evaluación empírica permanecen pendientes.
 | RNF06-RNF07 | Trazabilidad, consistencia e importación atómica verificadas |
 | OE1-OE3 | Materializados en levantamiento, modelo, requisitos e implementación |
 | OE4 | Preparado; exige sesiones reales autorizadas con usuarios |
-| Despliegue Parra | `c439b2f7f840` operativo y saludable en `8004`; reinicio completo del servidor y producción `8003` pendientes |
+| Despliegue Parra | `a1b80f9d7d3f` operativo y saludable en `8004`; la actualización de seguridad local aún debe publicarse, y el reinicio completo del servidor y producción `8003` siguen pendientes |
 
 La relación detallada entre cada requisito, pantalla, prueba y evidencia se
 encuentra en `MATRIZ_TRAZABILIDAD_ACADEMICA.md`.
+
+## Ajuste vigente del acceso de consulta
+
+Para simplificar las pruebas con usuarios se conservó un único mecanismo de
+alta: desde la pantalla de acceso, cada participante crea una cuenta Consulta
+con su correo y contraseña. La cuenta mantiene vigencia de siete días, límite
+de usuarios activos y permisos de solo lectura. Se retiraron del menú y del
+backend la creación, el listado y la desactivación administrativa de cuentas
+temporales en `/cuentas-consulta`, ya que duplicaban el autorregistro público.
+
+Las secciones históricas siguientes registran el estado que fue validado en
+cada segmento; las referencias a la antigua gestión administrativa no describen
+la interfaz vigente.
+
+## Evidencia local del Segmento 29
+
+El 25 de octubre de 2026 se cerró la preparación previa al commit de la versión
+vigente. El dashboard conserva gráficos separados para comuna y estado, con la
+distribución comunal como lectura principal, y el logotipo utiliza un soporte
+claro para mantener su legibilidad. Se retiró por completo el módulo
+administrativo duplicado de cuentas temporales, mientras `/register` mantiene
+el autorregistro de Consulta por siete días. El nombre del participante ahora
+normaliza espacios, admite caracteres propios de nombres humanos y rechaza
+marcado, números y símbolos ajenos al campo.
+
+La imagen fija `php:8.3.36-apache-bookworm` y desactiva
+`session.upload_progress`, corrigiendo antes de publicar la exposición del
+runtime 8.3.35 desplegado en staging. La imagen local se construyó y comprobó
+desde dentro con `PHP=8.3.36` y `upload_progress=0`. La validación aprobó 160
+pruebas con 1.834 aserciones, Pint y la construcción de producción de Vite. El
+despliegue y la repetición manual del QA en Parra permanecen pendientes y no se
+presentan como aceptación con usuarios.
 
 ## Evidencia local del Segmento 28
 

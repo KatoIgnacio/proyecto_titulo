@@ -18,7 +18,6 @@ export type PageProps<
             viewReports: boolean;
             viewMap: boolean;
             viewWeather: boolean;
-            manageTemporaryViewerAccounts: boolean;
             updateContingencies: boolean;
             registerFieldReports: boolean;
             manageFieldReports: boolean;

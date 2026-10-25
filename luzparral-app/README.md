@@ -59,7 +59,9 @@ sin reemplazar sus marcadores.
 La imagen compatible con Docker y Podman y su ejecución local están descritas en
 [`docs/CONTENEDORES.md`](docs/CONTENEDORES.md).
 Esa guía incluye el ensayo integral aislado con Docker, MySQL 8.4.11 y el
-conjunto sintético completo.
+conjunto sintético completo. El contenedor de aplicación fija PHP 8.3.36 como
+versión mínima del runtime; no se debe volver a una etiqueta 8.3 anterior ni a
+una etiqueta flotante sin repetir la comprobación de seguridad y las pruebas.
 
 Los escenarios de migración, generación sintética, respaldo, restauración y
 validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DATOS.md).
@@ -67,9 +69,9 @@ validación están descritos en [`docs/CICLO_BASE_DATOS.md`](docs/CICLO_BASE_DAT
 El aprovisionamiento de las cinco cuentas, la recuperación sin SMTP y las
 protecciones de sesión están documentados en
 [`docs/SEGURIDAD_OPERATIVA.md`](docs/SEGURIDAD_OPERATIVA.md). Esa guía también
-describe el autorregistro y la creación administrativa de cuentas temporales
-de consulta, su vencimiento automático, la revocación de sesiones y sus
-permisos de solo lectura.
+describe el autorregistro de cuentas de Consulta desde el acceso público, su
+vencimiento automático y sus permisos de solo lectura. No existe un flujo
+administrativo paralelo para generar credenciales temporales.
 
 Los informes permiten filtrar contingencias con o sin clientes críticos y
 electrodependientes. Los PDF ejecutivo, de desarrollo e integral incorporan un

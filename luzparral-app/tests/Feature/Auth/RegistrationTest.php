@@ -60,6 +60,34 @@ class RegistrationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_public_registration_normalizes_a_valid_human_name(): void
+    {
+        $this->post('/register', [
+            'name' => "  Ana   María O'Neill-Sepúlveda  ",
+            'email' => 'ana@example.com',
+            'password' => 'Prueba-Segura-2026!',
+            'password_confirmation' => 'Prueba-Segura-2026!',
+        ])->assertRedirect('/dashboard');
+
+        $this->assertDatabaseHas('users', [
+            'name' => "Ana María O'Neill-Sepúlveda",
+            'email' => 'ana@example.com',
+        ]);
+    }
+
+    public function test_public_registration_rejects_markup_and_non_name_symbols(): void
+    {
+        $this->post('/register', [
+            'name' => "<{123k'¿{",
+            'email' => 'nombre-invalido@example.com',
+            'password' => 'Prueba-Segura-2026!',
+            'password_confirmation' => 'Prueba-Segura-2026!',
+        ])->assertSessionHasErrors('name');
+
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', ['email' => 'nombre-invalido@example.com']);
+    }
+
     public function test_public_registration_respects_the_active_account_limit(): void
     {
         User::factory()->count(10)->create();

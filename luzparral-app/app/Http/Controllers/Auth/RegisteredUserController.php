@@ -33,10 +33,15 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $normalizedName = preg_replace('/\s+/u', ' ', (string) $request->input('name'));
+        $request->merge(['name' => trim($normalizedName ?? '')]);
+
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:80'],
+            'name' => ['required', 'string', 'min:2', 'max:80', 'regex:/^[\pL\pM]+(?:[ \'’\-][\pL\pM]+)*$/u'],
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'name.regex' => 'El nombre solo puede contener letras, espacios, apóstrofes y guiones.',
         ]);
 
         if ($this->activeUserCount() >= $this->maxActiveUsers()) {
@@ -48,7 +53,7 @@ class RegisteredUserController extends Controller
         $expiresAt = CarbonImmutable::now('America/Santiago')->addDays(7);
 
         $user = User::create([
-            'name' => trim((string) $validated['name']),
+            'name' => $validated['name'],
             'email' => $validated['email'],
             'email_verified_at' => now(),
             'password' => Hash::make($validated['password']),

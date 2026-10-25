@@ -76,20 +76,12 @@ class RoleAuthorizationTest extends TestCase
         $this->actingAs($operator)->get('/informes/contingencias.pdf')->assertForbidden();
     }
 
-    public function test_backend_shares_account_management_only_with_admin(): void
+    public function test_administrative_temporary_account_module_is_not_exposed(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin]);
-        $supervisor = User::factory()->create(['role' => UserRole::Supervisor]);
 
-        $this->actingAs($admin)
-            ->get('/dashboard')
-            ->assertInertia(fn (Assert $page) => $page
-                ->where('auth.permissions.manageTemporaryViewerAccounts', true));
-
-        $this->actingAs($supervisor)
-            ->get('/dashboard')
-            ->assertInertia(fn (Assert $page) => $page
-                ->where('auth.permissions.manageTemporaryViewerAccounts', false));
+        $this->actingAs($admin)->get('/cuentas-consulta')->assertNotFound();
+        $this->actingAs($admin)->post('/cuentas-consulta')->assertNotFound();
     }
 
     public function test_an_inactive_or_expired_authenticated_user_is_logged_out(): void

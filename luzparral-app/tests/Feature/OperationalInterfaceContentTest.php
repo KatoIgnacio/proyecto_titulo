@@ -67,16 +67,16 @@ class OperationalInterfaceContentTest extends TestCase
     public function test_qa_access_and_download_safeguards_are_present(): void
     {
         $login = (string) file_get_contents(base_path('resources/js/Pages/Auth/Login.tsx'));
-        $temporaryAccounts = (string) file_get_contents(base_path('resources/js/Pages/GuestAccounts/Index.tsx'));
+        $registration = (string) file_get_contents(base_path('resources/js/Pages/Auth/Register.tsx'));
         $reports = (string) file_get_contents(base_path('resources/js/Pages/Reports/Index.tsx'));
 
         $this->assertStringContainsString('new FormData(event.currentTarget)', $login);
         $this->assertStringContainsString('type="submit"', $login);
         $this->assertStringContainsString('Ingresando…', $login);
 
-        $this->assertStringContainsString("document.execCommand('copy')", $temporaryAccounts);
-        $this->assertStringContainsString('Nombre visible', $temporaryAccounts);
-        $this->assertStringContainsString('no se utiliza para iniciar sesión', $temporaryAccounts);
+        $this->assertStringContainsString("route('register')", $login);
+        $this->assertStringContainsString('Crear cuenta de consulta', $registration);
+        $this->assertStringContainsString('La cuenta durará siete días', $registration);
 
         $this->assertStringContainsString("fetch(exportUrl('reports.csv')", $reports);
         $this->assertStringContainsString('URL.createObjectURL', $reports);
@@ -101,5 +101,26 @@ class OperationalInterfaceContentTest extends TestCase
         $this->assertStringNotContainsString('Profile Information', $content);
         $this->assertStringNotContainsString('Update Password', $content);
         $this->assertStringNotContainsString('Current Password', $content);
+    }
+
+    public function test_commune_and_status_distributions_use_separate_complementary_pie_charts(): void
+    {
+        $dashboard = (string) file_get_contents(base_path('resources/js/Pages/Dashboard.tsx'));
+        $tablePosition = strpos($dashboard, 'Contingencias eléctricas');
+        $communeChartPosition = strpos($dashboard, 'id="commune-distribution-title"');
+        $statusChartPosition = strpos($dashboard, 'id="status-distribution-title"');
+
+        $this->assertIsInt($tablePosition);
+        $this->assertIsInt($communeChartPosition);
+        $this->assertIsInt($statusChartPosition);
+        $this->assertGreaterThan($tablePosition, $communeChartPosition);
+        $this->assertGreaterThan($tablePosition, $statusChartPosition);
+        $this->assertStringContainsString('DistributionPieChart', $dashboard);
+        $this->assertStringContainsString('ariaLabel="Distribución de contingencias por comuna"', $dashboard);
+        $this->assertStringContainsString('ariaLabel="Distribución de contingencias por estado"', $dashboard);
+        $this->assertStringContainsString('xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)]', $dashboard);
+        $this->assertStringContainsString('prominent', $dashboard);
+        $this->assertStringNotContainsString('Estados del período', $dashboard);
+        $this->assertStringNotContainsString('Clientes afectados acumulados en la selección.', $dashboard);
     }
 }
