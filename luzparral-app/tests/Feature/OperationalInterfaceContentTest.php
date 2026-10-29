@@ -83,6 +83,19 @@ class OperationalInterfaceContentTest extends TestCase
         $this->assertStringNotContainsString("<a href={exportUrl('reports.csv')}", $reports);
     }
 
+    public function test_public_access_uses_a_compact_institutional_identity(): void
+    {
+        $layout = (string) file_get_contents(base_path('resources/js/Layouts/GuestLayout.tsx'));
+        $login = (string) file_get_contents(base_path('resources/js/Pages/Auth/Login.tsx'));
+
+        $this->assertStringContainsString('ApplicationLogo', $layout);
+        $this->assertStringContainsString('SIGCEL', $layout);
+        $this->assertStringContainsString('Sistema de Información para la Gestión de Contingencias Eléctricas', $layout);
+        $this->assertStringContainsString('bg-amber-400', $layout);
+        $this->assertStringNotContainsString('SIGCEL Luzparral', $login);
+        $this->assertStringNotContainsString('¿Participas en las pruebas de SIGCEL?', $login);
+    }
+
     public function test_profile_interface_is_presented_in_spanish(): void
     {
         $files = [

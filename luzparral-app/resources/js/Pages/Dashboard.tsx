@@ -69,6 +69,17 @@ type ContingencyRow = {
     restored_at: string | null;
 };
 
+type PaginatedContingencies = {
+    data: ContingencyRow[];
+    total: number;
+    from: number | null;
+    to: number | null;
+    currentPage: number;
+    lastPage: number;
+    previousPageUrl: string | null;
+    nextPageUrl: string | null;
+};
+
 type DashboardProps = {
     filters: Filters;
     referenceDate: string;
@@ -80,7 +91,7 @@ type DashboardProps = {
     trend: TrendPoint[];
     communeDistribution: CommuneDistribution[];
     statusDistribution: StatusDistribution[];
-    contingencies: ContingencyRow[];
+    contingencies: PaginatedContingencies;
 };
 
 const statusLabels: Record<string, string> = {
@@ -516,10 +527,12 @@ export default function Dashboard({
                     <div className="flex flex-col justify-between gap-2 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center">
                         <div>
                             <h2 className="font-bold text-slate-900">Contingencias eléctricas</h2>
-                            <p className="mt-1 text-xs text-slate-500">Últimos 10 registros según los filtros aplicados.</p>
+                            <p className="mt-1 text-xs text-slate-500">Todas las contingencias filtradas, organizadas en páginas de 10 registros.</p>
                         </div>
                         <span className="self-start rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 sm:self-auto">
-                            {formatNumber(metrics.total)} resultados
+                            {contingencies.total > 0
+                                ? `${formatNumber(contingencies.from ?? 0)}–${formatNumber(contingencies.to ?? 0)} de ${formatNumber(contingencies.total)}`
+                                : '0 resultados'}
                         </span>
                     </div>
                     <div className="overflow-x-auto">
@@ -537,7 +550,7 @@ export default function Dashboard({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 bg-white text-sm">
-                                {contingencies.map((contingency) => (
+                                {contingencies.data.map((contingency) => (
                                     <tr key={contingency.id} className="transition hover:bg-slate-50">
                                         <td className="whitespace-nowrap px-5 py-4 font-mono text-xs font-bold">
                                             <Link href={route('contingencies.show', contingency.id)} className="text-blue-700 hover:text-blue-900 hover:underline">
@@ -553,12 +566,35 @@ export default function Dashboard({
                                         <td className="whitespace-nowrap px-5 py-4 text-xs text-slate-500">{formatDate(contingency.started_at)}</td>
                                     </tr>
                                 ))}
-                                {contingencies.length === 0 && (
+                                {contingencies.data.length === 0 && (
                                     <tr><td colSpan={8} className="px-5 py-12 text-center text-sm text-slate-500">No existen contingencias para la selección actual.</td></tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
+                    {contingencies.total > 0 && (
+                        <nav aria-label="Paginación de contingencias" className="flex items-center justify-between gap-4 border-t border-slate-200 px-5 py-4 text-sm">
+                            <span className="text-slate-500">
+                                Página {formatNumber(contingencies.currentPage)} de {formatNumber(contingencies.lastPage)}
+                            </span>
+                            <div className="flex gap-2">
+                                {contingencies.previousPageUrl ? (
+                                    <Link href={contingencies.previousPageUrl} preserveScroll preserveState aria-label="Página anterior de contingencias" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 transition hover:border-blue-400 hover:text-blue-700">
+                                        ← Anterior
+                                    </Link>
+                                ) : (
+                                    <span aria-disabled="true" className="rounded-lg border border-slate-200 px-4 py-2 text-slate-300">← Anterior</span>
+                                )}
+                                {contingencies.nextPageUrl ? (
+                                    <Link href={contingencies.nextPageUrl} preserveScroll preserveState aria-label="Página siguiente de contingencias" className="rounded-lg border border-slate-300 px-4 py-2 font-semibold text-slate-700 transition hover:border-blue-400 hover:text-blue-700">
+                                        Siguiente →
+                                    </Link>
+                                ) : (
+                                    <span aria-disabled="true" className="rounded-lg border border-slate-200 px-4 py-2 text-slate-300">Siguiente →</span>
+                                )}
+                            </div>
+                        </nav>
+                    )}
                 </section>
 
                 <section aria-label="Distribuciones complementarias" className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)]">

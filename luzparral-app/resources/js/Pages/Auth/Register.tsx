@@ -26,19 +26,13 @@ export default function Register() {
         <GuestLayout>
             <Head title="Crear cuenta de consulta" />
 
-            <div className="mb-6 text-center">
-                <h1 className="text-xl font-semibold text-gray-900">
-                    Crear cuenta de consulta
-                </h1>
-                <p className="mt-2 text-sm text-gray-600">
-                    Acceso temporal para participar en las pruebas de SIGCEL.
-                </p>
+            <div className="mb-5">
+                <h2 className="text-lg font-bold text-slate-900">Crear cuenta de consulta</h2>
+                <p className="mt-1 text-sm text-slate-500">Acceso temporal de solo lectura.</p>
             </div>
 
             <div className="mb-5 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
-                La cuenta durará siete días y tendrá acceso de solo lectura al
-                panel, buscador, detalle e informes. No habilita mapa,
-                pronóstico ni funciones operativas.
+                La cuenta durará siete días e incluye panel, búsqueda, detalle e informes en modo lectura.
             </div>
 
             <form onSubmit={submit}>
@@ -124,11 +118,6 @@ export default function Register() {
                         className="mt-2"
                     />
                 </div>
-
-                <p className="mt-4 text-xs text-gray-500">
-                    No ingrese información de clientes ni datos operacionales
-                    en el nombre de la cuenta.
-                </p>
 
                 <div className="mt-5 flex items-center justify-between gap-4">
                     <Link

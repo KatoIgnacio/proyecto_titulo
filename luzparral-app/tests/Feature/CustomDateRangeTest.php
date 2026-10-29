@@ -142,7 +142,8 @@ class CustomDateRangeTest extends TestCase
                 ->where('filters.date_from', '2026-09-01')
                 ->where('filters.date_to', '2026-09-03')
                 ->where('metrics.total', 2)
-                ->has('contingencies', 2));
+                ->where('contingencies.total', 2)
+                ->has('contingencies.data', 2));
 
         $this->actingAs($user)
             ->get('/contingencias/mapa'.$query)

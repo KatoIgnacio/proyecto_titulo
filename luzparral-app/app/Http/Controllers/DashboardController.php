@@ -101,11 +101,14 @@ class DashboardController extends Controller
                 'total' => (int) $row->total,
             ]);
 
-        $contingencies = (clone $query)
+        $contingencyPaginator = (clone $query)
             ->with(['commune:id,name', 'feeder:id,code,name'])
             ->orderByDesc('contingencies.started_at')
-            ->limit(10)
-            ->get()
+            ->orderByDesc('contingencies.id')
+            ->paginate(10)
+            ->withQueryString();
+
+        $contingencies = collect($contingencyPaginator->items())
             ->map(fn (Contingency $contingency) => [
                 'id' => $contingency->id,
                 'code' => $contingency->code,
@@ -146,7 +149,16 @@ class DashboardController extends Controller
             'trend' => $trend,
             'communeDistribution' => $communeDistribution,
             'statusDistribution' => $statusDistribution,
-            'contingencies' => $contingencies,
+            'contingencies' => [
+                'data' => $contingencies,
+                'total' => $contingencyPaginator->total(),
+                'from' => $contingencyPaginator->firstItem(),
+                'to' => $contingencyPaginator->lastItem(),
+                'currentPage' => $contingencyPaginator->currentPage(),
+                'lastPage' => $contingencyPaginator->lastPage(),
+                'previousPageUrl' => $contingencyPaginator->previousPageUrl(),
+                'nextPageUrl' => $contingencyPaginator->nextPageUrl(),
+            ],
         ]);
     }
 
