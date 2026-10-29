@@ -4,6 +4,12 @@ Este documento representa la solución implementada al cierre local del
 Segmento 20. Complementa el diseño conceptual del anteproyecto con las
 decisiones necesarias para seguridad, trazabilidad, importación y despliegue.
 
+La explicación de clases, secuencias, recorrido de formularios y flujo de
+datos se encuentra en
+[`ARQUITECTURA_FLUJOS_Y_CLASES.md`](ARQUITECTURA_FLUJOS_Y_CLASES.md). El
+diccionario de entidades y la matriz de factibilidad tecnológica están en
+[`DICCIONARIO_DATOS_Y_STACK.md`](DICCIONARIO_DATOS_Y_STACK.md).
+
 ## Vista de componentes
 
 ```mermaid
