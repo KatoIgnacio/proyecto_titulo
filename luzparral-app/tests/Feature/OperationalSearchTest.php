@@ -37,6 +37,38 @@ class OperationalSearchTest extends TestCase
                 ->has('results.data', 0));
     }
 
+    public function test_explicit_all_records_search_returns_paginated_contingencies_without_text(): void
+    {
+        $user = User::factory()->create();
+        [$commune, $feeder] = $this->createLocation();
+        $this->createContingency($commune, $feeder, 'CONT-SEARCH-001', 'OSF-SEARCH-001', 'reported');
+        $this->createContingency($commune, $feeder, 'CONT-SEARCH-002', 'OSF-SEARCH-002', 'closed');
+
+        $this->actingAs($user)
+            ->get('/buscador-operacional?category=all')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('hasSearched', true)
+                ->where('filters.category', 'all')
+                ->where('results.total', 2)
+                ->has('results.data', 2));
+    }
+
+    public function test_search_exposes_constrained_commune_and_feeder_options(): void
+    {
+        $user = User::factory()->create();
+        [$commune, $feeder] = $this->createLocation();
+
+        $this->actingAs($user)
+            ->get('/buscador-operacional')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('filterOptions.communes.0.id', $commune->id)
+                ->where('filterOptions.communes.0.name', $commune->name)
+                ->where('filterOptions.feeders.0.id', $feeder->id)
+                ->where('filterOptions.feeders.0.code', $feeder->code));
+    }
+
     public function test_search_finds_a_synthetic_contingency_by_osf(): void
     {
         $user = User::factory()->create();

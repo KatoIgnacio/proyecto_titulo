@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Commune;
 use App\Models\Contingency;
+use App\Models\Feeder;
 use App\Models\SupplyPoint;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -33,7 +35,8 @@ class OperationalSearchController extends Controller
             'priority' => $validated['priority'] ?? null,
         ];
 
-        $hasSearched = $filters['query'] !== ''
+        $hasSearched = ($filters['category'] === 'all' && $request->has('category'))
+            || $filters['query'] !== ''
             || $filters['status'] !== null
             || $filters['priority'] !== null;
         $supplySearch = in_array($filters['category'], ['customer', 'supply'], true);
@@ -64,6 +67,7 @@ class OperationalSearchController extends Controller
                 'filters' => $filters,
                 'hasSearched' => false,
                 'results' => $emptyResults,
+                'filterOptions' => $this->filterOptions(),
             ]);
         }
 
@@ -89,6 +93,7 @@ class OperationalSearchController extends Controller
         return Inertia::render('Contingencies/Search', [
             'filters' => $filters,
             'hasSearched' => true,
+            'filterOptions' => $this->filterOptions(),
             'results' => [
                 'data' => collect($paginator->items())->map(fn (Contingency $contingency) => [
                     'result_type' => 'contingency',
@@ -132,6 +137,7 @@ class OperationalSearchController extends Controller
         return Inertia::render('Contingencies/Search', [
             'filters' => $filters,
             'hasSearched' => true,
+            'filterOptions' => $this->filterOptions(),
             'results' => [
                 'data' => collect($paginator->items())->map(fn (SupplyPoint $point) => [
                     'result_type' => 'supply_point',
@@ -153,6 +159,30 @@ class OperationalSearchController extends Controller
                 'nextPageUrl' => $paginator->nextPageUrl(),
             ],
         ]);
+    }
+
+    /** @return array{communes: array<int, array{id: int, name: string}>, feeders: array<int, array{id: int, code: string, name: string}>} */
+    private function filterOptions(): array
+    {
+        return [
+            'communes' => Commune::query()
+                ->where('active', true)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (Commune $commune): array => [
+                    'id' => $commune->id,
+                    'name' => $commune->name,
+                ])->all(),
+            'feeders' => Feeder::query()
+                ->where('active', true)
+                ->orderBy('code')
+                ->get(['id', 'code', 'name'])
+                ->map(fn (Feeder $feeder): array => [
+                    'id' => $feeder->id,
+                    'code' => $feeder->code,
+                    'name' => $feeder->name,
+                ])->all(),
+        ];
     }
 
     private function applyTextSearch(Builder $query, string $category, string $search): void

@@ -41,7 +41,7 @@ class RegisteredUserController extends Controller
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
-            'name.regex' => 'El nombre solo puede contener letras, espacios, apóstrofes y guiones.',
+            'name.regex' => 'El nombre solo puede contener letras, espacios, apóstrofos y guiones.',
         ]);
 
         if ($this->activeUserCount() >= $this->maxActiveUsers()) {

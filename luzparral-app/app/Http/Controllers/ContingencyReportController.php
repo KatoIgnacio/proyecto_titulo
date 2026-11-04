@@ -9,12 +9,15 @@ use Carbon\CarbonImmutable;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ContingencyReportController extends Controller
 {
+    private const MAX_DETAIL_CONTINGENCIES = 200;
+
     private const REPORT_TYPES = [
         'executive' => [
             'title' => 'Informe ejecutivo de contingencias eléctricas',
@@ -126,6 +129,13 @@ class ContingencyReportController extends Controller
         $includesAnalytics = in_array($reportType, ['executive', 'complete'], true);
         $includesDetail = in_array($reportType, ['development', 'complete'], true);
         $query = $this->reports->filteredQuery($filters, $referenceDate);
+
+        if ($includesDetail && (clone $query)->count() > self::MAX_DETAIL_CONTINGENCIES) {
+            throw ValidationException::withMessages([
+                'range' => 'El informe detallado admite hasta 200 contingencias. Acote el período o utilice el informe ejecutivo.',
+            ]);
+        }
+
         $contingencies = $this->reports->pdfCollection($query, $includesDetail);
         $generatedAt = CarbonImmutable::now('America/Santiago');
         $definition = self::REPORT_TYPES[$reportType];
@@ -151,7 +161,7 @@ class ContingencyReportController extends Controller
             'companyLogo' => $this->reports->imageDataUri('images/logo-luzparral.png'),
             'systemLogo' => $this->reports->imageDataUri('images/logo-sigcel-transparente.png'),
         ])->render(), 'UTF-8');
-        $dompdf->setPaper('a4', 'landscape');
+        $dompdf->setPaper('a4', $reportType === 'executive' ? 'portrait' : 'landscape');
         $dompdf->render();
 
         $filename = $definition['filename'].'-'.$generatedAt->format('Ymd-His').'.pdf';

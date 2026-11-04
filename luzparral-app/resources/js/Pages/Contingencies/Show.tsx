@@ -692,9 +692,11 @@ export default function Show({ contingency, impactSummary, history, fieldReports
                             </select>
                         </label>
                         <div className="flex gap-2">
-                            <Link href={route('contingencies.map')} className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
-                                Volver al mapa
-                            </Link>
+                            {auth.permissions.viewMap && (
+                                <Link href={route('contingencies.map')} className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                                    Volver al mapa
+                                </Link>
+                            )}
                             <Link href={route('dashboard')} className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
                                 Panel general
                             </Link>
@@ -761,7 +763,6 @@ export default function Show({ contingency, impactSummary, history, fieldReports
                                 <DataItem label="Reposición estimada" value={formatDate(contingency.estimated_restore_at)} />
                                 <DataItem label="Reposición efectiva" value={formatDate(contingency.restored_at)} />
                                 <DataItem label="Causa" value={causeLabels[contingency.cause] ?? contingency.cause} />
-                                <DataItem label="Coordenadas sintéticas" value={`${contingency.latitude.toFixed(5)}, ${contingency.longitude.toFixed(5)}`} mono />
                             </dl>
 
                             <div className="mt-6 rounded-lg bg-slate-50 p-4">

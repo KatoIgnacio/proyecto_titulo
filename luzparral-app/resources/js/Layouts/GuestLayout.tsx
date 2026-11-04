@@ -28,6 +28,9 @@ export default function Guest({ children }: PropsWithChildren) {
                 <main className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white px-6 py-6 shadow-sm sm:px-8">
                     {children}
                 </main>
+                <footer className="mt-5 text-center text-xs text-slate-500">
+                    SIGCEL · Sistema de Información para la Gestión de Contingencias Eléctricas
+                </footer>
             </div>
         </div>
     );

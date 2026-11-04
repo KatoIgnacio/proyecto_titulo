@@ -10,7 +10,7 @@ class TrendChartRenderer
     {
         $width = 930;
         $height = 245;
-        $left = 58;
+        $left = 72;
         $top = 26;
         $right = 20;
         $bottom = 42;
@@ -46,6 +46,7 @@ class TrendChartRenderer
 
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">'
             .'<rect width="100%" height="100%" fill="#ffffff" />'
+            .'<text x="14" y="'.($top + ($plotHeight / 2)).'" transform="rotate(-90 14 '.($top + ($plotHeight / 2)).')" text-anchor="middle" font-size="9" fill="#64748b">Clientes</text>'
             .$grid
             .'<line x1="'.$left.'" y1="'.($top + $plotHeight).'" x2="'.($width - $right).'" y2="'.($top + $plotHeight).'" stroke="#94a3b8" />'
             .'<polyline points="'.implode(' ', $affectedPoints).'" fill="none" stroke="#ef4444" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" />'

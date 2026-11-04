@@ -29,7 +29,7 @@ interfaz vigente.
 | Cuentas temporales (histórico) | `Identificador visible` podía interpretarse como nombre de usuario. | Retirado de la interfaz vigente junto con la creación administrativa; no aplica al autorregistro público. |
 | Listado (histórico) | Se reportó que una cuenta temporal no aparecía. | Retirado de la interfaz vigente; el acceso ya no depende de un listado administrativo paralelo. |
 | Portapapeles (histórico) | `Copiar credenciales` podía fallar en HTTP o cuando el navegador rechazaba la API moderna. | Retirado de la interfaz vigente; cada participante define y conserva su propia credencial. |
-| Autorregistro | El campo nombre admitía cadenas de símbolos que no representaban un nombre de participante. | Se normalizan los espacios y solo se aceptan letras, espacios, apóstrofes y guiones, con un mensaje de ayuda y una prueba de regresión. |
+| Autorregistro | El campo nombre admitía cadenas de símbolos que no representaban un nombre de participante. | Se normalizan los espacios y solo se aceptan letras, espacios, apóstrofos y guiones, con un mensaje de ayuda y una prueba de regresión. |
 | Informes | La descarga CSV cambiaba la ubicación de la pestaña. | El archivo se obtiene como `Blob` y se descarga manteniendo la página y sus filtros. |
 | Perfil | Parte de la interfaz permanecía en inglés. | Títulos, campos, ayuda y confirmaciones quedaron en español. |
 

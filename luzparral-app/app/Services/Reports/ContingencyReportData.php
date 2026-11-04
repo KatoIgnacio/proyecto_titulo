@@ -310,23 +310,23 @@ class ContingencyReportData
                 $periods[$key] ??= ['key' => $key, 'affected' => 0, 'restored' => 0, 'started' => 0, 'completed' => 0];
                 $periods[$key]['affected'] += (int) $contingency->affected_total;
                 $periods[$key]['started']++;
-            }
 
-            if ($contingency->restored_at) {
-                $key = $this->periodKey(CarbonImmutable::parse($contingency->restored_at), $range);
-                $periods[$key] ??= ['key' => $key, 'affected' => 0, 'restored' => 0, 'started' => 0, 'completed' => 0];
-                $periods[$key]['restored'] += (int) $contingency->affected_total;
-                $periods[$key]['completed']++;
+                if ($contingency->restored_at) {
+                    $periods[$key]['restored'] += (int) $contingency->affected_total;
+                    $periods[$key]['completed']++;
+                }
             }
         }
 
         ksort($periods);
 
-        return collect($periods)->map(function (array $period) use ($range): array {
-            $period['label'] = $this->periodLabel($period['key'], $range);
+        return collect($periods)
+            ->take(-12)
+            ->map(function (array $period) use ($range): array {
+                $period['label'] = $this->periodLabel($period['key'], $range);
 
-            return $period;
-        })->values();
+                return $period;
+            })->values();
     }
 
     private function periodKey(CarbonImmutable $date, string $range): string

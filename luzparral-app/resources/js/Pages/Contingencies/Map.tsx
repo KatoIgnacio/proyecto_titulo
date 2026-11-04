@@ -460,16 +460,16 @@ export default function MapPage({
                             </select>
                         </label>
                         <label className="text-xs font-semibold text-slate-600">
-                            Estado
-                            <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })} className="mt-1 block w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
-                                {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                            </select>
-                        </label>
-                        <label className="text-xs font-semibold text-slate-600">
                             Criticidad
                             <select value={form.priority} onChange={(event) => setForm({ ...form, priority: event.target.value })} className="mt-1 block w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="">Todas</option>
                                 {Object.entries(priorityLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                            </select>
+                        </label>
+                        <label className="text-xs font-semibold text-slate-600">
+                            Estado
+                            <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })} className="mt-1 block w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                             </select>
                         </label>
                         <div className="flex items-end">
@@ -516,7 +516,10 @@ export default function MapPage({
                             <div className="absolute inset-0 z-[500] flex items-center justify-center bg-slate-900/25 p-6">
                                 <div className="rounded-lg bg-white px-5 py-4 text-center shadow-lg">
                                     <p className="font-semibold text-slate-900">No hay eventos para esta selección.</p>
-                                    <p className="mt-1 text-sm text-slate-500">Modifica los filtros o reinicia el mapa.</p>
+                                    <p className="mt-1 text-sm text-slate-500">Modifica los filtros o restablece la vista inicial.</p>
+                                    <button type="button" onClick={reset} className="mt-3 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700">
+                                        Restablecer vista
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -662,9 +665,12 @@ export default function MapPage({
                     </aside>
                 </section>
 
-                <div className="flex flex-wrap justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
                     <span>Mapa base © OpenStreetMap contributors.</span>
-                    <span>Área visible: {numberFormatter.format(data.summary.critical)} críticos · {numberFormatter.format(data.summary.electrodependent)} electrodependientes.</span>
+                    <span className="flex flex-wrap items-center gap-2 font-semibold">
+                        <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-700">{numberFormatter.format(data.summary.critical)} críticos</span>
+                        <span className="rounded-full bg-violet-50 px-3 py-1 text-violet-700">{numberFormatter.format(data.summary.electrodependent)} electrodependientes</span>
+                    </span>
                 </div>
             </div>
         </AuthenticatedLayout>

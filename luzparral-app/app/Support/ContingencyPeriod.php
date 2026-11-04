@@ -115,14 +115,9 @@ final class ContingencyPeriod
     /** @param array{range: string, date_from: ?string, date_to: ?string} $filters */
     public static function trendRange(array $filters): string
     {
-        if (! in_array($filters['range'], ['day', 'month', 'year', 'custom'], true)) {
-            return $filters['range'];
-        }
-
-        $days = CarbonImmutable::parse($filters['date_from'])
-            ->diffInDays(CarbonImmutable::parse($filters['date_to']));
-
-        return $days === 0 ? '24h' : ($days <= 62 ? '30d' : '12m');
+        // Dashboard and PDF use the same daily cohort: at most the last
+        // twelve dates with activity inside the selected period.
+        return '30d';
     }
 
     private static function monthName(int $month): string

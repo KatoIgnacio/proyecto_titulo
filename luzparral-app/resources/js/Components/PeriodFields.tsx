@@ -60,6 +60,11 @@ export default function PeriodFields<T extends PeriodFilterValue>({
                     <option value="year">Año completo</option>
                     <option value="all">Todo el historial</option>
                 </select>
+                {value.range === 'custom' && (
+                    <span className="mt-1 block text-[10px] font-normal leading-4 text-slate-500">
+                        Inicial: primer día del mes del último dato disponible.
+                    </span>
+                )}
             </label>
 
             {value.range === 'day' && (

@@ -29,6 +29,7 @@ export default function Register() {
             <div className="mb-5">
                 <h2 className="text-lg font-bold text-slate-900">Crear cuenta de consulta</h2>
                 <p className="mt-1 text-sm text-slate-500">Acceso temporal de solo lectura.</p>
+                <p className="mt-2 text-xs font-medium text-slate-600">Todos los campos son obligatorios.</p>
             </div>
 
             <div className="mb-5 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
@@ -52,7 +53,7 @@ export default function Register() {
 
                     <InputError message={errors.name} className="mt-2" />
                     <p className="mt-2 text-xs text-gray-500">
-                        Use solo letras, espacios, apóstrofes o guiones.
+                        Use solo letras, espacios, apóstrofos o guiones.
                     </p>
                 </div>
 

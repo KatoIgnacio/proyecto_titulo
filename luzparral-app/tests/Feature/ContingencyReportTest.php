@@ -8,6 +8,7 @@ use App\Models\Contingency;
 use App\Models\Feeder;
 use App\Models\User;
 use App\Services\Reports\ContingencyMapSnapshotRenderer;
+use App\Services\Reports\ContingencyReportData;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -157,6 +158,60 @@ class ContingencyReportTest extends TestCase
         $this->assertStringContainsString('<svg', $svg);
         $this->assertStringContainsString('CONT-MAP-PDF', $svg);
         $this->assertStringContainsString('Mapa esquemático', $svg);
+    }
+
+    public function test_detailed_pdf_requires_a_bounded_selection(): void
+    {
+        $user = $this->reportUser();
+        [$commune, $feeder] = $this->createLocation();
+
+        foreach (range(1, 201) as $index) {
+            $this->createContingency(
+                $commune,
+                $feeder,
+                sprintf('CONT-LIMIT-%03d', $index),
+                'reported',
+                'medium',
+                1,
+            );
+        }
+
+        $this->actingAs($user)
+            ->get('/informes/contingencias.pdf?range=all&report_type=development')
+            ->assertSessionHasErrors('range');
+    }
+
+    public function test_report_trend_uses_the_same_twelve_daily_cohorts_as_the_dashboard(): void
+    {
+        [$commune, $feeder] = $this->createLocation();
+        $contingencies = collect();
+
+        foreach (range(1, 13) as $day) {
+            $contingency = $this->createContingency(
+                $commune,
+                $feeder,
+                sprintf('CONT-TREND-%02d', $day),
+                'closed',
+                'medium',
+                $day,
+            );
+            $contingency->update([
+                'started_at' => sprintf('2026-09-%02d 10:00:00', $day),
+                'restored_at' => sprintf('2026-09-%02d 12:00:00', $day),
+            ]);
+            $contingencies->push($contingency->fresh());
+        }
+
+        $analytics = app(ContingencyReportData::class)->analytics($contingencies, [
+            'range' => 'all',
+            'date_from' => null,
+            'date_to' => null,
+        ]);
+
+        $this->assertCount(12, $analytics['trend']);
+        $this->assertSame('02/09', $analytics['trend']->first()['label']);
+        $this->assertSame(2, $analytics['trend']->first()['affected']);
+        $this->assertSame(2, $analytics['trend']->first()['restored']);
     }
 
     public function test_report_rejects_invalid_filters(): void

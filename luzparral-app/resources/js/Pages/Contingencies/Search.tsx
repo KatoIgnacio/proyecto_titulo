@@ -60,6 +60,10 @@ type SearchProps = {
     filters: SearchFilters;
     hasSearched: boolean;
     results: SearchResults;
+    filterOptions: {
+        communes: Array<{ id: number; name: string }>;
+        feeders: Array<{ id: number; code: string; name: string }>;
+    };
 };
 
 const statusLabels: Record<string, string> = {
@@ -121,7 +125,7 @@ function SearchIcon({ className = 'h-5 w-5' }: { className?: string }) {
     );
 }
 
-export default function Search({ filters, hasSearched, results }: SearchProps) {
+export default function Search({ filters, hasSearched, results, filterOptions }: SearchProps) {
     const { auth, errors } = usePage<PageProps>().props;
     const [form, setForm] = useState<SearchForm>({
         category: filters.category,
@@ -130,6 +134,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
         priority: filters.priority ?? '',
     });
     const supplySearch = form.category === 'customer' || form.category === 'supply';
+    const constrainedSearch = form.category === 'commune' || form.category === 'feeder';
     const displayingSupplyResults = filters.category === 'customer' || filters.category === 'supply';
 
     const submit = (event: FormEvent) => {
@@ -174,6 +179,7 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
                                     onChange={(event) => setForm((current) => ({
                                         ...current,
                                         category: event.target.value,
+                                        query: '',
                                         status: ['customer', 'supply'].includes(event.target.value) ? '' : current.status,
                                         priority: ['customer', 'supply'].includes(event.target.value) ? '' : current.priority,
                                     }))}
@@ -192,16 +198,29 @@ export default function Search({ filters, hasSearched, results }: SearchProps) {
 
                             <label className="block text-sm font-medium text-slate-700">
                                 Criterio de búsqueda
-                                <div className="relative mt-1.5">
-                                    <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                                    <input
+                                {constrainedSearch ? (
+                                    <select
                                         value={form.query}
                                         onChange={(event) => setForm((current) => ({ ...current, query: event.target.value }))}
-                                        placeholder={supplySearch ? 'Inicio o código sintético completo' : 'Código, OSF, comuna, alimentador o descripción'}
-                                        maxLength={80}
-                                        className="block w-full rounded-lg border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
-                                </div>
+                                        className="mt-1.5 block w-full rounded-lg border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    >
+                                        <option value="">Seleccione una opción</option>
+                                        {form.category === 'commune'
+                                            ? filterOptions.communes.map((commune) => <option key={commune.id} value={commune.name}>{commune.name}</option>)
+                                            : filterOptions.feeders.map((feeder) => <option key={feeder.id} value={feeder.code}>{feeder.code} · {feeder.name}</option>)}
+                                    </select>
+                                ) : (
+                                    <div className="relative mt-1.5">
+                                        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                                        <input
+                                            value={form.query}
+                                            onChange={(event) => setForm((current) => ({ ...current, query: event.target.value }))}
+                                            placeholder={supplySearch ? 'Inicio o código sintético completo' : form.category === 'all' ? 'Opcional: filtre todo el registro' : 'Ingrese el criterio de búsqueda'}
+                                            maxLength={80}
+                                            className="block w-full rounded-lg border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                )}
                             </label>
 
                             <label className="block text-sm font-medium text-slate-700">

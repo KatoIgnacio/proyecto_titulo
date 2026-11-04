@@ -116,6 +116,29 @@ class OperationalInterfaceContentTest extends TestCase
         $this->assertStringNotContainsString('Current Password', $content);
     }
 
+    public function test_teacher_feedback_quick_fixes_are_present(): void
+    {
+        $shell = (string) file_get_contents(base_path('resources/views/app.blade.php'));
+        $app = (string) file_get_contents(base_path('resources/js/app.tsx'));
+        $authenticatedLayout = (string) file_get_contents(base_path('resources/js/Layouts/AuthenticatedLayout.tsx'));
+        $guestLayout = (string) file_get_contents(base_path('resources/js/Layouts/GuestLayout.tsx'));
+        $dashboard = (string) file_get_contents(base_path('resources/js/Pages/Dashboard.tsx'));
+        $detail = (string) file_get_contents(base_path('resources/js/Pages/Contingencies/Show.tsx'));
+        $registration = (string) file_get_contents(base_path('resources/js/Pages/Auth/Register.tsx'));
+
+        $this->assertStringContainsString('rel="icon"', $shell);
+        $this->assertStringContainsString("'SIGCEL Luzparral'", $app);
+        $this->assertStringContainsString('Sistema de Información para la Gestión de Contingencias Eléctricas', $authenticatedLayout);
+        $this->assertStringContainsString('Sistema de Información para la Gestión de Contingencias Eléctricas', $guestLayout);
+        $this->assertStringContainsString('Todos los campos son obligatorios.', $registration);
+        $this->assertStringContainsString('apóstrofos', $registration);
+        $this->assertStringContainsString('auth.permissions.viewMap &&', $detail);
+        $this->assertStringContainsString('La búsqueda utiliza coincidencias parciales', $dashboard);
+        $this->assertStringContainsString('Hasta 12 fechas con actividad', $dashboard);
+        $this->assertStringContainsString('Clientes', $dashboard);
+        $this->assertStringContainsString('las más recientes primero', $dashboard);
+    }
+
     public function test_commune_and_status_distributions_use_separate_complementary_pie_charts(): void
     {
         $dashboard = (string) file_get_contents(base_path('resources/js/Pages/Dashboard.tsx'));

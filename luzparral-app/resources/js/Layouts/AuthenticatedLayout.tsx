@@ -200,7 +200,7 @@ export default function Authenticated({
                 </div>
             )}
 
-            <div className="lg:pl-64">
+            <div className="flex min-h-screen flex-col lg:pl-64">
                 <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
                     <div className="flex h-20 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
                         <div className="flex min-w-0 items-center gap-3">
@@ -260,7 +260,10 @@ export default function Authenticated({
                     </div>
                 )}
 
-                <main>{children}</main>
+                <main className="flex-1">{children}</main>
+                <footer className="border-t border-slate-200 bg-white px-4 py-3 text-center text-xs text-slate-500 sm:px-6 lg:px-8">
+                    SIGCEL · Sistema de Información para la Gestión de Contingencias Eléctricas
+                </footer>
             </div>
         </div>
     );

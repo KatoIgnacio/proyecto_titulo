@@ -196,7 +196,7 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
 
     const width = 760;
     const height = 260;
-    const paddingX = 42;
+    const paddingX = 60;
     const paddingTop = 20;
     const paddingBottom = 40;
     const plotHeight = height - paddingTop - paddingBottom;
@@ -218,12 +218,22 @@ function TrendChart({ points }: { points: TrendPoint[] }) {
                 role="img"
                 viewBox={`0 0 ${width} ${height}`}
             >
+                <text
+                    fill="#64748b"
+                    fontSize="10"
+                    textAnchor="middle"
+                    transform={`rotate(-90 14 ${paddingTop + plotHeight / 2})`}
+                    x="14"
+                    y={paddingTop + plotHeight / 2}
+                >
+                    Clientes
+                </text>
                 {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
                     const y = paddingTop + plotHeight - ratio * plotHeight;
                     return (
                         <g key={ratio}>
                             <line x1={paddingX} x2={width - paddingX} y1={y} y2={y} stroke="#e2e8f0" strokeDasharray="4 6" />
-                            <text x="3" y={y + 4} fill="#94a3b8" fontSize="10">{formatNumber(Math.round(maxValue * ratio))}</text>
+                            <text x={paddingX - 10} y={y + 4} fill="#94a3b8" fontSize="10" textAnchor="end">{formatNumber(Math.round(maxValue * ratio))}</text>
                         </g>
                     );
                 })}
@@ -500,6 +510,9 @@ export default function Dashboard({
                                     placeholder="Buscar por código de contingencia, OSF, alimentador o descripción…"
                                 />
                             </div>
+                            <p className="mt-2 text-xs text-slate-500">
+                                La búsqueda utiliza coincidencias parciales en los campos indicados.
+                            </p>
                         </label>
                     </form>
                 </section>
@@ -517,7 +530,7 @@ export default function Dashboard({
                     <article className="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <div className="mb-2">
                             <h2 className="font-bold text-slate-900">Evolución reciente de clientes</h2>
-                            <p className="mt-1 text-xs text-slate-500">Últimos 12 días con actividad dentro del filtro aplicado.</p>
+                            <p className="mt-1 text-xs text-slate-500">Hasta 12 fechas con actividad dentro del período aplicado.</p>
                         </div>
                         <div className="overflow-x-auto"><TrendChart points={trend} /></div>
                     </article>
@@ -527,7 +540,7 @@ export default function Dashboard({
                     <div className="flex flex-col justify-between gap-2 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center">
                         <div>
                             <h2 className="font-bold text-slate-900">Contingencias eléctricas</h2>
-                            <p className="mt-1 text-xs text-slate-500">Todas las contingencias filtradas, organizadas en páginas de 10 registros.</p>
+                            <p className="mt-1 text-xs text-slate-500">Todas las contingencias filtradas, con las más recientes primero y organizadas en páginas de 10 registros.</p>
                         </div>
                         <span className="self-start rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 sm:self-auto">
                             {contingencies.total > 0

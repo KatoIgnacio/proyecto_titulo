@@ -39,10 +39,10 @@
         .insight-value { color: #102a56; font-size: 11px; font-weight: bold; margin: 2px 0; }
         .chart-card, .map-card { border: 1px solid #dbe3ee; border-radius: 5px; padding: 8px 10px; }
         .chart-card img { display: block; height: 205px; width: 100%; }
-        .map-card img { display: block; height: 205px; width: 100%; }
+        .map-card img { display: block; height: 205px; object-fit: contain; width: 100%; }
         .visual-grid { border-collapse: separate; border-spacing: 8px 0; margin: 0 -8px; width: 101.6%; }
         .visual-grid td { vertical-align: top; width: 50%; }
-        .visual-grid .chart-card img, .visual-grid .map-card img { height: 172px; }
+        .visual-grid .chart-card img, .visual-grid .map-card img { height: 172px; object-fit: contain; }
         .section-head { border-bottom: 2px solid #1646a3; margin-bottom: 11px; padding-bottom: 7px; }
         .section-kicker { color: #1646a3; font-size: 7px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
         .two-column { border-spacing: 10px 0; margin: 0 -10px; width: 102.2%; }
@@ -180,7 +180,7 @@
                     <td>
                         <div class="chart-card">
                             <h3 style="margin-bottom: 1px">Evolución de clientes afectados y repuestos</h3>
-                            <p class="muted small" style="margin-bottom: 3px">Nuevas afectaciones y reposiciones registradas.</p>
+                            <p class="muted small" style="margin-bottom: 3px">Hasta 12 fechas con actividad; comparación por fecha de inicio.</p>
                             <img src="{{ $analytics['trendChart'] }}" alt="Evolución temporal">
                         </div>
                     </td>
@@ -211,7 +211,7 @@
         <div class="section-head">
             <div class="section-kicker">Análisis temporal</div>
             <h2>Evolución de las contingencias</h2>
-            <p class="muted">Los períodos se adaptan al filtro seleccionado y permiten comparar la aparición de eventos con su reposición efectiva.</p>
+            <p class="muted">Se muestran hasta las últimas 12 fechas con actividad del período seleccionado.</p>
         </div>
 
         <div class="chart-card avoid-break">
@@ -244,7 +244,7 @@
         </table>
 
         <div class="analysis-note">
-            <strong>Criterio de lectura:</strong> “Afectados” agrupa clientes asociados a contingencias iniciadas en cada período; “Repuestos” agrupa clientes asociados a contingencias cuya reposición efectiva quedó registrada en ese período.
+            <strong>Criterio de lectura:</strong> “Afectados” agrupa clientes asociados a contingencias iniciadas en cada fecha; “Repuestos” identifica, dentro de esa misma cohorte, los clientes de contingencias con reposición efectiva registrada.
         </div>
     </section>
 
