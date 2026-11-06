@@ -45,7 +45,7 @@ class SyntheticCsvContingencyAdapter implements ContingencyImportAdapter
 
     public function label(): string
     {
-        return 'CSV sintético SIGCEL v1';
+        return 'CSV SIGCEL v1';
     }
 
     public function preview(UploadedFile $file): ContingencyImportPreview
@@ -215,10 +215,10 @@ class SyntheticCsvContingencyAdapter implements ContingencyImportAdapter
             $latitude = filter_var($record['latitud'], FILTER_VALIDATE_FLOAT);
             $longitude = filter_var($record['longitud'], FILTER_VALIDATE_FLOAT);
             if ($latitude === false || $latitude < -37.0 || $latitude > -35.0) {
-                $rowErrors[] = $this->error($sourceRow, 'latitud', 'INVALID_COORDINATE', 'La latitud debe estar dentro del área sintética permitida.', $reference);
+                $rowErrors[] = $this->error($sourceRow, 'latitud', 'INVALID_COORDINATE', 'La latitud debe estar dentro del área geográfica permitida.', $reference);
             }
             if ($longitude === false || $longitude < -72.5 || $longitude > -71.0) {
-                $rowErrors[] = $this->error($sourceRow, 'longitud', 'INVALID_COORDINATE', 'La longitud debe estar dentro del área sintética permitida.', $reference);
+                $rowErrors[] = $this->error($sourceRow, 'longitud', 'INVALID_COORDINATE', 'La longitud debe estar dentro del área geográfica permitida.', $reference);
             }
 
             if ($rowErrors !== []) {

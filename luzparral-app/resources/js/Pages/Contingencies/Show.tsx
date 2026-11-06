@@ -127,7 +127,7 @@ const sourceLabels: Record<string, string> = {
     import: 'Importación',
     system: 'Sistema',
     manual: 'Registro manual',
-    synthetic: 'Generador sintético',
+    synthetic: 'Carga inicial',
 };
 
 const numberFormatter = new Intl.NumberFormat('es-CL');
@@ -809,7 +809,7 @@ export default function Show({ contingency, impactSummary, history, fieldReports
                             {source ? (
                                 <dl className="mt-5 grid gap-5 sm:grid-cols-3">
                                     <DataItem label="Fuente" value={source.name} />
-                                    <DataItem label="Archivo sintético" value={source.file} mono />
+                                    <DataItem label="Archivo de origen" value={source.file} mono />
                                     <DataItem label="Importación completada" value={formatDate(source.completed_at)} />
                                 </dl>
                             ) : (

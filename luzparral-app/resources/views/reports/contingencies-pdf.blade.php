@@ -109,7 +109,7 @@
         <div class="title-block">
             <div class="eyebrow">Sistema de información para apoyo a la gestión</div>
             <h1>{{ $reportTitle }}</h1>
-            <div class="meta">Generado: {{ $generatedAt->format('d-m-Y H:i') }} · Corte de datos: {{ $referenceDate->format('d-m-Y H:i') }} · Información sintética para fines académicos</div>
+            <div class="meta">Generado: {{ $generatedAt->format('d-m-Y H:i') }} · Corte de datos: {{ $referenceDate->format('d-m-Y H:i') }}</div>
         </div>
 
         <div class="filters">
@@ -187,7 +187,7 @@
                     <td>
                         <div class="map-card">
                             <h3 style="margin-bottom: 1px">Mapa de contingencias seleccionadas</h3>
-                            <p class="muted small" style="margin-bottom: 3px">Distribución esquemática según coordenadas sintéticas.</p>
+                            <p class="muted small" style="margin-bottom: 3px">Distribución esquemática de los eventos seleccionados.</p>
                             <img src="{{ $mapSnapshot }}" alt="Mapa de contingencias">
                         </div>
                     </td>
@@ -202,7 +202,6 @@
             <div class="analysis-note">
                 <strong>Criterio de lectura:</strong> las fichas se presentan desde la contingencia más reciente a la más antigua. Dentro de cada ficha, los hitos se ordenan cronológicamente.
             </div>
-            <div class="ethics">Los valores presentados son sintéticos y agregados. El informe no incorpora identificación de clientes, números de suministro ni datos personales.</div>
         @endif
     </section>
 
@@ -325,7 +324,7 @@
             </tbody>
         </table>
 
-        <div class="ethics">Los valores presentados son sintéticos y agregados. El informe no incorpora identificación de clientes, números de suministro ni datos personales.</div>
+        <div class="ethics">Datos de demostración para fines académicos.</div>
     </section>
     @endif
 

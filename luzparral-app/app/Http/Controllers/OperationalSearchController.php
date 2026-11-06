@@ -47,7 +47,7 @@ class OperationalSearchController extends Controller
 
         if ($supplySearch && mb_strlen($filters['query'], 'UTF-8') < 3) {
             throw ValidationException::withMessages([
-                'query' => 'Ingrese al menos tres caracteres del código sintético.',
+                'query' => 'Ingrese al menos tres caracteres del código.',
             ]);
         }
 

@@ -86,7 +86,7 @@ class ContingencyImportController extends Controller
     public function template(): HttpResponse
     {
         $header = 'codigo;osf;comuna;alimentador;estado;prioridad;causa;descripcion;inicio;reposicion_estimada;reposicion_efectiva;latitud;longitud';
-        $example = 'SYN-IMPORT-EJEMPLO-001;SYN-OSF-EJEMPLO-001;COM-01;SYN-AL-01;reported;medium;unknown;Contingencia sintetica de ejemplo;2026-09-16 08:00:00;2026-09-16 12:00:00;;-36.1430000;-71.8260000';
+        $example = 'SYN-IMPORT-EJEMPLO-001;SYN-OSF-EJEMPLO-001;COM-01;SYN-AL-01;reported;medium;unknown;Interrupcion de suministro de ejemplo;2026-09-16 08:00:00;2026-09-16 12:00:00;;-36.1430000;-71.8260000';
         $contents = "\xEF\xBB\xBF{$header}\r\n{$example}\r\n";
 
         return response($contents, 200, [

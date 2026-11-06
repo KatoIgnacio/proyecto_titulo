@@ -191,8 +191,8 @@ export default function Search({ filters, hasSearched, results, filterOptions }:
                                     <option value="commune">Comuna</option>
                                     <option value="feeder">Alimentador</option>
                                     <option value="description">Descripción o causa</option>
-                                    {auth.permissions.viewSupplyIdentifiers && <option value="customer">Código de cliente sintético</option>}
-                                    {auth.permissions.viewSupplyIdentifiers && <option value="supply">Código de suministro sintético</option>}
+                                    {auth.permissions.viewSupplyIdentifiers && <option value="customer">Código de cliente</option>}
+                                    {auth.permissions.viewSupplyIdentifiers && <option value="supply">Código de suministro</option>}
                                 </select>
                             </label>
 
@@ -215,7 +215,7 @@ export default function Search({ filters, hasSearched, results, filterOptions }:
                                         <input
                                             value={form.query}
                                             onChange={(event) => setForm((current) => ({ ...current, query: event.target.value }))}
-                                            placeholder={supplySearch ? 'Inicio o código sintético completo' : form.category === 'all' ? 'Opcional: filtre todo el registro' : 'Ingrese el criterio de búsqueda'}
+                                            placeholder={supplySearch ? 'Inicio o código completo' : form.category === 'all' ? 'Opcional: filtre todo el registro' : 'Ingrese el criterio de búsqueda'}
                                             maxLength={80}
                                             className="block w-full rounded-lg border-slate-300 py-2.5 pl-10 pr-3 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
@@ -257,12 +257,6 @@ export default function Search({ filters, hasSearched, results, filterOptions }:
 
                         {errors.query && <p className="text-sm font-semibold text-rose-600">{errors.query}</p>}
 
-                        {auth.permissions.viewSupplyIdentifiers && (
-                            <p className="text-xs text-slate-500">
-                                Los identificadores de cliente y suministro son ficticios y solo están disponibles para perfiles operacionales autorizados.
-                            </p>
-                        )}
-
                         {(hasSearched || form.query || form.status || form.priority) && (
                             <div className="flex justify-end">
                                 <button type="button" onClick={clear} className="text-sm font-semibold text-slate-500 hover:text-blue-700">
@@ -300,8 +294,8 @@ export default function Search({ filters, hasSearched, results, filterOptions }:
                                 <table className="min-w-full divide-y divide-slate-200 text-sm">
                                     <thead className="bg-slate-50 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500">
                                         <tr>
-                                            <th className="px-5 py-3">Suministro sintético</th>
-                                            <th className="px-5 py-3">Cliente sintético</th>
+                                            <th className="px-5 py-3">Suministro</th>
+                                            <th className="px-5 py-3">Cliente</th>
                                             <th className="px-5 py-3">Comuna</th>
                                             <th className="px-5 py-3">Alimentador</th>
                                             <th className="px-5 py-3">Clasificación</th>
@@ -323,7 +317,7 @@ export default function Search({ filters, hasSearched, results, filterOptions }:
                                         ))}
                                         {results.data.length === 0 && (
                                             <tr>
-                                                <td colSpan={7} className="px-5 py-14 text-center text-sm text-slate-500">No se encontraron identificadores sintéticos para la búsqueda actual.</td>
+                                                <td colSpan={7} className="px-5 py-14 text-center text-sm text-slate-500">No se encontraron identificadores para la búsqueda actual.</td>
                                             </tr>
                                         )}
                                     </tbody>

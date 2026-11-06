@@ -73,7 +73,7 @@ class ImportContingencies
                     ]);
                     $contingency->history()->create([
                         'status' => $contingency->status,
-                        'note' => 'Contingencia sintética incorporada mediante importación controlada.',
+                        'note' => 'Contingencia incorporada mediante importación controlada.',
                         'event_at' => $contingency->started_at,
                         'user_id' => $user->id,
                         'source' => 'import',

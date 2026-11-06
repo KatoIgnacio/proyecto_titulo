@@ -176,7 +176,7 @@ try {
         $feedersByCommune[$communeName] = [];
         for ($local = 1; $local <= 2; $local++) {
             $code = sprintf('SYN-AL-%02d', $feederNumber++);
-            $insertFeeder->execute([$commune['id'], $code, "Alimentador sintetico {$communeName} {$local}", dt($now), dt($now)]);
+            $insertFeeder->execute([$commune['id'], $code, "Alimentador {$communeName} {$local}", dt($now), dt($now)]);
             $feedersByCommune[$communeName][] = (int) $pdo->lastInsertId();
         }
     }
@@ -224,10 +224,10 @@ try {
     $insertImportError = $pdo->prepare('INSERT INTO import_errors (import_batch_id, source_row_number, field_name, error_code, message, synthetic_reference, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
     $batchIds = [];
     $errorDefinitions = [
-        ['MINUTOS', 'NEGATIVE_MINUTES', 'Duracion negativa detectada en registro sintetico'],
-        ['X', 'MISSING_COORDINATE', 'Coordenada X ausente en registro sintetico'],
-        ['Y', 'MISSING_COORDINATE', 'Coordenada Y ausente en registro sintetico'],
-        ['STATUS', 'INVALID_STATUS', 'Estado no reconocido en registro sintetico'],
+        ['MINUTOS', 'NEGATIVE_MINUTES', 'Duración negativa detectada en el registro'],
+        ['X', 'MISSING_COORDINATE', 'Coordenada X ausente en el registro'],
+        ['Y', 'MISSING_COORDINATE', 'Coordenada Y ausente en el registro'],
+        ['STATUS', 'INVALID_STATUS', 'Estado no reconocido en el registro'],
         ['ENCODING', 'INVALID_ENCODING', 'Caracter no valido para la codificacion esperada'],
     ];
     for ($month = 17; $month >= 0; $month--) {
@@ -236,7 +236,7 @@ try {
         $rejectedRows = mt_rand(1, 8);
         $completed = $started->add(new DateInterval('PT'.mt_rand(3, 18).'M'));
         $insertBatch->execute([
-            'PowerOn sintetico',
+            'PowerOn',
             'SYN_POWERON_'.$started->format('Ym').'.txt',
             'completed_with_warnings',
             $totalRows,
@@ -264,6 +264,14 @@ try {
     $updateContingency = $pdo->prepare('UPDATE contingencies SET priority = ?, affected_total = ?, critical_affected = ?, electrodependent_affected = ?, updated_at = ? WHERE id = ?');
 
     $causes = ['weather', 'vegetation', 'equipment_failure', 'vehicle_collision', 'third_party', 'unknown'];
+    $descriptions = [
+        'weather' => 'Interrupción asociada a condiciones meteorológicas.',
+        'vegetation' => 'Interrupción asociada a vegetación sobre la red.',
+        'equipment_failure' => 'Interrupción asociada a falla de equipamiento.',
+        'vehicle_collision' => 'Interrupción asociada a colisión vehicular.',
+        'third_party' => 'Interrupción asociada a intervención de terceros.',
+        'unknown' => 'Causa de interrupción en evaluación.',
+    ];
     $openStatuses = ['reported', 'assigned', 'in_progress'];
     $finalStatuses = ['restored', 'closed'];
     $allFeederIds = array_merge(...array_values($feedersByCommune));
@@ -316,7 +324,7 @@ try {
             $status,
             'low',
             $cause,
-            "Contingencia sintetica {$code}; no representa un evento real.",
+            $descriptions[$cause],
             dt($startedAt),
             dt($estimatedRestoreAt),
             $restoredAt ? dt($restoredAt) : null,
@@ -376,18 +384,18 @@ try {
         $updateContingency->execute([$priority, $affectedCount, $criticalAffected, $electrodependentAffected, dt($restoredAt ?? $startedAt), $contingencyId]);
 
         $historyRows = [
-            ['reported', 'Contingencia sintetica registrada por importacion.', $startedAt, null, 'import'],
+            ['reported', 'Contingencia registrada por importación.', $startedAt, null, 'import'],
         ];
         if ($status !== 'reported') {
-            $historyRows[] = ['assigned', 'Asignacion sintetica a equipo de operacion.', $startedAt->add(new DateInterval('PT10M')), $createdBy, 'user'];
+            $historyRows[] = ['assigned', 'Asignación a equipo de operación.', $startedAt->add(new DateInterval('PT10M')), $createdBy, 'user'];
         }
         if (in_array($status, ['in_progress', 'restored', 'closed'], true)) {
-            $historyRows[] = ['in_progress', 'Analisis sintetico de la contingencia en curso.', $startedAt->add(new DateInterval('PT25M')), $createdBy, 'user'];
+            $historyRows[] = ['in_progress', 'Análisis de la contingencia en curso.', $startedAt->add(new DateInterval('PT25M')), $createdBy, 'user'];
         }
         if ($restoredAt !== null) {
-            $historyRows[] = ['restored', 'Suministro restablecido en escenario sintetico.', $restoredAt, $createdBy, 'system'];
+            $historyRows[] = ['restored', 'Suministro restablecido.', $restoredAt, $createdBy, 'system'];
             if ($status === 'closed') {
-                $historyRows[] = ['closed', 'Contingencia sintetica cerrada y disponible para informe.', $restoredAt->add(new DateInterval('PT15M')), $userIds[1], 'user'];
+                $historyRows[] = ['closed', 'Contingencia cerrada y disponible para informe.', $restoredAt->add(new DateInterval('PT15M')), $userIds[1], 'user'];
             }
         }
         foreach ($historyRows as [$historyStatus, $note, $eventAt, $historyUser, $source]) {
@@ -397,9 +405,9 @@ try {
 
         $fieldReportCount = $i <= min(120, $contingencyCount) ? ($i % 5 === 0 ? 2 : 1) : 0;
         $fieldReportDescriptions = [
-            'Inspeccion sintetica realizada; se verifican condiciones del sector y elementos de la red.',
-            'Brigada sintetica informa avance de reparacion y coordinacion de recursos en terreno.',
-            'Trabajo sintetico completado; se registran verificaciones previas a la reposicion.',
+            'Inspección realizada; se verifican condiciones del sector y elementos de la red.',
+            'La brigada informa avance de reparación y coordinación de recursos en terreno.',
+            'Trabajo completado; se registran verificaciones previas a la reposición.',
         ];
         for ($reportIndex = 1; $reportIndex <= $fieldReportCount; $reportIndex++) {
             $windowEnd = $restoredAt ?? $now;
@@ -442,7 +450,7 @@ try {
             $insertHistory->execute([
                 $contingencyId,
                 $reportHistoryStatus,
-                'Antecedente de terreno sintetico incorporado al expediente.',
+                'Antecedente de terreno incorporado al expediente.',
                 dt($reportAt),
                 $createdBy,
                 'synthetic',

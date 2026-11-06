@@ -90,7 +90,7 @@ class ContingencyMapSnapshotRenderer
             .'<circle cx="670" cy="16" r="4" fill="#f97316"/><text x="680" y="19" font-size="8" fill="#475569">Alta</text>'
             .'<circle cx="725" cy="16" r="4" fill="#2563eb"/><text x="735" y="19" font-size="8" fill="#475569">Media</text>'
             .'<circle cx="790" cy="16" r="4" fill="#64748b"/><text x="800" y="19" font-size="8" fill="#475569">Baja</text>'
-            .'<text x="'.$left.'" y="'.($height - 4).'" font-size="7" fill="#64748b">Mapa esquemático · coordenadas sintéticas · '.number_format($points->count(), 0, ',', '.').' puntos</text>'
+            .'<text x="'.$left.'" y="'.($height - 4).'" font-size="7" fill="#64748b">Mapa esquemático · '.number_format($points->count(), 0, ',', '.').' puntos</text>'
             .'</svg>';
 
         return 'data:image/svg+xml;base64,'.base64_encode($svg);

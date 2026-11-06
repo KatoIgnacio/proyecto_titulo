@@ -419,9 +419,6 @@ export default function Index({ sources, recentBatches, selectedBatch }: ImportP
                     ) : (
                         <p className="p-6 text-sm text-slate-500">Aún no se han ejecutado importaciones controladas.</p>
                     )}
-                    <p className="border-t border-slate-100 px-5 py-4 text-xs leading-relaxed text-slate-500 sm:px-6">
-                        En los lotes sintéticos, los rechazos son casos de prueba deliberados —por ejemplo, duplicados, estados no válidos o coordenadas incompletas— y no provienen de registros reales.
-                    </p>
                 </section>
             </div>
         </AuthenticatedLayout>

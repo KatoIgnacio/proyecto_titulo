@@ -13,6 +13,8 @@ class OperationalInterfaceContentTest extends TestCase
             'resources/js/Pages/Dashboard.tsx',
             'resources/js/Pages/Contingencies/Map.tsx',
             'resources/js/Pages/Contingencies/Show.tsx',
+            'resources/js/Pages/Contingencies/Search.tsx',
+            'resources/js/Pages/Imports/Index.tsx',
             'resources/js/Pages/Reports/Index.tsx',
         ];
 
@@ -32,6 +34,11 @@ class OperationalInterfaceContentTest extends TestCase
             'Información anonimizada y agregada',
             'Resumen agregado de los puntos de suministro relacionados',
             'La selección usa los filtros aplicados y no cambia los datos del sistema.',
+            'Código de cliente sintético',
+            'Código de suministro sintético',
+            'Archivo sintético',
+            'Generador sintético',
+            'no provienen de registros reales',
         ];
 
         foreach ($removedMessages as $message) {
@@ -50,18 +57,41 @@ class OperationalInterfaceContentTest extends TestCase
         $this->assertStringContainsString('Trazabilidad de origen', $expedient);
         $this->assertStringContainsString('trazabilidad histórica', $expedient);
         $this->assertStringContainsString('trazabilidad', mb_strtolower($reports));
-        $this->assertStringContainsString('Los valores presentados son sintéticos y agregados.', $pdf);
+        $this->assertStringContainsString('Datos de demostración para fines académicos.', $pdf);
+        $this->assertSame(1, substr_count($pdf, 'Datos de demostración para fines académicos.'));
+        $this->assertStringNotContainsString('Los valores presentados son sintéticos y agregados.', $pdf);
     }
 
-    public function test_import_results_explain_partial_rejections_and_synthetic_test_cases(): void
+    public function test_import_results_explain_partial_rejections_without_redundant_demo_copy(): void
     {
         $imports = (string) file_get_contents(base_path('resources/js/Pages/Imports/Index.tsx'));
 
         $this->assertStringContainsString('las filas válidas se incorporaron y las rechazadas no se agregaron', $imports);
         $this->assertStringContainsString('Ver detalle', $imports);
         $this->assertStringContainsString("UNKNOWN_FEEDER: 'Alimentador no registrado'", $imports);
-        $this->assertStringContainsString('los rechazos son casos de prueba deliberados', $imports);
-        $this->assertStringContainsString('no provienen de registros reales', $imports);
+        $this->assertStringNotContainsString('los rechazos son casos de prueba deliberados', $imports);
+        $this->assertStringNotContainsString('no provienen de registros reales', $imports);
+    }
+
+    public function test_generated_operational_copy_uses_neutral_language(): void
+    {
+        $generator = (string) file_get_contents(base_path('database/synthetic/generate_synthetic.php'));
+        $importer = (string) file_get_contents(base_path('app/Services/Imports/ImportContingencies.php'));
+
+        foreach ([
+            'no representa un evento real',
+            'Contingencia sintetica registrada por importacion.',
+            'Asignacion sintetica a equipo de operacion.',
+            'Analisis sintetico de la contingencia en curso.',
+            'Suministro restablecido en escenario sintetico.',
+            'Antecedente de terreno sintetico incorporado al expediente.',
+        ] as $message) {
+            $this->assertStringNotContainsString($message, $generator);
+        }
+
+        $this->assertStringNotContainsString('Contingencia sintética incorporada mediante importación controlada.', $importer);
+        $this->assertStringContainsString('Interrupción asociada a falla de equipamiento.', $generator);
+        $this->assertStringContainsString('Contingencia incorporada mediante importación controlada.', $importer);
     }
 
     public function test_qa_access_and_download_safeguards_are_present(): void
